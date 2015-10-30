@@ -13,7 +13,7 @@ public class Tile {
     private final int value;
 
     public Tile(Color color){
-        this(Color.Joker,1);
+        this(Color.Joker,-1);
         if (color != Color.Joker)
             throw new InvalidTile();
     }

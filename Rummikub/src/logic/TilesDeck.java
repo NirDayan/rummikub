@@ -7,7 +7,6 @@ public class TilesDeck {
 
     public static final int LOWEST_TILE_VALUE = 1;
     public static final int HIGHEST_TILE_VALUE = 13;
-    public static final int NUMBER_OF_JOKERS = 2;
     private ArrayList<Tile> deck;
 
     public TilesDeck() {
@@ -26,5 +25,6 @@ public class TilesDeck {
         deck.add(new Tile(Color.Joker));
         deck.add(new Tile(Color.Joker));
     }
+    
 
 }
