@@ -2,6 +2,7 @@ package views.console;
 
 import java.util.Scanner;
 import logic.GameDetails;
+import logic.Game;
 
 public class GameView {
     
@@ -57,5 +58,13 @@ public class GameView {
         //      Currently use a mock
         String filePath = "filePath";
         return new GameDetails(0, 0, 0, null, null, filePath);        
+    }
+    
+    public void showWrongInitialGameInput() {
+        System.out.println("Wrong game input, please try again:");
+    }
+    
+    public void renderGame(Game game) {
+        //TODO - implement
     }
 }

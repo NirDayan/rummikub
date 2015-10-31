@@ -7,9 +7,11 @@ public class Game {
     private ArrayList<Player> players;
     private TilesDeck tilesDeck;
     private Board board;
+    private Player currentPlayer;
     
     public Game() {
         this.players = new ArrayList<Player>();
+        this.currentPlayer = null;
     }
     
     public TilesSequence createSequence (int playerID, Tile[] tiles) {
@@ -34,6 +36,9 @@ public class Game {
     }
     
     public void addPlayer(Player player) {
+        if (currentPlayer == null) {
+            currentPlayer = player;            
+        }
         players.add(player);
     }
 }

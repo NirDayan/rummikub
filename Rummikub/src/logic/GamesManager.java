@@ -23,18 +23,25 @@ public class GamesManager {
     }
     
     public void start() {
-        GameDetails initialUserInput = controller.getInitialGameInput();
-        if (isGameInputValid(initialUserInput)){
-            createGame(initialUserInput);
+        boolean isGameInitialized = false;
+        while (!isGameInitialized) {
+            GameDetails initialUserInput = controller.getInitialGameInput();
+            if (isGameInputValid(initialUserInput)){
+                createGame(initialUserInput);
+                isGameInitialized = true;
+            }
+            else {
+                controller.showWrongInitialGameInput();
+            }
         }
-        else {
-            //TODO: continue...
-        }
+        
+        manageGames();
     }
     
     public void createGame (GameDetails gameDetails) {        
         Game game = new Game();
-        createPlayers(gameDetails, game);        
+        createPlayers(gameDetails, game);
+        games.add(game);
     }
     
     public String createGameFromXML (String xmlData) {
@@ -66,7 +73,9 @@ public class GamesManager {
     }
     
     public void manageGames() {
-        
+        for (Game game : games) {
+            controller.renderGame(game);            
+        }
     }
     
     private void createPlayers(GameDetails gameDetails, Game game) {
