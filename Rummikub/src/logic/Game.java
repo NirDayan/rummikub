@@ -22,4 +22,9 @@ public class Game {
     public void resign (int playerID) {
         
     }
+    
+    public static boolean isGameInputValid (GameDetails input) {
+        //TODO: implement
+        return false;
+    }
 }

@@ -1,13 +1,28 @@
 package logic;
 
+import controllers.IController;
 import java.util.ArrayList;
 import java.util.Map;
 
 public class GamesManager {
     
+    private final IController controller;
     private Map<Game, ArrayList<GameAction>> gamesActions;
-    
     private ArrayList<Game> games;
+    
+    public GamesManager (IController controller) {
+        this.controller = controller;
+    }
+    
+    public void start() {
+        GameDetails initialUserInput = controller.getInitialGameInput();
+        if (Game.isGameInputValid(initialUserInput)){
+            //TODO: continue...
+        }
+        else {
+            //TODO: continue...
+        }
+    }
     
     public Game createGame (String gameName, int computerPlayers, int humanPlayers) {
         return null;
