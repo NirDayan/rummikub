@@ -1,6 +1,16 @@
 package logic;
 
+import java.util.ArrayList;
+
 public class Game {
+    
+    private ArrayList<Player> players;
+    private TilesDeck tilesDeck;
+    private Board board;
+    
+    public Game() {
+        this.players = new ArrayList<Player>();
+    }
     
     public TilesSequence createSequence (int playerID, Tile[] tiles) {
         return null;
@@ -23,8 +33,7 @@ public class Game {
         
     }
     
-    public static boolean isGameInputValid (GameDetails input) {
-        //TODO: implement
-        return false;
+    public void addPlayer(Player player) {
+        players.add(player);
     }
 }
