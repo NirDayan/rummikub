@@ -14,6 +14,8 @@ public class Game {
     private static int nextPlayerID = 1;
     private final int MAX_PLAYERS_NUM = 4;
     private final String COMPUTER_NAME_PREFIX = "Computer#";
+    private final int INITIAL_TILES_COUNT = 14;
+    private Status status;
     
     public static enum Status {
         WAIT,
@@ -24,6 +26,9 @@ public class Game {
         this.gamePlayers = new ArrayList<Player>();
         this.currentPlayer = null;
         this.controller = controller;
+        this.tilesDeck = new TilesDeck();
+        this.board = new Board();
+        status = Status.WAIT;
     }
     
     public Game init() {
@@ -34,6 +39,7 @@ public class Game {
             GameDetails initialUserInput = controller.getInitialGameInput();
             if (isGameInputValid(initialUserInput)) {
                 createPlayers(initialUserInput);
+                distributeTiles();
                 isGameInitialized = true;
             }
             else {
@@ -71,6 +77,14 @@ public class Game {
         }
         allPlayers.add(player);
         gamePlayers.add(player);
+    }
+    
+    public void distributeTiles() {
+        for(Player player : gamePlayers) {
+            for(int i = 0; i < INITIAL_TILES_COUNT; i++) {
+                player.addTile(tilesDeck.popTile());
+            }
+        }
     }
     
     //TODO: more edge cases???

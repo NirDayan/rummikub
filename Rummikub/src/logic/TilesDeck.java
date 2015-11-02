@@ -10,6 +10,7 @@ public class TilesDeck {
     private ArrayList<Tile> deck;
 
     public TilesDeck() {
+        deck = new ArrayList<Tile>();
         createAllTilesInDeck();
         Collections.shuffle(deck);
     }
@@ -26,5 +27,11 @@ public class TilesDeck {
         deck.add(new Tile(Color.Joker));
     }
     
-
+    public Tile popTile() {
+        if (deck.size() == 0) 
+            return null;
+        
+        //return the last tile from the deck
+        return deck.remove(deck.size() - 1);
+    }
 }
