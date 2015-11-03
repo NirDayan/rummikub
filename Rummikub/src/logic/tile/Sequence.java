@@ -17,7 +17,25 @@ public class Sequence {
         sapateJokersAndDumbTiles(tiles);
         validate();
     }
-    
+
+    public final void validate() throws Sequence.InvalidSequence {
+        Collections.sort(dumbTilesSequence);
+        SequenceValidator validator = new SequenceValidator(dumbTilesSequence, jokerTiles);
+        validator.validate();
+    }
+
+    public int getSize() {
+        return dumbTilesSequence.size();
+    }
+
+    public int getValueSum() {
+        int sum = 0;
+        for (Tile tile : dumbTilesSequence) {
+            sum += tile.getValue();
+        }
+        return sum;
+    }
+
     private void initTiles(Tile... tiles) {
         for (Tile tile : tiles) {
             tile.initialize();
@@ -33,24 +51,7 @@ public class Sequence {
             }
         }
     }
-    
-    public final void validate() throws Sequence.InvalidSequence {
-        Collections.sort(dumbTilesSequence);
-        SequenceValidator validator = new SequenceValidator(dumbTilesSequence,jokerTiles);
-        validator.validate();
-    }
 
-    public static class InvalidSequence extends RuntimeException {}
-
-    public int getSize() {
-        return dumbTilesSequence.size();
-    }
-
-    public int getValueSum() {
-        int sum = 0;
-        for (Tile tile : dumbTilesSequence) {
-            sum += tile.getValue();
-        }
-        return sum;
+    public static class InvalidSequence extends RuntimeException {
     }
 }

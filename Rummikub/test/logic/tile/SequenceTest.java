@@ -1,4 +1,4 @@
-package logictest;
+package logic.tile;
 
 import static logic.tile.Color.*;
 import logic.tile.JokerTile;

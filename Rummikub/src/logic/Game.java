@@ -2,12 +2,13 @@ package logic;
 
 import java.util.ArrayList;
 import controllers.IController;
+import logic.tile.*;
 
 public class Game {
     
     private static ArrayList<Player> allPlayers = new ArrayList<Player>();
     private ArrayList<Player> gamePlayers;
-    private TilesDeck tilesDeck;
+    private Deck tilesDeck;
     private Board board;
     private Player currentPlayer;
     private IController controller;
@@ -26,7 +27,7 @@ public class Game {
         this.gamePlayers = new ArrayList<Player>();
         this.currentPlayer = null;
         this.controller = controller;
-        this.tilesDeck = new TilesDeck();
+        this.tilesDeck = new Deck();
         this.board = new Board();
         status = Status.WAIT;
     }
@@ -50,7 +51,7 @@ public class Game {
         return result;
     }
     
-    public TilesSequence createSequence (int playerID, Tile[] tiles) {
+    public Sequence createSequence (int playerID, Tile[] tiles) {
         return null;
     }
     
@@ -82,7 +83,7 @@ public class Game {
     public void distributeTiles() {
         for(Player player : gamePlayers) {
             for(int i = 0; i < INITIAL_TILES_COUNT; i++) {
-                player.addTile(tilesDeck.popTile());
+                player.addTile(tilesDeck.pullTile());
             }
         }
     }
@@ -104,7 +105,7 @@ public class Game {
                 return false;
             //check names are unique
             for (int j = i + 1; j < input.getHumenPlayersNum(); j++) {
-                if (playerNames[i] == playerNames[j]) {
+                if (playerNames[i].equals(playerNames[j])) {
                     return false;
                 }
             }

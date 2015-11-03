@@ -4,7 +4,7 @@ public class Tile implements Comparable<Tile>{
     protected Color color;
     protected int value;
     
-    public Tile(Color color, int value) {
+    Tile(Color color, int value) {
         this.color = color;
         this.value = value;
     }
@@ -19,7 +19,7 @@ public class Tile implements Comparable<Tile>{
 
     void initialize() {}
     
-    public class InvalidTile extends RuntimeException{
+    class InvalidTile extends RuntimeException{
     }
     
     @Override

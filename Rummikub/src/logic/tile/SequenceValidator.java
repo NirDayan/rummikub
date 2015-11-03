@@ -13,7 +13,7 @@ class SequenceValidator {
     private ListIterator<Tile> indexInSeq;
     private final Stack<JokerTile> jokers;
     private final LinkedList<Color> unusedColors;
-    private Stack jokersToAdd;
+    private Stack<Tile> jokersToAdd;
     private boolean isStraight;
 
     enum PrevCurrTileRes {
@@ -25,7 +25,7 @@ class SequenceValidator {
     }
 
     public SequenceValidator(ArrayList<Tile> sequence, Stack<JokerTile> jokers) {
-        jokersToAdd = new Stack();
+        jokersToAdd = new Stack<>();
         this.sequence = sequence;
         this.jokers = jokers;
         unusedColors = new LinkedList<>();
@@ -44,7 +44,7 @@ class SequenceValidator {
         indexInSeq = sequence.listIterator();
         Tile prevTile = indexInSeq.next();
         markColor(prevTile.color);
-        while(indexInSeq.hasNext()) {
+        while (indexInSeq.hasNext()) {
             Tile currTile = indexInSeq.next();
             prevTile = handleCurTile(prevTile, currTile);
         }
@@ -95,6 +95,15 @@ class SequenceValidator {
         }
     }
 
+    //Return false if it has been used before
+    private boolean isColorMarked(Color color) {
+        return unusedColors.contains(color) == false;
+    }
+
+    private void markColor(Color color) {
+        unusedColors.remove(color);
+    }
+
     private Tile tryToUseJokerForStright(Tile tile) throws Sequence.InvalidSequence {
         if (jokers.isEmpty()) {
             throw new Sequence.InvalidSequence();
@@ -131,7 +140,7 @@ class SequenceValidator {
                 } else {
                     //Add to head of straight
                     Tile tileNext = sequence.get(0);
-                    sequence.add(0,morphJokerToTile(tileNext.color, tileNext.value - 1));
+                    sequence.add(0, morphJokerToTile(tileNext.color, tileNext.value - 1));
                 }
             } else {
                 tryToUseJokerForSameValueSequence();
@@ -139,16 +148,6 @@ class SequenceValidator {
         }
     }
 
-    //Return false if it has been used before
-    private boolean isColorMarked(Color color) {
-        return unusedColors.contains(color) == false;
-    }
-
-    private void markColor(Color color) {
-        unusedColors.remove(color);
-    }
-
     private static class SequenceValidatorError extends RuntimeException {
     }
-
 }

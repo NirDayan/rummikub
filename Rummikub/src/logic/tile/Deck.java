@@ -4,15 +4,22 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class Deck {
-
     public static final int LOWEST_TILE_VALUE = 1;
     public static final int HIGHEST_TILE_VALUE = 13;
-    private final ArrayList<Tile> deck;
+    private ArrayList<Tile> deck;
 
     public Deck() {
         deck = new ArrayList<>();
         createAllTilesInDeck();
         Collections.shuffle(deck);
+    }
+
+    public Tile pullTile() {
+        return deck.remove(0);
+    }
+    
+    public boolean hasMore() {
+        return (deck.isEmpty() == false);
     }
 
     private void createAllTilesInDeck() {
@@ -26,13 +33,4 @@ public class Deck {
         deck.add(new JokerTile());
         deck.add(new JokerTile());
     }
-
-    public boolean hasMore() {
-        return (deck.isEmpty() == false);
-    }
-
-    public Tile pullTile() {
-        return deck.remove(0);
-    }
-
 }

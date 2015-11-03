@@ -1,11 +1,12 @@
 package logic;
 
 import java.util.ArrayList;
+import logic.tile.Sequence;
 
 public class Board {
-    private ArrayList<TilesSequence> sequences;
+    private ArrayList<Sequence> sequences;
     
     Board() {
-        sequences = new ArrayList<TilesSequence>();
+        sequences = new ArrayList<Sequence>();
     }
 }

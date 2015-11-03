@@ -1,4 +1,4 @@
-package logictest;
+package logic.tile;
 
 import logic.tile.Deck;
 import logic.tile.JokerTile;

@@ -1,5 +1,7 @@
 package logic;
 
+import logic.tile.*;
+
 public class Event {
     
     private int ID;
