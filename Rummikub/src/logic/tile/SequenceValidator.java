@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Stack;
+import logic.tile.Sequence.InvalidSequenceException;
 import static logic.tile.SequenceValidator.PrevCurrTileRes.*;
 
 class SequenceValidator {
@@ -33,14 +34,14 @@ class SequenceValidator {
         isStraight = false;
     }
 
-    public void validate() throws Sequence.InvalidSequence {
+    public void validate() throws InvalidSequenceException {
         if (sequence.size() + jokers.size() < 3) {
-            throw new Sequence.InvalidSequence();
+            throw new InvalidSequenceException();
         }
         validateTilesOneByOne();
     }
 
-    private void validateTilesOneByOne() throws Sequence.InvalidSequence {
+    private void validateTilesOneByOne() throws InvalidSequenceException {
         indexInSeq = sequence.listIterator();
         Tile prevTile = indexInSeq.next();
         markColor(prevTile.color);
@@ -53,11 +54,11 @@ class SequenceValidator {
     }
 
     private Tile handleCurTile(Tile prevTile, Tile currTile)
-            throws SequenceValidatorError, Sequence.InvalidSequence {
+            throws SequenceValidatorException, InvalidSequenceException {
         switch (getPrevCurrTileRelations(prevTile, currTile)) {
             case SAME_COLOR_FOLLOWING_VAL:
                 if (isColorMarked(currTile.color) == false) {
-                    throw new Sequence.InvalidSequence();
+                    throw new InvalidSequenceException();
                 }
                 isStraight = true;
                 break;
@@ -69,14 +70,14 @@ class SequenceValidator {
                 break;
             case DIFF_COLOR_SAME_VAL:
                 if (isStraight || isColorMarked(currTile.color)) {
-                    throw new Sequence.InvalidSequence();
+                    throw new InvalidSequenceException();
                 }
                 markColor(currTile.color);
                 break;
             case DIFF_COLOR_NOT_SAME_VAL:
-                throw new Sequence.InvalidSequence();
+                throw new InvalidSequenceException();
             default:
-                throw new SequenceValidatorError();
+                throw new SequenceValidatorException();
         }
         return currTile;
     }
@@ -104,9 +105,9 @@ class SequenceValidator {
         unusedColors.remove(color);
     }
 
-    private Tile tryToUseJokerForStright(Tile tile) throws Sequence.InvalidSequence {
+    private Tile tryToUseJokerForStright(Tile tile) throws InvalidSequenceException {
         if (jokers.isEmpty()) {
-            throw new Sequence.InvalidSequence();
+            throw new InvalidSequenceException();
         }
 
         Tile joker = morphJokerToTile(tile.color, tile.value + 1);
@@ -114,9 +115,9 @@ class SequenceValidator {
         return joker;
     }
 
-    private void tryToUseJokerForSameValueSequence() {
+    private void tryToUseJokerForSameValueSequence() throws InvalidSequenceException {
         if (jokers.isEmpty() || unusedColors.isEmpty() || sequence.isEmpty()) {
-            throw new Sequence.InvalidSequence();
+            throw new InvalidSequenceException();
         }
 
         Tile tile = morphJokerToTile(unusedColors.getFirst(), sequence.get(0).value);
@@ -130,7 +131,7 @@ class SequenceValidator {
         return joker;
     }
 
-    private void handleUnusedJokers() {
+    private void handleUnusedJokers() throws InvalidSequenceException {
         while (jokers.isEmpty() == false) {
             if (isStraight) {
                 if (sequence.get(sequence.size() - 1).value != 13) {
@@ -148,6 +149,6 @@ class SequenceValidator {
         }
     }
 
-    private static class SequenceValidatorError extends RuntimeException {
+    private static class SequenceValidatorException extends RuntimeException {
     }
 }

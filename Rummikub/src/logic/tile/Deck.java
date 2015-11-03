@@ -2,11 +2,13 @@ package logic.tile;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class Deck {
     public static final int LOWEST_TILE_VALUE = 1;
     public static final int HIGHEST_TILE_VALUE = 13;
-    private ArrayList<Tile> deck;
+    public static final int INITIAL_TILES_IN_DECK_NUM = 106;
+    private final List<Tile> deck;
 
     public Deck() {
         deck = new ArrayList<>();
@@ -15,6 +17,8 @@ public class Deck {
     }
 
     public Tile pullTile() {
+        if (deck.isEmpty() == true)
+            throw new DeckUnderflow();
         return deck.remove(0);
     }
     
@@ -32,5 +36,8 @@ public class Deck {
         }
         deck.add(new JokerTile());
         deck.add(new JokerTile());
+    }
+
+    public static class DeckUnderflow extends RuntimeException {
     }
 }

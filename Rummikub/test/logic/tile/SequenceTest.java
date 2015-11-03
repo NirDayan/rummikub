@@ -1,9 +1,6 @@
 package logic.tile;
 
 import static logic.tile.Color.*;
-import logic.tile.JokerTile;
-import logic.tile.Sequence;
-import logic.tile.Tile;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
@@ -13,7 +10,7 @@ public class SequenceTest {
     // Should Create Sequence Seccessfuly
     // ========================
     @Test
-    public void sequenceCreatedSeccessfulyWithNoJokers() {
+    public void sequenceCreatedSeccessfulyWithNoJokers() throws Exception {
         Sequence sequence = new Sequence(
                 new Tile(Red, 10),
                 new Tile(Red, 11),
@@ -32,7 +29,7 @@ public class SequenceTest {
     }
 
     @Test
-    public void sequenceCreatedSeccessfulyWithOneJoker() {
+    public void sequenceCreatedSeccessfulyWithOneJoker() throws Exception {
         Sequence sequence = new Sequence(
                 new Tile(Black, 3),
                 new JokerTile(),
@@ -50,7 +47,7 @@ public class SequenceTest {
     }
 
     @Test
-    public void createLongStraightWithJokersSeccessfuly() {
+    public void createLongStraightWithJokersSeccessfuly() throws Exception {
         Sequence sequence = new Sequence(
                 new Tile(Red, 1),
                 new Tile(Red, 2),
@@ -71,7 +68,7 @@ public class SequenceTest {
     }
 
     @Test
-    public void addOneJokerFromBelow() {
+    public void addOneJokerFromBelow() throws Exception{
         Sequence sequence = new Sequence(
                 new Tile(Black, 12),
                 new Tile(Black, 13),
@@ -81,7 +78,7 @@ public class SequenceTest {
     }
 
     @Test
-    public void addTwoJokerFromBelow() {
+    public void addTwoJokerFromBelow() throws Exception {
         Sequence sequence = new Sequence(
                 new Tile(Black, 12),
                 new Tile(Black, 13),
@@ -92,7 +89,7 @@ public class SequenceTest {
     }
 
     @Test
-    public void createSeqWith2GoodTilesAndOneJoker() {
+    public void createSeqWith2GoodTilesAndOneJoker() throws Exception {
         Sequence sequence = new Sequence(
                 new Tile(Red, 3),
                 new Tile(Red, 4),
@@ -110,8 +107,8 @@ public class SequenceTest {
 
     // Should Throw Exceptions
     // ========================
-    @Test(expected = Sequence.InvalidSequence.class)
-    public void whenInvalidSequenceCreated_ThrowException1() {
+    @Test(expected = Sequence.InvalidSequenceException.class)
+    public void whenInvalidSequenceCreated_ThrowException1() throws Exception {
         Sequence sequence = new Sequence(
                 new Tile(Red, 10),
                 new Tile(Blue, 11),
@@ -120,8 +117,8 @@ public class SequenceTest {
 
     }
 
-    @Test(expected = Sequence.InvalidSequence.class)
-    public void whenInvalidSequenceCreated_ThrowException2() {
+    @Test(expected = Sequence.InvalidSequenceException.class)
+    public void whenInvalidSequenceCreated_ThrowException2() throws Exception {
         Sequence sequence = new Sequence(
                 new Tile(Yellow, 5),
                 new Tile(Blue, 3),
@@ -129,8 +126,8 @@ public class SequenceTest {
         );
     }
 
-    @Test(expected = Sequence.InvalidSequence.class)
-    public void FourOfASameKindWithJoker_ThrowException() {
+    @Test(expected = Sequence.InvalidSequenceException.class)
+    public void FourOfASameKindWithJoker_ThrowException() throws Exception {
         Sequence sequence = new Sequence(
                 new Tile(Red, 2),
                 new Tile(Blue, 2),
@@ -140,8 +137,8 @@ public class SequenceTest {
         );
     }
 
-    @Test(expected = Sequence.InvalidSequence.class)
-    public void BadStraightWithJoker_ThrowExc() {
+    @Test(expected = Sequence.InvalidSequenceException.class)
+    public void BadStraightWithJoker_ThrowExc() throws Exception {
         Sequence sequence = new Sequence(
                 new Tile(Red, 2),
                 new Tile(Red, 3),

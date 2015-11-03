@@ -1,16 +1,9 @@
 package logic.tile;
 
-import logic.tile.Deck;
-import logic.tile.JokerTile;
-import logic.tile.Tile;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-/**
- *
- * @author Lior
- */
 public class TilesAndDeckTest {
  
     private Deck deck;
@@ -34,8 +27,8 @@ public class TilesAndDeckTest {
         if (t.getValue() == JokerTile.JOKER_INITIAL_VALUE) {
             return true;
         }
-        return (t.getValue() < 14)
-                && (t.getValue() > 0);
+        return (t.getValue() <= Deck.HIGHEST_TILE_VALUE)
+                && (t.getValue() >= Deck.LOWEST_TILE_VALUE);
     }
     
     @Test
@@ -55,6 +48,15 @@ public class TilesAndDeckTest {
         }
         assertEquals(pulled,106);
         assertFalse(testDeck.hasMore());
+    }
+    
+    @Test(expected = Deck.DeckUnderflow.class)
+    public void whenNoTilesInDeckAndPulling_throwUnderFlow(){
+        Deck testDeck = new Deck();
+        while (testDeck.hasMore())
+            testDeck.pullTile();
+        
+        testDeck.pullTile();
     }
     
 }

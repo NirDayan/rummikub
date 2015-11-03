@@ -3,6 +3,8 @@ package logic;
 import java.util.ArrayList;
 import controllers.IController;
 import logic.tile.*;
+import logic.tile.Sequence.InvalidSequenceException;
+import logic.Board.sequenceNotFoundException;
 
 public class Game {
     
@@ -51,21 +53,25 @@ public class Game {
         return result;
     }
     
-    public Sequence createSequence (int playerID, Tile[] tiles) {
-        return null;
+    // Returns the Sequence index to the controller
+    public int createSequence (int playerID, Tile[] tiles) {
+        return 0;
     }
     
-    public void addTile (int playerID, Tile tile, int sequenceIndex, int sequencePosition) {
-        
+    public void addTile (AddTileData data) throws sequenceNotFoundException {
+        board.addTile(data);
     }
     
-    public void moveTile (int playerID, int sourceSequenceIndex,
-            int sourceSequencePosition, int targetSequenceIndex,
-            int targetSequencePosition) {
+    public void moveTile (MoveTileData data) throws sequenceNotFoundException {
+        board.moveTile(data);
     }
     
     public void finishTurn (int playerID) {
-        
+            try{
+                board.finishTurn();
+            }catch(InvalidSequenceException e){
+ //    TODO:           handleExceptionOnFinishTurn(playerID);
+            }
     }
     
     public void resign (int playerID) {
