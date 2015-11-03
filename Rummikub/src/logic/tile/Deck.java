@@ -1,16 +1,16 @@
-package logic;
+package logic.tile;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class TilesDeck {
+public class Deck {
 
     public static final int LOWEST_TILE_VALUE = 1;
     public static final int HIGHEST_TILE_VALUE = 13;
-    private ArrayList<Tile> deck;
+    private final ArrayList<Tile> deck;
 
-    public TilesDeck() {
-        deck = new ArrayList<Tile>();
+    public Deck() {
+        deck = new ArrayList<>();
         createAllTilesInDeck();
         Collections.shuffle(deck);
     }
@@ -23,15 +23,16 @@ public class TilesDeck {
                 deck.add(new Tile(color, value));
             }
         }
-        deck.add(new Tile(Color.Joker));
-        deck.add(new Tile(Color.Joker));
+        deck.add(new JokerTile());
+        deck.add(new JokerTile());
     }
-    
-    public Tile popTile() {
-        if (deck.size() == 0) 
-            return null;
-        
-        //return the last tile from the deck
-        return deck.remove(deck.size() - 1);
+
+    public boolean hasMore() {
+        return (deck.isEmpty() == false);
     }
+
+    public Tile pullTile() {
+        return deck.remove(0);
+    }
+
 }
