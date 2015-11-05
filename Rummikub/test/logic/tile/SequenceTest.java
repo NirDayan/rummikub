@@ -6,12 +6,13 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 public class SequenceTest {
+    private Sequence sequence;
 
     // Should Create Sequence Seccessfuly
     // ========================
     @Test
     public void sequenceCreatedSeccessfulyWithNoJokers() throws Exception {
-        Sequence sequence = new Sequence(
+        sequence = new Sequence(
                 new Tile(Red, 10),
                 new Tile(Red, 11),
                 new Tile(Red, 12)
@@ -30,7 +31,7 @@ public class SequenceTest {
 
     @Test
     public void sequenceCreatedSeccessfulyWithOneJoker() throws Exception {
-        Sequence sequence = new Sequence(
+        sequence = new Sequence(
                 new Tile(Black, 3),
                 new JokerTile(),
                 new Tile(Black, 5)
@@ -48,20 +49,20 @@ public class SequenceTest {
 
     @Test
     public void createLongStraightWithJokersSeccessfuly() throws Exception {
-        Sequence sequence = new Sequence(
+        sequence = new Sequence(
                 new Tile(Red, 1),
                 new Tile(Red, 2),
                 new Tile(Red, 3),
+                new JokerTile(),
                 new Tile(Red, 5),
                 new Tile(Red, 6),
                 new Tile(Red, 7),
                 new Tile(Red, 8),
                 new Tile(Red, 9),
                 new Tile(Red, 10),
-                new Tile(Red, 12),
-                new Tile(Red, 13),
                 new JokerTile(),
-                new JokerTile()
+                new Tile(Red, 12),
+                new Tile(Red, 13)
         );
         assertEquals(sequence.getSize(), 13);
         assertTrue(sequence.getValueSum() == 91);
@@ -69,28 +70,28 @@ public class SequenceTest {
 
     @Test
     public void addOneJokerFromBelow() throws Exception{
-        Sequence sequence = new Sequence(
+        sequence = new Sequence(
+                new JokerTile(),
                 new Tile(Black, 12),
-                new Tile(Black, 13),
-                new JokerTile()
+                new Tile(Black, 13)
         );
         assertTrue(sequence.getValueSum() == 36);
     }
 
     @Test
     public void addTwoJokerFromBelow() throws Exception {
-        Sequence sequence = new Sequence(
-                new Tile(Black, 12),
-                new Tile(Black, 13),
+        sequence = new Sequence(
                 new JokerTile(), //10
-                new JokerTile() //11
+                new JokerTile(), //11
+                new Tile(Black, 12),
+                new Tile(Black, 13)
         );
         assertTrue(sequence.getValueSum() == 46);
     }
 
     @Test
     public void createSeqWith2GoodTilesAndOneJoker() throws Exception {
-        Sequence sequence = new Sequence(
+        sequence = new Sequence(
                 new Tile(Red, 3),
                 new Tile(Red, 4),
                 new JokerTile()
@@ -109,7 +110,7 @@ public class SequenceTest {
     // ========================
     @Test(expected = Sequence.InvalidSequenceException.class)
     public void whenInvalidSequenceCreated_ThrowException1() throws Exception {
-        Sequence sequence = new Sequence(
+        sequence = new Sequence(
                 new Tile(Red, 10),
                 new Tile(Blue, 11),
                 new Tile(Red, 12)
@@ -119,7 +120,7 @@ public class SequenceTest {
 
     @Test(expected = Sequence.InvalidSequenceException.class)
     public void whenInvalidSequenceCreated_ThrowException2() throws Exception {
-        Sequence sequence = new Sequence(
+        sequence = new Sequence(
                 new Tile(Yellow, 5),
                 new Tile(Blue, 3),
                 new Tile(Black, 8)
@@ -128,7 +129,7 @@ public class SequenceTest {
 
     @Test(expected = Sequence.InvalidSequenceException.class)
     public void FourOfASameKindWithJoker_ThrowException() throws Exception {
-        Sequence sequence = new Sequence(
+        sequence = new Sequence(
                 new Tile(Red, 2),
                 new Tile(Blue, 2),
                 new Tile(Black, 2),
@@ -139,7 +140,7 @@ public class SequenceTest {
 
     @Test(expected = Sequence.InvalidSequenceException.class)
     public void BadStraightWithJoker_ThrowExc() throws Exception {
-        Sequence sequence = new Sequence(
+        sequence = new Sequence(
                 new Tile(Red, 2),
                 new Tile(Red, 3),
                 new Tile(Red, 6),

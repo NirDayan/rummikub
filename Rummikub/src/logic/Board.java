@@ -7,16 +7,16 @@ package logic;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import logic.tile.Sequence.InvalidSequenceException;
+import logic.tile.SequenceValidator;
 import logic.tile.Tile;
 
 public class Board {
 
-    private Map<Integer, List<Tile>> sequencesMap;
+    private final Map<Integer, List<Tile>> sequencesMap;
     private Integer sequnceIndex;
 
     Board() {
@@ -28,8 +28,9 @@ public class Board {
         List<Tile> sourceSeq, targetSeq;
         sourceSeq = sequencesMap.get(data.getSourceSequenceIndex());
         targetSeq = sequencesMap.get(data.getTargetSequenceIndex());
-        if(sourceSeq == null || targetSeq == null)
+        if (sourceSeq == null || targetSeq == null) {
             throw new sequenceNotFoundException();
+        }
         Tile tileToMove = sourceSeq.remove(data.getSourceSequencePosition());
         targetSeq.add(data.getTargetSequencePosition(), tileToMove);
     }
@@ -44,7 +45,11 @@ public class Board {
     }
 
     public void finishTurn() throws InvalidSequenceException {
-
+        SequenceValidator validator;
+        for (List list : sequencesMap.values()) {
+            validator = new SequenceValidator(list);
+            validator.validate();
+        }
     }
 
     public int createSequence(Tile[] tiles) {
@@ -57,6 +62,10 @@ public class Board {
 
     private int generateNewIndex() {
         return sequnceIndex++;
+    }
+    
+    public List getSequence(int index){
+        return sequencesMap.get(index);
     }
 
     public static class sequenceNotFoundException extends Exception {

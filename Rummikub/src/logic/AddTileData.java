@@ -17,6 +17,9 @@ public class AddTileData {
         this.sequencePosition = sequencePosition;
     }
 
+    public AddTileData() {
+    }
+
     public int getPlayerID() {
         return playerID;
     }

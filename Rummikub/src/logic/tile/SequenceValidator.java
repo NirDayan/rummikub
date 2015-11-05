@@ -2,20 +2,24 @@ package logic.tile;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Stack;
 import logic.tile.Sequence.InvalidSequenceException;
 import static logic.tile.SequenceValidator.PrevCurrTileRes.*;
 
-class SequenceValidator {
+public class SequenceValidator {
 
-    private final ArrayList<Tile> sequence;
+    private List<Tile> validatedSequence;
+    private List<Tile> originalSequence;
     private ListIterator<Tile> indexInSeq;
-    private final Stack<JokerTile> jokers;
-    private final LinkedList<Color> unusedColors;
+    private Stack<JokerTile> jokers;
+    private LinkedList<Color> unusedColors;
     private Stack<Tile> jokersToAdd;
     private boolean isStraight;
+
 
     enum PrevCurrTileRes {
 
@@ -25,32 +29,66 @@ class SequenceValidator {
         DIFF_COLOR_NOT_SAME_VAL
     }
 
-    public SequenceValidator(ArrayList<Tile> sequence, Stack<JokerTile> jokers) {
+    public SequenceValidator(List tileList) {
+        initilaizations(tileList);
+        initTiles(tileList);
+        separateJokersAndDumbTiles(tileList);
+        Collections.sort(validatedSequence);
+    }
+
+    private void initilaizations(List tileList) {
         jokersToAdd = new Stack<>();
-        this.sequence = sequence;
-        this.jokers = jokers;
         unusedColors = new LinkedList<>();
+        validatedSequence = new ArrayList<>();
+        originalSequence = tileList;
+        jokers = new Stack<>();
         unusedColors.addAll(Arrays.asList(Color.values()));
         isStraight = false;
     }
 
-    public void validate() throws InvalidSequenceException {
-        if (sequence.size() + jokers.size() < 3) {
-            throw new InvalidSequenceException();
+    private static void initTiles(List<Tile> tiles) {
+        for (Tile tile : tiles) {
+            tile.initialize();
         }
-        validateTilesOneByOne();
     }
 
-    private void validateTilesOneByOne() throws InvalidSequenceException {
-        indexInSeq = sequence.listIterator();
+    private void separateJokersAndDumbTiles(List<Tile> tiles) {
+        for (Tile tile : tiles) {
+            if (tile.getValue() == JokerTile.JOKER_INITIAL_VALUE) {
+                jokers.push((JokerTile) tile);
+            } else {
+                validatedSequence.add(tile);
+            }
+        }
+    }
+
+    public void validate() throws InvalidSequenceException {
+        if (validatedSequence.size() + jokers.size() < 3) {
+            throw new InvalidSequenceException();
+        }
+        createValidatedSequence();
+        compareOriginalAndValidatedSequences();
+    }
+
+    private void createValidatedSequence() throws InvalidSequenceException {
+        indexInSeq = validatedSequence.listIterator();
         Tile prevTile = indexInSeq.next();
         markColor(prevTile.color);
         while (indexInSeq.hasNext()) {
             Tile currTile = indexInSeq.next();
             prevTile = handleCurTile(prevTile, currTile);
         }
-        handleUnusedJokers();
-        sequence.addAll(jokersToAdd);
+        addJokersToValidatedSequence();
+    }
+    
+    private void compareOriginalAndValidatedSequences() throws InvalidSequenceException {
+        ListIterator<Tile> origIt = originalSequence.listIterator(),
+                            validatedIt = validatedSequence.listIterator();
+        while(origIt.hasNext()){
+            if(origIt.next().equals(validatedIt.next())== false){
+                throw new InvalidSequenceException();
+            }
+        }
     }
 
     private Tile handleCurTile(Tile prevTile, Tile currTile)
@@ -66,7 +104,7 @@ class SequenceValidator {
                 currTile = tryToUseJokerForStright(prevTile);
                 isStraight = true;
                 //Itarate back so we wont miss a tile.
-                indexInSeq = sequence.listIterator(indexInSeq.previousIndex());
+                indexInSeq = validatedSequence.listIterator(indexInSeq.previousIndex());
                 break;
             case DIFF_COLOR_SAME_VAL:
                 if (isStraight || isColorMarked(currTile.color)) {
@@ -95,6 +133,12 @@ class SequenceValidator {
             return DIFF_COLOR_NOT_SAME_VAL;
         }
     }
+    
+    private void addJokersToValidatedSequence() throws InvalidSequenceException {
+        handleUnusedJokers();
+        validatedSequence.addAll(jokersToAdd);
+        Collections.sort(validatedSequence);
+    }
 
     //Return false if it has been used before
     private boolean isColorMarked(Color color) {
@@ -116,11 +160,11 @@ class SequenceValidator {
     }
 
     private void tryToUseJokerForSameValueSequence() throws InvalidSequenceException {
-        if (jokers.isEmpty() || unusedColors.isEmpty() || sequence.isEmpty()) {
+        if (jokers.isEmpty() || unusedColors.isEmpty() || validatedSequence.isEmpty()) {
             throw new InvalidSequenceException();
         }
 
-        Tile tile = morphJokerToTile(unusedColors.getFirst(), sequence.get(0).value);
+        Tile tile = morphJokerToTile(unusedColors.removeFirst(), validatedSequence.get(0).value);
         jokersToAdd.push(tile);
     }
 
@@ -134,14 +178,14 @@ class SequenceValidator {
     private void handleUnusedJokers() throws InvalidSequenceException {
         while (jokers.isEmpty() == false) {
             if (isStraight) {
-                if (sequence.get(sequence.size() - 1).value != 13) {
+                if (validatedSequence.get(validatedSequence.size() - 1).value != 13) {
                     //Add to tail of straight
-                    Tile tilePrev = sequence.get(sequence.size() - 1);
-                    sequence.add(morphJokerToTile(tilePrev.color, tilePrev.value + 1));
+                    Tile tilePrev = validatedSequence.get(validatedSequence.size() - 1);
+                    validatedSequence.add(morphJokerToTile(tilePrev.color, tilePrev.value + 1));
                 } else {
                     //Add to head of straight
-                    Tile tileNext = sequence.get(0);
-                    sequence.add(0, morphJokerToTile(tileNext.color, tileNext.value - 1));
+                    Tile tileNext = validatedSequence.get(0);
+                    validatedSequence.add(0, morphJokerToTile(tileNext.color, tileNext.value - 1));
                 }
             } else {
                 tryToUseJokerForSameValueSequence();

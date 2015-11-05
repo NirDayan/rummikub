@@ -9,6 +9,17 @@ public class MoveTileData {
     private int targetSequenceIndex;
     private int targetSequencePosition;
 
+    public MoveTileData(int playerID, int sourceSequenceIndex, int sourceSequencePosition, int targetSequenceIndex, int targetSequencePosition) {
+        this.playerID = playerID;
+        this.sourceSequenceIndex = sourceSequenceIndex;
+        this.sourceSequencePosition = sourceSequencePosition;
+        this.targetSequenceIndex = targetSequenceIndex;
+        this.targetSequencePosition = targetSequencePosition;
+    }
+
+    public MoveTileData() {
+    }
+    
     public int getPlayerID() {
         return playerID;
     }
