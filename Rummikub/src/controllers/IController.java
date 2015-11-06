@@ -1,15 +1,15 @@
 package controllers;
 
 import logic.GameDetails;
-import logic.Event;
-import logic.Game;
 
 public interface IController {    
-    public GameDetails getInitialGameInput();
+    public GameDetails getNewGameInput();
     
-    public void showWrongInitialGameInput();
+    public void showWrongNewGameInput();
     
-    public Event getNextEvent();
+    public boolean isGameFromFile();
     
-    public void renderGame(Game game);
+    public String getGameFilePath();
+    
+    public boolean isPlayerResign();
 }

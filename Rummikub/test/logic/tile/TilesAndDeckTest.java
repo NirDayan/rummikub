@@ -16,7 +16,7 @@ public class TilesAndDeckTest {
     @Test
     public void CheckAllCardsExitInDeck() {
         int counter = 0;
-        while (deck.hasMore()) {
+        while (!deck.isEmpty()) {
             assertTrue(isTileValid(deck.pullTile()));
             counter++;
         }
@@ -41,19 +41,19 @@ public class TilesAndDeckTest {
     public void PullAllTilesFromDeckSeccessfuly() {
         int pulled =0;
         Deck testDeck = new Deck();
-        while (testDeck.hasMore()){
+        while (!testDeck.isEmpty()){
             Tile tile = testDeck.pullTile();
             if (tile != null)
                 pulled++;
         }
         assertEquals(pulled,106);
-        assertFalse(testDeck.hasMore());
+        assertFalse(!testDeck.isEmpty());
     }
     
     @Test(expected = Deck.DeckUnderflow.class)
     public void whenNoTilesInDeckAndPulling_throwUnderFlow(){
         Deck testDeck = new Deck();
-        while (testDeck.hasMore())
+        while (!testDeck.isEmpty())
             testDeck.pullTile();
         
         testDeck.pullTile();

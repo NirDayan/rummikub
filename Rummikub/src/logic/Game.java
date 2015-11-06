@@ -7,12 +7,11 @@ import logic.tile.Sequence.InvalidSequenceException;
 import logic.Board.sequenceNotFoundException;
 
 public class Game {
-
-    private static ArrayList<Player> allPlayers = new ArrayList<Player>();
-    private ArrayList<Player> gamePlayers;
+    private ArrayList<Player> players;
     private Deck tilesDeck;
     private Board board;
     private Player currentPlayer;
+    private Player winner;
     private IController controller;
     private static int nextPlayerID = 1;
     private final int MAX_PLAYERS_NUM = 4;
@@ -21,32 +20,31 @@ public class Game {
     private Status status;
 
     public static enum Status {
-
         WAIT,
         ACTIVE
     };
 
     public Game(IController controller) {
-        this.gamePlayers = new ArrayList<Player>();
-        this.currentPlayer = null;
         this.controller = controller;
-        this.tilesDeck = new Deck();
-        this.board = new Board();
-        status = Status.WAIT;
     }
 
-    public Game init() {
+    public Game initNewGame() {
+        players = new ArrayList<Player>();
+        currentPlayer = null;
+        tilesDeck = new Deck();
+        board = new Board();
+        status = Status.WAIT;
         Game result = null;
         boolean isGameInitialized = false;
 
         while (!isGameInitialized) {
-            GameDetails initialUserInput = controller.getInitialGameInput();
+            GameDetails initialUserInput = controller.getNewGameInput();
             if (isGameInputValid(initialUserInput)) {
                 createPlayers(initialUserInput);
                 distributeTiles();
                 isGameInitialized = true;
             } else {
-                controller.showWrongInitialGameInput();
+                controller.showWrongNewGameInput();
             }
         }
 
@@ -78,16 +76,43 @@ public class Game {
         if (currentPlayer == null) {
             currentPlayer = player;
         }
-        allPlayers.add(player);
-        gamePlayers.add(player);
+        players.add(player);
     }
 
     public void distributeTiles() {
-        for (Player player : gamePlayers) {
+        for (Player player : players) {
             for (int i = 0; i < INITIAL_TILES_COUNT; i++) {
                 player.addTile(tilesDeck.pullTile());
             }
         }
+    }
+    
+    public void play() {
+        boolean isGameOver = false;
+        Player currPlayer;
+        while (!isGameOver) {
+           for (int i = 0; i < players.size() && !isGameOver; i++) {
+               currPlayer = players.get(i);
+               if (controller.isPlayerResign()) {//What do we need to do with the player tiles?
+                   currPlayer.setIsResign(true);
+               }
+               currPlayer.play();
+               isGameOver = checkIsGameOver(currPlayer);
+           }
+        }
+    }
+
+    private boolean checkIsGameOver(Player currPlayer) {
+        boolean isGameOver = false;
+        
+        if (currPlayer.isFinished()) {
+            winner = currPlayer;
+            isGameOver = true;
+        }
+        if (tilesDeck.isEmpty()) {
+            isGameOver = true;
+        }
+        return isGameOver;
     }
 
     //TODO: more edge cases???

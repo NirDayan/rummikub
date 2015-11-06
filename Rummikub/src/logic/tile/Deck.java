@@ -22,8 +22,8 @@ public class Deck {
         return deck.remove(0);
     }
     
-    public boolean hasMore() {
-        return (deck.isEmpty() == false);
+    public boolean isEmpty() {
+        return deck.isEmpty();
     }
 
     private void createAllTilesInDeck() {
