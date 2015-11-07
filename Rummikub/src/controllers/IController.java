@@ -2,6 +2,7 @@ package controllers;
 
 import java.util.ArrayList;
 import java.util.InputMismatchException;
+import logic.Board;
 import logic.GameDetails;
 import logic.Player;
 import logic.persistency.FileDetails;
@@ -65,4 +66,6 @@ public interface IController {
     public void showEndOfGameMenu();
     
     public FileDetails askUserToSaveGame(boolean isAlreadySaved);
+    
+    public void showGameStatus(Board board, Player player);
 }

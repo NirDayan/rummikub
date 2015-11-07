@@ -12,8 +12,7 @@ public class Deck {
 
     public Deck() {
         deck = new ArrayList<>();
-        createAllTilesInDeck();
-        Collections.shuffle(deck);
+        reset();
     }
 
     public Tile pullTile() {
@@ -25,7 +24,12 @@ public class Deck {
     public boolean isEmpty() {
         return deck.isEmpty();
     }
-
+    
+    public void reset() {
+        createAllTilesInDeck();
+        Collections.shuffle(deck);
+    }
+    
     private void createAllTilesInDeck() {
         //Iterate all tile types and add 2 of each type
         for (Color color : Color.values()) {

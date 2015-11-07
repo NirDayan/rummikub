@@ -28,14 +28,21 @@ public abstract class Player {
         if (tile != null) 
             tiles.add(tile);
     }
-    
-    public abstract void play();
-    
+        
     public boolean isFinished() {
         return tiles.isEmpty();
     }
 
     public String getName() {
         return name;
+    }
+    
+    public void reset() {
+        tiles.clear();
+        isResign = false;
+    }
+    
+    public ArrayList<Tile> getTiles() {
+        return tiles;
     }
 }

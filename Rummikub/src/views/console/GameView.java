@@ -5,8 +5,10 @@ import java.util.Scanner;
 import logic.GameDetails;
 import java.util.ArrayList;
 import java.lang.Integer;
+import logic.Board;
 import logic.Player;
 import logic.persistency.FileDetails;
+import logic.tile.Tile;
 
 public class GameView {
     
@@ -52,7 +54,10 @@ public class GameView {
     }
     
     public boolean askPlayerIfResign(Player player) {
-        System.out.println("Player " + player.getName() + " What would you like to do?");
+        System.out.println("=========================================");
+        System.out.println("*****  Player " + player.getName() + "  *****");
+        System.out.println("=========================================");
+        System.out.println(" What would you like to do?");
         System.out.println("1. Continue play");
         System.out.println("2. Resign from game");
         
@@ -183,5 +188,19 @@ public class GameView {
         else {
             System.out.println("There is no winner");
         }
+    }
+    
+    public void showGameStatus(Board board, Player player) {
+        System.out.println("------- Board start -------");
+        //TODO: print board
+        System.out.println("------- Board end -------");
+        System.out.println("------- " + player.getName() + " tiles start -------");
+        ArrayList<Tile> tiles = player.getTiles();
+        for (int i = 0; i < tiles.size(); i++) {
+            System.out.println("[Tile #"+ (i + 1) + "] Color: " + 
+                    tiles.get(i).getValue() + " Value: " + 
+                    tiles.get(i).getColor());
+        }
+        System.out.println("------- " + player.getName() + " tiles end -------");
     }
 }

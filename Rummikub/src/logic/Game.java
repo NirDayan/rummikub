@@ -22,14 +22,8 @@ public class Game {
     private final int MAX_PLAYERS_NUM = 4;
     private final String COMPUTER_NAME_PREFIX = "Computer#";
     private final int INITIAL_TILES_COUNT = 14;
-    private Status status;
     private boolean isPersisted;
     private List<IPersistencyListener> saveListeners;
-
-    public static enum Status {
-        WAIT,
-        ACTIVE
-    };
 
     public Game(IController controller) {
         this.controller = controller;
@@ -41,7 +35,6 @@ public class Game {
         currentPlayer = null;
         tilesDeck = new Deck();
         board = new Board();
-        status = Status.WAIT;
         isPersisted = false;
         Game result = null;
         boolean isGameInitialized = false;
@@ -58,6 +51,17 @@ public class Game {
         }
 
         return result;
+    }
+    
+    public void reset() {
+        for(Player player : players) {
+            player.reset();
+        }
+        board.reset();
+        tilesDeck.reset();
+        winner = null;
+        currentPlayer = players.get(0);
+        isPersisted = false;
     }
 
     // Returns the Sequence index to the controller
@@ -97,24 +101,31 @@ public class Game {
     }
     
     public void play() {
-        boolean isGameOver = false;
-        Player currPlayer;
-        while (!isGameOver) {
-           for (int i = 0; i < players.size() && !isGameOver; i++) {
-               currPlayer = players.get(i);
-               if (!currPlayer.isResign()) {
-                   if (controller.isPlayerResign(currPlayer)) {//What do we need to do with the player tiles?
-                        currPlayer.setIsResign(true);
-                    }
-                   else {
-                       handleGameSaving(currPlayer);
-                       currPlayer.play();
-                   }
-               }   
-               isGameOver = checkIsGameOver(currPlayer);
-           }
-        }
+        while (!checkIsGameOver()) {
+            //loop over the players starting from the currentPlayer
+            if (!currentPlayer.isResign()) {
+                controller.showGameStatus(board, currentPlayer);
+                if (controller.isPlayerResign(currentPlayer)) {//What do we need to do with the player tiles?
+                     currentPlayer.setIsResign(true);
+                 }
+                else {
+                    handleGameSaving(currentPlayer);
+                    //TODO: continue the game flow...
+                }
+            }
+            setNextPlayer();
+        }        
         controller.showEndOfGame(winner);
+    }
+    
+    public void setNextPlayer() {
+        int currPlayerIndex = players.indexOf(currentPlayer);
+        if (currPlayerIndex == players.size() - 1) {
+            currentPlayer = players.get(0);
+        }
+        else {
+            currentPlayer = players.get(currPlayerIndex + 1);
+        }
     }
     
     public synchronized void addEventListener(IPersistencyListener listener)  {
@@ -135,10 +146,10 @@ public class Game {
         }
     }
 
-    private boolean checkIsGameOver(Player currPlayer) {        
+    private boolean checkIsGameOver() {        
         //if there is a winner
-        if (currPlayer.isFinished()) {
-            winner = currPlayer;
+        if (currentPlayer.isFinished()) {
+            winner = currentPlayer;
             return true;
         }
         //if the deck is empty

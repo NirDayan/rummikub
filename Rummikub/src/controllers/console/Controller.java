@@ -2,6 +2,7 @@ package controllers.console;
 
 import controllers.IController;
 import java.util.ArrayList;
+import logic.Board;
 import logic.GameDetails;
 import logic.Player;
 import logic.persistency.FileDetails;
@@ -58,5 +59,10 @@ public class Controller implements IController {
     @Override
     public FileDetails askUserToSaveGame(boolean isAlreadySaved) {
         return view.askUserToSaveGame(isAlreadySaved);
+    }
+
+    @Override
+    public void showGameStatus(Board board, Player player) {
+        view.showGameStatus(board, player);
     }
 }

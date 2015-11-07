@@ -16,6 +16,8 @@ import logic.tile.Tile;
 
 public class Board {
 
+    //[Nir] Why Map and not ArrayList?
+    //ArrayList is ordered and the sequenceIndex will be redundent
     private final Map<Integer, List<Tile>> sequencesMap;
     private Integer sequnceIndex;
 
@@ -66,6 +68,10 @@ public class Board {
     
     public List getSequence(int index){
         return sequencesMap.get(index);
+    }
+    
+    public void reset() {
+        //TODO: implement
     }
 
     public static class sequenceNotFoundException extends Exception {

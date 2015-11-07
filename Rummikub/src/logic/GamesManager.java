@@ -77,6 +77,6 @@ public class GamesManager implements IPersistencyListener{
     }
     
     private void replayGame() {
-        //TODO: implement
+        game.reset();
     }
 }
