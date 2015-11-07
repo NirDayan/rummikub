@@ -2,9 +2,14 @@ package logic;
 
 import java.util.ArrayList;
 import controllers.IController;
+import java.util.Iterator;
+import java.util.List;
 import logic.tile.*;
 import logic.tile.Sequence.InvalidSequenceException;
 import logic.Board.sequenceNotFoundException;
+import logic.persistency.FileDetails;
+import logic.persistency.IPersistencyListener;
+import logic.persistency.PersistencyEvent;
 
 public class Game {
     private ArrayList<Player> players;
@@ -18,6 +23,8 @@ public class Game {
     private final String COMPUTER_NAME_PREFIX = "Computer#";
     private final int INITIAL_TILES_COUNT = 14;
     private Status status;
+    private boolean isPersisted;
+    private List<IPersistencyListener> saveListeners;
 
     public static enum Status {
         WAIT,
@@ -26,6 +33,7 @@ public class Game {
 
     public Game(IController controller) {
         this.controller = controller;
+        saveListeners = new ArrayList<IPersistencyListener>();
     }
 
     public Game initNewGame() {
@@ -34,6 +42,7 @@ public class Game {
         tilesDeck = new Deck();
         board = new Board();
         status = Status.WAIT;
+        isPersisted = false;
         Game result = null;
         boolean isGameInitialized = false;
 
@@ -98,6 +107,7 @@ public class Game {
                         currPlayer.setIsResign(true);
                     }
                    else {
+                       handleGameSaving(currPlayer);
                        currPlayer.play();
                    }
                }   
@@ -105,6 +115,24 @@ public class Game {
            }
         }
         controller.showEndOfGame(winner);
+    }
+    
+    public synchronized void addEventListener(IPersistencyListener listener)  {
+      saveListeners.add(listener);
+    }
+    
+    public synchronized void removeEventListener(IPersistencyListener listener)   {
+      saveListeners.remove(listener);
+    }
+    
+    public void handleGameSaving(Player player) {
+        if (player instanceof HumanPlayer) {
+            FileDetails fileDetails = controller.askUserToSaveGame(isPersisted);
+            if (fileDetails != null && fileDetails.isNewFile()) {
+                fireSaveEvent(fileDetails);
+                isPersisted = true;
+            }
+        }
     }
 
     private boolean checkIsGameOver(Player currPlayer) {        
@@ -188,5 +216,13 @@ public class Game {
 
     private int generatePlayerId() {
         return (nextPlayerID)++;
+    }
+    
+    private synchronized void fireSaveEvent(FileDetails fileDetails) {
+        PersistencyEvent event = new PersistencyEvent(this, fileDetails);
+        Iterator listeners = saveListeners.iterator();
+        while( listeners.hasNext() ) {
+            ((IPersistencyListener) listeners.next()).handleSaveGame(event);
+        }
     }
 }

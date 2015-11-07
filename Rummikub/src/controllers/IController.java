@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.InputMismatchException;
 import logic.GameDetails;
 import logic.Player;
+import logic.persistency.FileDetails;
 
 public interface IController {    
     public enum UserOptions {
@@ -62,4 +63,6 @@ public interface IController {
     public void showEndOfGame(Player winner);
     
     public void showEndOfGameMenu();
+    
+    public FileDetails askUserToSaveGame(boolean isAlreadySaved);
 }

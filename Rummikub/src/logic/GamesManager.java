@@ -3,8 +3,10 @@ package logic;
 import controllers.IController;
 import controllers.IController.UserOptions;
 import java.util.ArrayList;
+import logic.persistency.IPersistencyListener;
+import logic.persistency.PersistencyEvent;
 
-public class GamesManager {
+public class GamesManager implements IPersistencyListener{
 
     private final IController controller;
     private Game game;
@@ -25,7 +27,14 @@ public class GamesManager {
       
     public Game createGameFromXML (String xmlData, IController controller) {
         //TODO: implement
-        return new Game(controller);
+        game = new Game(controller);
+        game.addEventListener(this);
+        return game;
+    }
+    
+    @Override
+    public void handleSaveGame(PersistencyEvent evt) {
+        //TODO: implement
     }
     
     private void createNewGame() {
@@ -35,6 +44,7 @@ public class GamesManager {
         else {
             game = new Game(controller);
             game.initNewGame();
+            game.addEventListener(this);
         }
     }
     

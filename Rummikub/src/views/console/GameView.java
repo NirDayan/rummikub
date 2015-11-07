@@ -6,6 +6,7 @@ import logic.GameDetails;
 import java.util.ArrayList;
 import java.lang.Integer;
 import logic.Player;
+import logic.persistency.FileDetails;
 
 public class GameView {
     
@@ -110,5 +111,77 @@ public class GameView {
         
         //we should not get into this line
         return UserOptions.ONE;
+    }
+    
+    public FileDetails askUserToSaveGame(boolean isAlreadySaved) {
+        FileDetails result = null;
+        
+        System.out.println("Would you like to save the game? Please choose one option: ");
+        System.out.println("1. Save");
+        System.out.println("2. Continue without saving");
+        
+        ArrayList<Integer> options = new ArrayList<>();
+        options.add(UserOptions.ONE.getOption());
+        options.add(UserOptions.TWO.getOption());
+        
+        UserOptions option = askUserChooseOption(options);
+        if (option.equals(UserOptions.ONE)) {
+            if (isAlreadySaved) {
+                System.out.println("Would you like to save the game into the last file,"
+                        + " or create a new file? Please choose one option: ");
+                System.out.println("1. Save into the last file");
+                System.out.println("2. Save as a new file");
+                options = new ArrayList<>();
+                options.add(UserOptions.ONE.getOption());
+                options.add(UserOptions.TWO.getOption());
+                
+                option = askUserChooseOption(options);
+                if (option.equals(UserOptions.ONE)) {
+                    result = new FileDetails(null, null, false);
+                }
+                else {
+                    return getNewFileDetails();
+                }
+            }
+            else {
+                return getNewFileDetails();
+            }
+        }
+        
+        return result;
+    }
+    
+    private FileDetails getNewFileDetails() {
+        boolean isInputValid = false;
+        String filePath, fileName;
+        FileDetails fileDetails = null;
+        
+        while (!isInputValid) {
+            try {
+                scanner.nextLine(); //throw away the \n not consumed by nextInt()
+                System.out.print("Please enter the file path: ");
+                filePath = scanner.nextLine();
+                System.out.print("Please enter the file name: ");
+                fileName = scanner.nextLine();
+                fileDetails = new FileDetails(filePath, fileName, true);
+                isInputValid = true;
+            }
+            catch(Exception err) {
+                System.out.println("Wrong input. Please try again: ");
+                scanner.next();
+            }
+        }
+        
+        return fileDetails;
+    }
+    
+    public void showEndOfGame(Player winner) {
+        System.out.println("GAME OVER!");
+        if (winner != null) {
+            System.out.println("The winner is: " + winner.getName());
+        }
+        else {
+            System.out.println("There is no winner");
+        }
     }
 }
