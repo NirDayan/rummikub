@@ -1,42 +1,15 @@
 package views.console;
 
+import controllers.IController.UserOptions;
 import java.util.Scanner;
 import logic.GameDetails;
 import java.util.ArrayList;
 import java.lang.Integer;
-import java.util.InputMismatchException;
+import logic.Player;
 
 public class GameView {
     
     private final Scanner scanner;
-    private enum UserOptions {
-        FIRST(1),
-        SECOND(2);
-        
-        private final int option;
-        
-        UserOptions(final int option) {
-            this.option = option;
-        }
-        
-        public int getOption() { return option; }
-        
-        public static UserOptions getOptionByInt(int option) {
-            UserOptions res = FIRST;
-            switch (option) {
-                case 1:
-                    res = FIRST;
-                    break;
-                case 2:
-                    res =  SECOND;
-                    break;
-                default:
-                    throw new InputMismatchException();
-            }
-            //we should not get here
-            return res;
-        }
-    }
     
     public GameView () {
         this.scanner = new Scanner(System.in);
@@ -67,24 +40,44 @@ public class GameView {
         System.out.println("2. Load game from file");
         
         ArrayList<Integer> usrOptions = new ArrayList<Integer>();
-        usrOptions.add(UserOptions.FIRST.getOption());
-        usrOptions.add(UserOptions.SECOND.getOption());
+        usrOptions.add(UserOptions.ONE.getOption());
+        usrOptions.add(UserOptions.TWO.getOption());
         
         UserOptions option = askUserChooseOption(usrOptions);
                 
-        if (option.equals(UserOptions.SECOND))
+        if (option.equals(UserOptions.TWO))
             return true;
         return false;
     }
     
-    public boolean askPlayerIfResign() {
-        return false;
+    public boolean askPlayerIfResign(Player player) {
+        System.out.println("Player " + player.getName() + " What would you like to do?");
+        System.out.println("1. Continue play");
+        System.out.println("2. Resign from game");
+        
+        ArrayList<Integer> usrOptions = new ArrayList<Integer>();
+        usrOptions.add(UserOptions.ONE.getOption());
+        usrOptions.add(UserOptions.TWO.getOption());
+        
+        UserOptions option = askUserChooseOption(usrOptions);
+        
+        if (option.equals(UserOptions.ONE))
+            return false;
+        
+        return true;
     }
     
-    private UserOptions askUserChooseOption(ArrayList<Integer> availableOptions) {
+    public void showEndOfGameMenu() {
+        System.out.println("What would you like to do?");
+        System.out.println("1. Replay last game");
+        System.out.println("2. Create a new game");
+        System.out.println("3. Exit Game");
+    }
+    
+    public UserOptions askUserChooseOption(ArrayList<Integer> availableOptions) {
         boolean isInputValid = false;
         int option;
-        String wrongInputStr = "Wrong input. Please choose between options: ";
+        String wrongInputStr = "Wrong input";
         String chooseOptions = "Please choose your option between ";
         
         for (int i = 0; i < availableOptions.size(); i++) {
@@ -106,13 +99,16 @@ public class GameView {
                 }
                 else {
                     System.out.println(wrongInputStr);
+                    System.out.print(chooseOptions);
                 }
             } catch (Exception e) {
                 System.out.println(wrongInputStr);
+                System.out.print(chooseOptions);
+                scanner.next();
             }
         }     
         
         //we should not get into this line
-        return UserOptions.FIRST;
+        return UserOptions.ONE;
     }
 }

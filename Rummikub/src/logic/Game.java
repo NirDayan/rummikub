@@ -93,26 +93,41 @@ public class Game {
         while (!isGameOver) {
            for (int i = 0; i < players.size() && !isGameOver; i++) {
                currPlayer = players.get(i);
-               if (controller.isPlayerResign()) {//What do we need to do with the player tiles?
-                   currPlayer.setIsResign(true);
-               }
-               currPlayer.play();
+               if (!currPlayer.isResign()) {
+                   if (controller.isPlayerResign(currPlayer)) {//What do we need to do with the player tiles?
+                        currPlayer.setIsResign(true);
+                    }
+                   else {
+                       currPlayer.play();
+                   }
+               }   
                isGameOver = checkIsGameOver(currPlayer);
            }
         }
+        controller.showEndOfGame(winner);
     }
 
-    private boolean checkIsGameOver(Player currPlayer) {
-        boolean isGameOver = false;
-        
+    private boolean checkIsGameOver(Player currPlayer) {        
+        //if there is a winner
         if (currPlayer.isFinished()) {
             winner = currPlayer;
-            isGameOver = true;
+            return true;
         }
+        //if the deck is empty
         if (tilesDeck.isEmpty()) {
-            isGameOver = true;
+            return true;
         }
-        return isGameOver;
+        //if all players resigned
+        int resignedPlayersCount = 0;
+        for(Player player : players) {
+            if (player.isResign()) {
+                resignedPlayersCount++;
+            }
+        }
+        if (resignedPlayersCount == players.size())
+            return true;
+        
+        return false;
     }
 
     //TODO: more edge cases???

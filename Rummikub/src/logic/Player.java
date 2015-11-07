@@ -20,7 +20,7 @@ public abstract class Player {
         this.isResign = isResign;
     }
 
-    public boolean getIsResign() {
+    public boolean isResign() {
         return isResign;
     }   
     
@@ -34,6 +34,8 @@ public abstract class Player {
     public boolean isFinished() {
         return tiles.isEmpty();
     }
-    
-    
+
+    public String getName() {
+        return name;
+    }
 }
