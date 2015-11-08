@@ -34,12 +34,14 @@ public class Deck {
         //Iterate all tile types and add 2 of each type
         for (Color color : Color.values()) {
             for (int value = LOWEST_TILE_VALUE; value <= HIGHEST_TILE_VALUE; value++) {
-                deck.add(new Tile(color, value));
-                deck.add(new Tile(color, value));
+                Tile tile = new Tile(color, value);
+                deck.add(tile);
+                deck.add(tile);
             }
         }
-        deck.add(new JokerTile());
-        deck.add(new JokerTile());
+        JokerTile joker = new JokerTile();
+        deck.add(joker);
+        deck.add(joker);
     }
 
     public static class DeckUnderflow extends RuntimeException {

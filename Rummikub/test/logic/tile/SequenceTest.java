@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 public class SequenceTest {
+
     private Sequence sequence;
 
     // Should Create Sequence Seccessfuly
@@ -17,6 +18,7 @@ public class SequenceTest {
                 new Tile(Red, 11),
                 new Tile(Red, 12)
         );
+        sequence.validate();
         assertEquals(sequence.getSize(), 3);
         assertTrue(sequence.getValueSum() == 33);
         sequence = new Sequence(
@@ -25,6 +27,7 @@ public class SequenceTest {
                 new Tile(Black, 5),
                 new Tile(Yellow, 5)
         );
+        sequence.validate();
         assertEquals(sequence.getSize(), 4);
         assertTrue(sequence.getValueSum() == 20);
     }
@@ -36,6 +39,7 @@ public class SequenceTest {
                 new JokerTile(),
                 new Tile(Black, 5)
         );
+        sequence.validate();
         assertEquals(sequence.getSize(), 3);
         assertTrue(sequence.getValueSum() == 12);
 
@@ -44,6 +48,7 @@ public class SequenceTest {
                 new JokerTile(),
                 new JokerTile()
         );
+        sequence.validate();
         assertEquals(sequence.getSize(), 3);
     }
 
@@ -64,17 +69,19 @@ public class SequenceTest {
                 new Tile(Red, 12),
                 new Tile(Red, 13)
         );
+        sequence.validate();
         assertEquals(sequence.getSize(), 13);
         assertTrue(sequence.getValueSum() == 91);
     }
 
     @Test
-    public void addOneJokerFromBelow() throws Exception{
+    public void addOneJokerFromBelow() throws Exception {
         sequence = new Sequence(
                 new JokerTile(),
                 new Tile(Black, 12),
                 new Tile(Black, 13)
         );
+        sequence.validate();
         assertTrue(sequence.getValueSum() == 36);
     }
 
@@ -86,6 +93,7 @@ public class SequenceTest {
                 new Tile(Black, 12),
                 new Tile(Black, 13)
         );
+        sequence.validate();
         assertTrue(sequence.getValueSum() == 46);
     }
 
@@ -96,6 +104,7 @@ public class SequenceTest {
                 new Tile(Red, 4),
                 new JokerTile()
         );
+        sequence.validate();
         assertEquals(sequence.getSize(), 3);
         sequence = new Sequence(
                 new Tile(Red, 5),
@@ -103,6 +112,7 @@ public class SequenceTest {
                 new Tile(Black, 5),
                 new JokerTile()
         );
+        sequence.validate();
         assertEquals(sequence.getSize(), 4);
     }
 
@@ -115,7 +125,7 @@ public class SequenceTest {
                 new Tile(Blue, 11),
                 new Tile(Red, 12)
         );
-
+        sequence.validate();
     }
 
     @Test(expected = Sequence.InvalidSequenceException.class)
@@ -125,6 +135,7 @@ public class SequenceTest {
                 new Tile(Blue, 3),
                 new Tile(Black, 8)
         );
+        sequence.validate();
     }
 
     @Test(expected = Sequence.InvalidSequenceException.class)
@@ -136,6 +147,7 @@ public class SequenceTest {
                 new Tile(Yellow, 2),
                 new JokerTile()
         );
+        sequence.validate();
     }
 
     @Test(expected = Sequence.InvalidSequenceException.class)
@@ -146,5 +158,6 @@ public class SequenceTest {
                 new Tile(Red, 6),
                 new JokerTile()
         );
+        sequence.validate();
     }
 }

@@ -1,7 +1,5 @@
 package logic.tile;
 
-import java.util.Objects;
-
 public class Tile implements Comparable<Tile>{
     protected Color color;
     protected int value;
@@ -21,22 +19,12 @@ public class Tile implements Comparable<Tile>{
 
     void initialize() {}
     
-    class InvalidTile extends RuntimeException{
-    }
     
     @Override
     public int compareTo(Tile other){
         return this.value - other.value;
     }
-
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 79 * hash + Objects.hashCode(this.color);
-        hash = 79 * hash + this.value;
-        return hash;
-    }
-
+    
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {

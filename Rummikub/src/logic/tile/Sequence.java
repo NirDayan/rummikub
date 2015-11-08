@@ -21,12 +21,15 @@ public class Sequence {
 
     private void init(List<Tile> tiles) throws InvalidSequenceException {
         sequence = tiles;
-        validate();
     }
 
-    private void validate() throws Sequence.InvalidSequenceException {
+    public void validate() throws Sequence.InvalidSequenceException {
         SequenceValidator validator = new SequenceValidator(sequence);
         validator.validate();
+    }
+    
+    public List toList() {
+        return sequence;
     }
 
     public int getSize() {

@@ -10,7 +10,7 @@ import java.util.Stack;
 import logic.tile.Sequence.InvalidSequenceException;
 import static logic.tile.SequenceValidator.PrevCurrTileRes.*;
 
-public class SequenceValidator {
+class SequenceValidator {
 
     private List<Tile> validatedSequence;
     private List<Tile> originalSequence;

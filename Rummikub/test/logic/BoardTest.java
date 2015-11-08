@@ -6,23 +6,16 @@ import logic.tile.Tile;
 import static logic.tile.TileGenerator.generate;
 import static logic.tile.TileGenerator.generateJoker;
 import static org.junit.Assert.*;
-import org.junit.Before;
 import org.junit.Test;
 
 public class BoardTest {
 
     private Board board;
 
-    @Before
-    public void setUp() {
-        board = new Board();
-    }
-
     @Test
     public void boardCreateSequenceSeccessfuly() throws Exception {
-        int index = -1;
-        index = board.createSequence(generate(4));
-        assertTrue(index >= 0);
+        board = new Board();
+        board.createSequence(generate(4));
     }
 
     @Test
@@ -32,8 +25,7 @@ public class BoardTest {
         board.createSequence(generate(3));
         board.createSequence(generate(5));
         board.createSequence(generate(6));
-        int index = board.createSequence(generate(2));
-        assertEquals(index, 4);
+        board.createSequence(generate(2));
     }
 
     @Test

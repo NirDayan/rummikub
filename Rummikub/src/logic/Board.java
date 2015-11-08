@@ -7,29 +7,27 @@ package logic;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import logic.tile.Sequence;
 import logic.tile.Sequence.InvalidSequenceException;
-import logic.tile.SequenceValidator;
 import logic.tile.Tile;
 
 public class Board {
 
-    //[Nir] Why Map and not ArrayList?
-    //ArrayList is ordered and the sequenceIndex will be redundent
-    private final Map<Integer, List<Tile>> sequencesMap;
-    private Integer sequnceIndex;
+    private List<List<Tile>> sequencesArray;
 
     Board() {
-        sequencesMap = new HashMap<>();
-        sequnceIndex = 0;
+        reset();
     }
 
+    public void reset() {
+        sequencesArray = new ArrayList<>();
+    }
+    
     public void moveTile(MoveTileData data) throws sequenceNotFoundException {
         List<Tile> sourceSeq, targetSeq;
-        sourceSeq = sequencesMap.get(data.getSourceSequenceIndex());
-        targetSeq = sequencesMap.get(data.getTargetSequenceIndex());
+        sourceSeq = sequencesArray.get(data.getSourceSequenceIndex());
+        targetSeq = sequencesArray.get(data.getTargetSequenceIndex());
         if (sourceSeq == null || targetSeq == null) {
             throw new sequenceNotFoundException();
         }
@@ -39,39 +37,33 @@ public class Board {
 
     public void addTile(AddTileData data) throws sequenceNotFoundException {
         List<Tile> sequence;
-        sequence = sequencesMap.get(data.getSequenceIndex());
-        if (sequence == null) {
+        try{
+        sequence = sequencesArray.get(data.getSequenceIndex());
+        }
+        catch(IndexOutOfBoundsException e){
             throw new sequenceNotFoundException();
         }
         sequence.add(data.getSequencePosition(), data.getTile());
     }
 
     public void finishTurn() throws InvalidSequenceException {
-        SequenceValidator validator;
-        for (List list : sequencesMap.values()) {
-            validator = new SequenceValidator(list);
-            validator.validate();
+        for (List list : sequencesArray) {
+            new Sequence(list).validate();
         }
     }
 
-    public int createSequence(Tile[] tiles) {
+    public void createSequence(Tile[] tiles) {
         List<Tile> tilesList = new ArrayList<>();
         tilesList.addAll(Arrays.asList(tiles));
-        int newIndex = generateNewIndex();
-        sequencesMap.put(newIndex, tilesList);
-        return newIndex;
+        sequencesArray.add(tilesList);
     }
 
-    private int generateNewIndex() {
-        return sequnceIndex++;
-    }
-    
     public List getSequence(int index){
-        return sequencesMap.get(index);
+        return sequencesArray.get(index);
     }
     
-    public void reset() {
-        //TODO: implement
+    public List<List<Tile>> getBoard(){
+        return sequencesArray;
     }
 
     public static class sequenceNotFoundException extends Exception {
