@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import logic.tile.Sequence;
-import logic.tile.Sequence.InvalidSequenceException;
 import logic.tile.Tile;
 
 public class Board {
@@ -24,18 +23,19 @@ public class Board {
         sequencesArray = new ArrayList<>();
     }
     
-    public void moveTile(MoveTileData data) throws sequenceNotFoundException {
+    public void moveTile(MoveTileData data) {
         List<Tile> sourceSeq, targetSeq;
+        try{
         sourceSeq = sequencesArray.get(data.getSourceSequenceIndex());
         targetSeq = sequencesArray.get(data.getTargetSequenceIndex());
-        if (sourceSeq == null || targetSeq == null) {
+        }catch(IndexOutOfBoundsException e){
             throw new sequenceNotFoundException();
         }
         Tile tileToMove = sourceSeq.remove(data.getSourceSequencePosition());
         targetSeq.add(data.getTargetSequencePosition(), tileToMove);
     }
 
-    public void addTile(AddTileData data) throws sequenceNotFoundException {
+    public void addTile(AddTileData data) {
         List<Tile> sequence;
         try{
         sequence = sequencesArray.get(data.getSequenceIndex());
@@ -46,10 +46,12 @@ public class Board {
         sequence.add(data.getSequencePosition(), data.getTile());
     }
 
-    public void finishTurn() throws InvalidSequenceException {
+    public boolean finishTurn() {
         for (List list : sequencesArray) {
-            new Sequence(list).validate();
+            if(new Sequence(list).isValid() == false)
+                return false;
         }
+        return true;
     }
 
     public void createSequence(Tile[] tiles) {
@@ -66,6 +68,6 @@ public class Board {
         return sequencesArray;
     }
 
-    public static class sequenceNotFoundException extends Exception {
+    public static class sequenceNotFoundException extends RuntimeException {
     }
 }

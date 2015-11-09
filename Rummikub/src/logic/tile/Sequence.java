@@ -9,35 +9,33 @@ public class Sequence {
 
     private List<Tile> sequence;
 
-    public Sequence(Tile... tiles) throws InvalidSequenceException {
+    public Sequence(Tile... tiles) {
         List<Tile> allTiles = new ArrayList<>();
         allTiles.addAll(Arrays.asList(tiles));
         init(allTiles);
     }
 
-    public Sequence(List<Tile> tiles) throws InvalidSequenceException {
+    public Sequence(List<Tile> tiles) {
         init(tiles);
     }
 
-    private void init(List<Tile> tiles) throws InvalidSequenceException {
+    private void init(List<Tile> tiles) {
         sequence = tiles;
     }
 
-    public void validate() throws Sequence.InvalidSequenceException {
+    public boolean isValid() {
         SequenceValidator validator = new SequenceValidator(sequence);
-        validator.validate();
-    }
-    
-    public List toList() {
-        return sequence;
+        return validator.isValid();
     }
 
     public int getSize() {
         return sequence.size();
     }
 
-    public int getValueSum() throws InvalidSequenceException {
-        validate();
+    public int getValueSum() {
+        if (isValid() == false){
+            return -1; // TODO: I dont like this kind of error code passing. 
+        }// I think it should throw an exception. nir, what do you think?
         int sum = 0;
         for (Tile tile : sequence) {
             sum += tile.getValue();
@@ -45,6 +43,4 @@ public class Sequence {
         return sum;
     }
 
-    public static class InvalidSequenceException extends Exception {
-    }
 }
