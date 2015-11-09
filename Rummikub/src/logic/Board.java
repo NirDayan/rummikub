@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import logic.tile.Sequence;
-import logic.tile.Sequence.InvalidSequenceException;
 import logic.tile.Tile;
 
 public class Board {
@@ -46,10 +45,12 @@ public class Board {
         sequence.add(data.getSequencePosition(), data.getTile());
     }
 
-    public void finishTurn() throws InvalidSequenceException {
+    public boolean finishTurn() {
         for (List list : sequencesArray) {
-            new Sequence(list).validate();
+            if(new Sequence(list).isValid() == false)
+                return false;
         }
+        return true;
     }
 
     public void createSequence(Tile[] tiles) {

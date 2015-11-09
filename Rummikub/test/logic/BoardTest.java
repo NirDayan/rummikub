@@ -1,7 +1,6 @@
 package logic;
 
 import static logic.tile.Color.*;
-import logic.tile.Sequence;
 import logic.tile.Tile;
 import static logic.tile.TileGenerator.generate;
 import static logic.tile.TileGenerator.generateJoker;
@@ -114,11 +113,11 @@ public class BoardTest {
                     generate(Black, 9),
                     generate(Black, 10),});
 
-        board.finishTurn();
+        assertTrue(board.finishTurn());
 
     }
 
-    @Test (expected = Sequence.InvalidSequenceException.class)
+    @Test 
     public void whenBoardIsInvalid_throwException() throws Exception {
         board = new Board();
 
@@ -155,7 +154,7 @@ public class BoardTest {
                     generate(Black, 9),
                     generate(Black, 10),});
 
-        board.finishTurn();
+        assertFalse(board.finishTurn());
     }
     
     @Test(expected = IndexOutOfBoundsException.class)

@@ -5,7 +5,6 @@ import controllers.IController;
 import java.util.Iterator;
 import java.util.List;
 import logic.tile.*;
-import logic.tile.Sequence.InvalidSequenceException;
 import logic.Board.sequenceNotFoundException;
 import logic.persistency.FileDetails;
 import logic.persistency.IPersistencyListener;
@@ -77,7 +76,7 @@ public class Game {
         board.moveTile(data);
     }
 
-    public void finishTurn(int playerID) throws InvalidSequenceException {
+    public void finishTurn(int playerID) {
         board.finishTurn();
     }
 
