@@ -12,14 +12,10 @@ public class Sequence {
     public Sequence(Tile... tiles) {
         List<Tile> allTiles = new ArrayList<>();
         allTiles.addAll(Arrays.asList(tiles));
-        init(allTiles);
+        sequence = allTiles;
     }
 
     public Sequence(List<Tile> tiles) {
-        init(tiles);
-    }
-
-    private void init(List<Tile> tiles) {
         sequence = tiles;
     }
 
@@ -33,9 +29,10 @@ public class Sequence {
     }
 
     public int getValueSum() {
-        if (isValid() == false){
+        if (isValid() == false) {
             return -1; // TODO: I dont like this kind of error code passing. 
         }// I think it should throw an exception. nir, what do you think?
+        //TODO: figure out a way to check the sum
         int sum = 0;
         for (Tile tile : sequence) {
             sum += tile.getValue();

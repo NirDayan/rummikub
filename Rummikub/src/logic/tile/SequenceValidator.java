@@ -1,7 +1,5 @@
 package logic.tile;
 
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -27,7 +25,7 @@ class SequenceValidator {
 
     private boolean validateSameValues() {
         initIteratorAndValueIndex(tileList.listIterator(), -1);
-        List unusedColors = getNewUnusedColorsList();
+        List unusedColors = Color.getColorsList();
         int jokerCounter = 0;
         while (iterator.hasNext()) {
             Tile tile = iterator.next();
@@ -77,14 +75,8 @@ class SequenceValidator {
 
     private boolean isTileInStraightOrder(Tile tile) {
         if (!(tile instanceof JokerTile)) {
-            //Handle Normal Tile
-            if (valueIndex == -1) {
-                setValueIndexAndSeqColor(tile);
-            } else if (tile.getColor() != sequnceColor
-                    || tile.getValue() != valueIndex + 1) {
+            if (!isNormalTileInStraight(tile)) {
                 return false;
-            } else {
-                valueIndex++;
             }
         } else if (valueIndex != -1) {
             valueIndex++;
@@ -92,11 +84,17 @@ class SequenceValidator {
         return true;
     }
 
-    private List<Color> getNewUnusedColorsList() {
-        List<Color> unusedColors;
-        unusedColors = new LinkedList<>();
-        unusedColors.addAll(Arrays.asList(Color.values()));
-        return unusedColors;
+    private boolean isNormalTileInStraight(Tile tile) {
+        if (valueIndex == -1) {
+            setValueIndexAndSeqColor(tile);
+            return true;
+        }
+        if (tile.getColor() != sequnceColor
+                || tile.getValue() != valueIndex + 1) {
+            return false;
+        }
+        valueIndex++;
+        return true;
     }
 
     private void setValueIndexAndSeqColor(Tile tile) {

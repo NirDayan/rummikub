@@ -23,18 +23,19 @@ public class Board {
         sequencesArray = new ArrayList<>();
     }
     
-    public void moveTile(MoveTileData data) throws sequenceNotFoundException {
+    public void moveTile(MoveTileData data) {
         List<Tile> sourceSeq, targetSeq;
+        try{
         sourceSeq = sequencesArray.get(data.getSourceSequenceIndex());
         targetSeq = sequencesArray.get(data.getTargetSequenceIndex());
-        if (sourceSeq == null || targetSeq == null) {
+        }catch(IndexOutOfBoundsException e){
             throw new sequenceNotFoundException();
         }
         Tile tileToMove = sourceSeq.remove(data.getSourceSequencePosition());
         targetSeq.add(data.getTargetSequencePosition(), tileToMove);
     }
 
-    public void addTile(AddTileData data) throws sequenceNotFoundException {
+    public void addTile(AddTileData data) {
         List<Tile> sequence;
         try{
         sequence = sequencesArray.get(data.getSequenceIndex());
@@ -67,6 +68,6 @@ public class Board {
         return sequencesArray;
     }
 
-    public static class sequenceNotFoundException extends Exception {
+    public static class sequenceNotFoundException extends RuntimeException {
     }
 }

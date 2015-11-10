@@ -68,11 +68,11 @@ public class Game {
         return 0;
     }
 
-    public void addTile(AddTileData data) throws sequenceNotFoundException, IndexOutOfBoundsException {
+    public void addTile(AddTileData data) {
         board.addTile(data);
     }
 
-    public void moveTile(MoveTileData data) throws sequenceNotFoundException, IndexOutOfBoundsException {
+    public void moveTile(MoveTileData data) {
         board.moveTile(data);
     }
 
