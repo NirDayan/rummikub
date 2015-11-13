@@ -4,6 +4,7 @@ import controllers.IControllerInputOutput;
 import java.util.ArrayList;
 import logic.Board;
 import logic.GameDetails;
+import logic.MoveTileData;
 import logic.Player;
 import logic.persistency.FileDetails;
 import views.console.GameView;
@@ -13,11 +14,6 @@ public class InputOutputController implements IControllerInputOutput {
     
     public InputOutputController() {
         this.view = new GameView();
-    }
-    
-    @Override
-    public boolean isPlayerResign(Player player) {
-        return view.askPlayerIfResign(player);
     }
 
     @Override
@@ -37,8 +33,8 @@ public class InputOutputController implements IControllerInputOutput {
     }
     
     @Override
-    public void showWrongNewGameInput() {
-        view.showWrongNewGameInput();
+    public void showWrongInputMessage() {
+        view.showWrongInputMessage();
     }
 
     @Override
@@ -64,5 +60,20 @@ public class InputOutputController implements IControllerInputOutput {
     @Override
     public void showGameStatus(Board board, Player player) {
         view.showGameStatus(board, player);
+    }
+
+    @Override
+    public void showUserActionsMenu(Player player) {
+        view.showUserActionsMenu(player);
+    }
+
+    @Override
+    public void showFinishTurnWithoutAction() {
+        view.showFinishTurnWithoutAction();
+    }
+    
+    @Override
+    public MoveTileData getAddTileData() {
+        return view.getAddTileData();
     }
 }

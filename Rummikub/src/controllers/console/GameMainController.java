@@ -1,10 +1,12 @@
 package controllers.console;
 
 import controllers.IControllerInputOutput;
+import controllers.IControllerInputOutput.UserOptions;
 import java.util.ArrayList;
 import logic.Game;
 import logic.GameDetails;
 import logic.HumanPlayer;
+import logic.MoveTileData;
 import logic.Player;
 import logic.persistency.FileDetails;
 
@@ -86,7 +88,7 @@ public class GameMainController {
                 game = new Game(initialUserInput);
                 isGameInitialized = true;
             } else {
-                inputOutputController.showWrongNewGameInput();
+                inputOutputController.showWrongInputMessage();
             }
         }
     }
@@ -125,13 +127,7 @@ public class GameMainController {
             currentPlayer = game.getCurrentPlayer();
             if (!currentPlayer.isResign()) {
                 inputOutputController.showGameStatus(game.getBoard(), currentPlayer);
-                if (inputOutputController.isPlayerResign(currentPlayer)) {//TODO: What do we need to do with the player tiles?
-                     currentPlayer.setIsResign(true);
-                 }
-                else {
-                    handleGameSaving(currentPlayer);
-                    //TODO: continue the game flow...
-                }
+                performPlayerGameRound(currentPlayer);
             }
             game.moveToNextPlayer();
         }        
@@ -139,12 +135,85 @@ public class GameMainController {
     }
     
     private void handleGameSaving(Player player) {
+        FileDetails fileDetails = inputOutputController.askUserToSaveGame(isPersisted);
+        if (fileDetails != null && fileDetails.isNewFile()) {
+            //TODO: implement - save game to XML file
+            isPersisted = true;
+        }
+    }
+
+    private void performPlayerGameRound(Player player) {
         if (player instanceof HumanPlayer) {
-            FileDetails fileDetails = inputOutputController.askUserToSaveGame(isPersisted);
-            if (fileDetails != null && fileDetails.isNewFile()) {
-                //TODO: implement - save game to XML file
-                isPersisted = true;
+            handleGameSaving(player);
+        }
+        
+        performPlayerStep(player);
+    }
+    
+    private void performPlayerStep(Player player) {
+        ArrayList<Integer> options = new ArrayList<>();
+        options.add(IControllerInputOutput.UserOptions.ONE.getOption());
+        options.add(IControllerInputOutput.UserOptions.TWO.getOption());
+        options.add(IControllerInputOutput.UserOptions.THREE.getOption());
+        options.add(IControllerInputOutput.UserOptions.FOUR.getOption());
+        options.add(IControllerInputOutput.UserOptions.FIVE.getOption());
+        UserOptions option;
+        boolean isPlayerFinished = false;
+        boolean isPlayerPerformAnyChange = false;
+        
+        do {
+            inputOutputController.showUserActionsMenu(player);
+            if (player instanceof HumanPlayer) {
+                option = inputOutputController.askUserChooseOption(options);
+            }
+            else {
+                //TODO: implement ComputerPlayer actions
+                option = UserOptions.ONE;
+            }
+
+            if (option == UserOptions.ONE) {
+                //TODO: What do we need to do with the player tiles?
+                game.playerResign(player.getID());
+                isPlayerFinished = true;
+            }
+            else if (option == UserOptions.TWO) {
+                isPlayerPerformAnyChange = handleAddTile(player);
+            }
+            else if (option == UserOptions.THREE) {
+                isPlayerPerformAnyChange = handleMoveTile(player);
+            }
+            else if (option == UserOptions.FOUR) {
+                game.pullTileFromDeck(player.getID());
+                isPlayerFinished = true;
+            }
+            else if (option == UserOptions.FIVE) {
+                if (isPlayerPerformAnyChange) {
+                    isPlayerFinished = true;
+                }
+                else {
+                    inputOutputController.showFinishTurnWithoutAction();
+                }
+            }            
+        }
+        while (!isPlayerFinished);
+    }
+
+    private boolean handleAddTile(Player player) {
+        boolean isValid = false;
+        MoveTileData addTileData;
+        while (!isValid) {
+            addTileData = inputOutputController.getAddTileData();
+            isValid = game.addTile(player.getID(), addTileData);
+            if (!isValid) {
+                inputOutputController.showWrongInputMessage();
             }
         }
+        
+        return isValid;
+    }
+
+    private boolean handleMoveTile(Player player) {
+        return false;
+        //TODO: implement
     }
 }

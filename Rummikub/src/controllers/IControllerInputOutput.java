@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.InputMismatchException;
 import logic.Board;
 import logic.GameDetails;
+import logic.MoveTileData;
 import logic.Player;
 import logic.persistency.FileDetails;
 
 public interface IControllerInputOutput {    
+
     public enum UserOptions {
         ONE(1),
         TWO(2),
@@ -51,13 +53,11 @@ public interface IControllerInputOutput {
     
     public GameDetails getNewGameInput();
     
-    public void showWrongNewGameInput();
+    public void showWrongInputMessage();
     
     public boolean isGameFromFile();
     
     public String getGameFilePath();
-    
-    public boolean isPlayerResign(Player player);
     
     public UserOptions askUserChooseOption(ArrayList<Integer> availableOptions);
     
@@ -65,7 +65,13 @@ public interface IControllerInputOutput {
     
     public void showEndOfGameMenu();
     
+    public void showUserActionsMenu(Player player);
+    
     public FileDetails askUserToSaveGame(boolean isAlreadySaved);
     
     public void showGameStatus(Board board, Player player);
+    
+    public void showFinishTurnWithoutAction();
+    
+    public MoveTileData getAddTileData();
 }

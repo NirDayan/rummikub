@@ -71,6 +71,10 @@ public class Game {
         return board;
     }
     
+    public Player getWinner() {
+        return winner;
+    }
+    
     public void moveToNextPlayer() {
         int currPlayerIndex = players.indexOf(currentPlayer);
         if (currPlayerIndex == players.size() - 1) {
@@ -81,8 +85,10 @@ public class Game {
         }
     }
     
-    public Player getWinner() {
-        return winner;
+    public void pullTileFromDeck(int playerID) {
+        Player player = getPlayerByID(playerID);
+        if (player != null)
+            player.addTile(tilesDeck.pullTile());
     }
     
     private void distributeTiles() {
@@ -117,8 +123,46 @@ public class Game {
             addPlayer(currPlayer);
         }
     }
+    
+    public boolean moveTile(int playerID, MoveTileData data) {
+        //TODO: implement
+        return false;
+    }
+    
+    public boolean addTile(int playerID, MoveTileData addTileData) {
+        Player player = getPlayerByID(playerID);
+        Tile tile;
+        int seqIndex = addTileData.getTargetSequenceIndex();
+        int seqPosition = addTileData.getTargetSequencePosition();
+        
+        if (player != null && board.isTargetValid(seqIndex, seqPosition)) {
+            tile = player.removeTile(addTileData.getSourceSequencePosition());
+            if (tile != null) {
+                return board.addTile(addTileData.getTargetSequenceIndex(), 
+                        addTileData.getTargetSequencePosition(), tile);
+            }
+        }
+        
+        return false;
+    }
+    
+    public void playerResign(int playerID) {
+        Player player = getPlayerByID(playerID);
+        if (player != null) {
+            player.setIsResign(true);
+        }
+    }
 
     private int generatePlayerId() {
         return (nextPlayerID)++;
+    }
+    
+    private Player getPlayerByID (int playerID) {
+        for(Player pl : players) {
+            if (pl.getID() == playerID) 
+                return pl;
+        }
+        
+        return null;
     }
 }

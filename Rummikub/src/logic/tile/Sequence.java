@@ -50,10 +50,13 @@ public class Sequence {
         return tileToRemove;
     }
     
-    public void addTile(int index, Tile tile) {
+    public boolean addTile(int index, Tile tile) {
         if (tile != null && (index < tiles.size() && index >= 0)) {
             tiles.add(index, tile);
+            
+            return true;
         }
+        return false;
     }
     
     public Tile getTile(int index) {
@@ -63,5 +66,20 @@ public class Sequence {
         }
         
         return tile;
+    }
+    
+    public Sequence split(int index) {
+        Sequence newSequence = null;
+        List<Tile> tilesNewSeq;
+        
+        if (index < tiles.size() - 1 && index >= 1) {
+            tilesNewSeq = new ArrayList<Tile>();
+            for (int i = index; i < tiles.size(); i++) {
+                tilesNewSeq.add(tiles.remove(i));
+            }
+            newSequence = new Sequence(tilesNewSeq);
+        }
+        
+        return newSequence;
     }
 }

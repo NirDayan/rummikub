@@ -6,6 +6,7 @@ import logic.GameDetails;
 import java.util.ArrayList;
 import java.util.List;
 import logic.Board;
+import logic.MoveTileData;
 import logic.Player;
 import logic.persistency.FileDetails;
 import logic.tile.Sequence;
@@ -37,8 +38,8 @@ public class GameView {
         return "filePath";
     }
 
-    public void showWrongNewGameInput() {
-        System.out.println("Wrong game input, please try again:");
+    public void showWrongInputMessage() {
+        System.out.println("Wrong input, please try again:");
     }
 
     public boolean isGameFromFile() {
@@ -60,25 +61,16 @@ public class GameView {
         return false;
     }
 
-    public boolean askPlayerIfResign(Player player) {
+    public void showUserActionsMenu(Player player) {
         System.out.println("=========================================");
         System.out.println("*****  Player " + player.getName() + "  *****");
         System.out.println("=========================================");
         System.out.println(" What would you like to do?");
-        System.out.println("1. Continue play");
-        System.out.println("2. Resign from game");
-
-        ArrayList<Integer> usrOptions = new ArrayList<Integer>();
-        usrOptions.add(UserOptions.ONE.getOption());
-        usrOptions.add(UserOptions.TWO.getOption());
-
-        UserOptions option = askUserChooseOption(usrOptions);
-
-        if (option.equals(UserOptions.ONE)) {
-            return false;
-        }
-
-        return true;
+        System.out.println("1. Resign from game");
+        System.out.println("2. Add tile into the board");
+        System.out.println("3. Move tile in the board");
+        System.out.println("4. Take one tile from the deck");
+        System.out.println("5. Finish your turn");
     }
 
     public void showEndOfGameMenu() {
@@ -159,6 +151,10 @@ public class GameView {
 
         return result;
     }
+    
+    public void showFinishTurnWithoutAction() {
+        System.out.println("You must perform any action before you can finish your turn!");
+    }
 
     private FileDetails getNewFileDetails() {
         boolean isInputValid = false;
@@ -193,12 +189,12 @@ public class GameView {
     }
 
     public void showGameStatus(Board board, Player player) {
-        System.out.println("------- Board start -------");
-        printBoard(board);
-        System.out.println("------- Board end -------");
         System.out.println("------- " + player.getName() + " tiles start -------");
         printTiles(player.getTiles());
         System.out.println("------- " + player.getName() + " tiles end -------");
+        System.out.println("------- Board start -------");
+        printBoard(board);
+        System.out.println("------- Board end -------");
     }
 
     private void printTiles(List<Tile> tiles) {
@@ -244,5 +240,34 @@ public class GameView {
                 color = ANSI_RESET;
         }
         System.out.print(color + tile.getValue() + ANSI_RESET);
+    }
+
+    public MoveTileData getAddTileData() {
+         boolean isInputValid = false;
+        int sourceIndex = 0;
+        int targetSequenceIndex = 0;
+        int targetSequencePosition = 0;
+        MoveTileData result = new MoveTileData();
+
+        while (!isInputValid) {
+            try {
+                scanner.nextLine(); //throw away the \n not consumed by nextInt()
+                System.out.print("Please enter the tile index from your hand: ");
+                sourceIndex = scanner.nextInt();
+                System.out.print("Please enter the sequence index in the board: ");
+                targetSequenceIndex = scanner.nextInt();
+                System.out.print("Please enter the position in the sequence: ");
+                targetSequencePosition = scanner.nextInt();
+                isInputValid = true;
+            } catch (Exception err) {
+                System.out.println("Wrong input. Please try again: ");
+                scanner.next();
+            }
+        }
+        result.setSourceSequencePosition(sourceIndex);
+        result.setTargetSequenceIndex(targetSequenceIndex);
+        result.setTargetSequencePosition(targetSequencePosition);
+        
+        return result;
     }
 }

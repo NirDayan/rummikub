@@ -37,6 +37,10 @@ public abstract class Player {
         return name;
     }
     
+    public int getID() {
+        return ID;
+    }
+    
     public void reset() {
         tiles.clear();
         isResign = false;
@@ -44,5 +48,13 @@ public abstract class Player {
     
     public ArrayList<Tile> getTiles() {
         return tiles;
+    }
+    
+    Tile removeTile(int index) {
+        if (index < tiles.size() && index >=0) {
+            return tiles.remove(index);
+        }
+        
+        return null;
     }
 }
