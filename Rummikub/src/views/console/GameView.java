@@ -1,6 +1,6 @@
 package views.console;
 
-import controllers.IController.UserOptions;
+import controllers.IControllerInputOutput.UserOptions;
 import java.util.Scanner;
 import logic.GameDetails;
 import java.util.ArrayList;

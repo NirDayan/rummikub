@@ -1,6 +1,6 @@
 package controllers.console;
 
-import controllers.IController;
+import controllers.IControllerInputOutput;
 import java.util.ArrayList;
 import logic.Board;
 import logic.GameDetails;
@@ -8,10 +8,10 @@ import logic.Player;
 import logic.persistency.FileDetails;
 import views.console.GameView;
 
-public class Controller implements IController {
+public class InputOutputController implements IControllerInputOutput {
     private final GameView view;  
     
-    public Controller() {
+    public InputOutputController() {
         this.view = new GameView();
     }
     

@@ -7,7 +7,7 @@ import logic.GameDetails;
 import logic.Player;
 import logic.persistency.FileDetails;
 
-public interface IController {    
+public interface IControllerInputOutput {    
     public enum UserOptions {
         ONE(1),
         TWO(2),
