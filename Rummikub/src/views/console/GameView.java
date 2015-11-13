@@ -8,6 +8,7 @@ import java.util.List;
 import logic.Board;
 import logic.Player;
 import logic.persistency.FileDetails;
+import logic.tile.Sequence;
 import logic.tile.Tile;
 
 public class GameView {
@@ -208,14 +209,20 @@ public class GameView {
         }
         System.out.println();
     }
-
-    private void printBoard(Board board) {
-        List<List<Tile>> boardSequences = board.getBoard();
-        for (int i = 0; i < boardSequences.size(); i++) {
-            System.out.print("[Sequence #" + i + "]");
-            printTiles(boardSequences.get(i));
+    
+    private void printSequene(Sequence sequence) {
+        for (int i = 0; i < sequence.getSize(); i++) {            
+            printTile(sequence.getTile(i));
             System.out.println();
         }
+    }
+
+    private void printBoard(Board board) {
+        List<Sequence> boardSequences = board.getSequences();
+         for (int i = 0; i < boardSequences.size(); i++) {
+             System.out.print("[Sequence #" + i + "]");
+             printSequene(boardSequences.get(i));
+         }
     }
 
     private void printTile(Tile tile) {
@@ -238,5 +245,4 @@ public class GameView {
         }
         System.out.print(color + tile.getValue() + ANSI_RESET);
     }
-
 }

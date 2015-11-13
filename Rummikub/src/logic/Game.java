@@ -5,7 +5,6 @@ import controllers.IController;
 import java.util.Iterator;
 import java.util.List;
 import logic.tile.*;
-import logic.Board.sequenceNotFoundException;
 import logic.persistency.FileDetails;
 import logic.persistency.IPersistencyListener;
 import logic.persistency.PersistencyEvent;
@@ -68,16 +67,8 @@ public class Game {
         return 0;
     }
 
-    public void addTile(AddTileData data) {
-        board.addTile(data);
-    }
-
-    public void moveTile(MoveTileData data) {
-        board.moveTile(data);
-    }
-
     public void finishTurn(int playerID) {
-        board.finishTurn();
+        board.isValid();
     }
 
     public void resign(int playerID) {

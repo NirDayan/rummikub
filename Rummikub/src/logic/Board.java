@@ -6,14 +6,13 @@
 package logic;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import logic.tile.Sequence;
 import logic.tile.Tile;
 
 public class Board {
 
-    private List<List<Tile>> sequencesArray;
+    private List<Sequence> sequencesArray;
 
     Board() {
         reset();
@@ -24,50 +23,47 @@ public class Board {
     }
     
     public void moveTile(MoveTileData data) {
-        List<Tile> sourceSeq, targetSeq;
-        try{
+        Sequence sourceSeq, targetSeq;
         sourceSeq = sequencesArray.get(data.getSourceSequenceIndex());
         targetSeq = sequencesArray.get(data.getTargetSequenceIndex());
-        }catch(IndexOutOfBoundsException e){
-            throw new sequenceNotFoundException();
+        if (sourceSeq != null && targetSeq != null) {
+            Tile tileToMove = sourceSeq.removeTile(data.getSourceSequencePosition());
+            targetSeq.addTile(data.getTargetSequencePosition(), tileToMove);
         }
-        Tile tileToMove = sourceSeq.remove(data.getSourceSequencePosition());
-        targetSeq.add(data.getTargetSequencePosition(), tileToMove);
     }
 
-    public void addTile(AddTileData data) {
-        List<Tile> sequence;
-        try{
-        sequence = sequencesArray.get(data.getSequenceIndex());
+    public void addTile(int sequenceIndex, int indexInSequence, Tile tile) {
+        if (sequenceIndex < sequencesArray.size() && sequenceIndex >= 0) {
+            Sequence sequence = sequencesArray.get(sequenceIndex);
+            sequence.addTile(indexInSequence, tile);
         }
-        catch(IndexOutOfBoundsException e){
-            throw new sequenceNotFoundException();
-        }
-        sequence.add(data.getSequencePosition(), data.getTile());
     }
 
-    public boolean finishTurn() {
-        for (List list : sequencesArray) {
-            if(new Sequence(list).isValid() == false)
+    public boolean isValid() {
+        for (Sequence sequence : sequencesArray) {
+            if(sequence.isValid() == false)
                 return false;
         }
         return true;
     }
 
-    public void createSequence(Tile[] tiles) {
-        List<Tile> tilesList = new ArrayList<>();
-        tilesList.addAll(Arrays.asList(tiles));
-        sequencesArray.add(tilesList);
+    public void addSequence(Sequence sequence) {
+        if (sequence != null) {
+            sequencesArray.add(sequence);
+        }
     }
 
-    public List getSequence(int index){
-        return sequencesArray.get(index);
+    public Sequence getSequence(int index) {
+        Sequence res = null;
+        
+        if (index >=0 && index < sequencesArray.size()) {
+            res = sequencesArray.get(index);
+        }
+        
+        return res;
     }
     
-    public List<List<Tile>> getBoard(){
+    public List<Sequence> getSequences(){
         return sequencesArray;
-    }
-
-    public static class sequenceNotFoundException extends RuntimeException {
     }
 }

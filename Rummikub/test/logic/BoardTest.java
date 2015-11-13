@@ -30,7 +30,7 @@ public class BoardTest {
     @Test
     public void MoveTileSeccessfuly() throws Exception {
         board = new Board();
-        MoveTileData data = new MoveTileData();
+        TileStepData data = new TileStepData();
         data.setSourceSequenceIndex(0);
         data.setSourceSequencePosition(2);
         data.setTargetSequenceIndex(1);
@@ -113,7 +113,7 @@ public class BoardTest {
                     generate(Black, 9),
                     generate(Black, 10),});
 
-        assertTrue(board.finishTurn());
+        assertTrue(board.isValid());
 
     }
 
@@ -154,7 +154,7 @@ public class BoardTest {
                     generate(Black, 9),
                     generate(Black, 10),});
 
-        assertFalse(board.finishTurn());
+        assertFalse(board.isValid());
     }
     
     @Test(expected = IndexOutOfBoundsException.class)

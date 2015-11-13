@@ -7,25 +7,25 @@ import java.util.List;
 // This class might be redundent. need to consider removing it.
 public class Sequence {
 
-    private List<Tile> sequence;
+    private List<Tile> tiles;
 
     public Sequence(Tile... tiles) {
         List<Tile> allTiles = new ArrayList<>();
         allTiles.addAll(Arrays.asList(tiles));
-        sequence = allTiles;
+        this.tiles = allTiles;
     }
 
     public Sequence(List<Tile> tiles) {
-        sequence = tiles;
+        this.tiles = tiles;
     }
 
     public boolean isValid() {
-        SequenceValidator validator = new SequenceValidator(sequence);
+        SequenceValidator validator = new SequenceValidator(tiles);
         return validator.isValid();
     }
 
     public int getSize() {
-        return sequence.size();
+        return tiles.size();
     }
 
     public int getValueSum() {
@@ -34,10 +34,34 @@ public class Sequence {
         }// I think it should throw an exception. nir, what do you think?
         //TODO: figure out a way to check the sum
         int sum = 0;
-        for (Tile tile : sequence) {
+        for (Tile tile : tiles) {
             sum += tile.getValue();
         }
         return sum;
     }
-
+    
+    public Tile removeTile(int tileIndex) {
+        Tile tileToRemove = null;
+        if (tileIndex < tiles.size() && tileIndex >= 0) {
+            tileToRemove = tiles.get(tileIndex);
+            tiles.remove(tileToRemove);
+        }
+        
+        return tileToRemove;
+    }
+    
+    public void addTile(int index, Tile tile) {
+        if (tile != null && (index < tiles.size() && index >= 0)) {
+            tiles.add(index, tile);
+        }
+    }
+    
+    public Tile getTile(int index) {
+        Tile tile = null;
+        if (index < tiles.size() && index >= 0) {
+            tile = tiles.get(index);
+        }
+        
+        return tile;
+    }
 }
