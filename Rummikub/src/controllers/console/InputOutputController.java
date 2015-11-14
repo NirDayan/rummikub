@@ -76,4 +76,9 @@ public class InputOutputController implements IControllerInputOutput {
     public MoveTileData getAddTileData() {
         return view.getAddTileData();
     }
+
+    @Override
+    public MoveTileData getMoveTileData() {
+        return view.getMoveTileData();
+    }
 }

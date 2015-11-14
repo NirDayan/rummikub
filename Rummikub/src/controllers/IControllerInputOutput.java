@@ -74,4 +74,6 @@ public interface IControllerInputOutput {
     public void showFinishTurnWithoutAction();
     
     public MoveTileData getAddTileData();
+    
+    public MoveTileData getMoveTileData();
 }

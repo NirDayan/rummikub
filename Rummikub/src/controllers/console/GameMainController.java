@@ -126,7 +126,6 @@ public class GameMainController {
             //loop over the players starting from the currentPlayer
             currentPlayer = game.getCurrentPlayer();
             if (!currentPlayer.isResign()) {
-                inputOutputController.showGameStatus(game.getBoard(), currentPlayer);
                 performPlayerGameRound(currentPlayer);
             }
             game.moveToNextPlayer();
@@ -162,6 +161,7 @@ public class GameMainController {
         boolean isPlayerPerformAnyChange = false;
         
         do {
+            inputOutputController.showGameStatus(game.getBoard(), player);
             inputOutputController.showUserActionsMenu(player);
             if (player instanceof HumanPlayer) {
                 option = inputOutputController.askUserChooseOption(options);
@@ -171,22 +171,22 @@ public class GameMainController {
                 option = UserOptions.ONE;
             }
 
-            if (option == UserOptions.ONE) {
+            if (option == UserOptions.ONE) {//Resign
                 //TODO: What do we need to do with the player tiles?
                 game.playerResign(player.getID());
                 isPlayerFinished = true;
             }
-            else if (option == UserOptions.TWO) {
+            else if (option == UserOptions.TWO) {//Add tile into the board
                 isPlayerPerformAnyChange = handleAddTile(player);
             }
-            else if (option == UserOptions.THREE) {
+            else if (option == UserOptions.THREE) {//Move tile in the board
                 isPlayerPerformAnyChange = handleMoveTile(player);
             }
-            else if (option == UserOptions.FOUR) {
+            else if (option == UserOptions.FOUR) {//Take one tile from the deck
                 game.pullTileFromDeck(player.getID());
                 isPlayerFinished = true;
             }
-            else if (option == UserOptions.FIVE) {
+            else if (option == UserOptions.FIVE) {//Finish turn
                 if (isPlayerPerformAnyChange) {
                     isPlayerFinished = true;
                 }
@@ -213,7 +213,16 @@ public class GameMainController {
     }
 
     private boolean handleMoveTile(Player player) {
-        return false;
-        //TODO: implement
+        boolean isValid = false;
+        MoveTileData moveTileData;
+        while (!isValid) {
+            moveTileData = inputOutputController.getMoveTileData();
+            isValid = game.moveTile(moveTileData);
+            if (!isValid) {
+                inputOutputController.showWrongInputMessage();
+            }
+        }
+        
+        return isValid;
     }
 }

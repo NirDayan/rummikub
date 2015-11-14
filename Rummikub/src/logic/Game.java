@@ -124,9 +124,8 @@ public class Game {
         }
     }
     
-    public boolean moveTile(int playerID, MoveTileData data) {
-        //TODO: implement
-        return false;
+    public boolean moveTile(MoveTileData data) {
+        return board.moveTile(data);
     }
     
     public boolean addTile(int playerID, MoveTileData addTileData) {

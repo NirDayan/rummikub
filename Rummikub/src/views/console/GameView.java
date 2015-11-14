@@ -20,6 +20,7 @@ public class GameView {
     private static final String ANSI_RED = "\u001B[31m";
     private static final String ANSI_YELLOW = "\u001B[33m";
     private static final String ANSI_BLUE = "\u001B[34m";
+    private static final int INDEX_NOT_FOUND = -1;
 
     public GameView() {
         this.scanner = new Scanner(System.in);
@@ -29,7 +30,7 @@ public class GameView {
         //TODO: get new game input from the user an check input validity
         //      Currently use a mock
         String[] playersNames = {"player1", "player2", "player3", "player"};
-        return new GameDetails(4, 2, 2, "GameName", playersNames, null);
+        return new GameDetails(2, 0, 2, "GameName", playersNames, null);
     }
 
     public String getSavedFilePath() {
@@ -171,7 +172,7 @@ public class GameView {
                 fileDetails = new FileDetails(filePath, fileName, true);
                 isInputValid = true;
             } catch (Exception err) {
-                System.out.println("Wrong input. Please try again: ");
+                showWrongInputMessage();
                 scanner.next();
             }
         }
@@ -207,9 +208,10 @@ public class GameView {
     }
     
     private void printSequene(Sequence sequence) {
-        for (int i = 0; i < sequence.getSize(); i++) {            
+        for (int i = 0; i < sequence.getSize(); i++) {   
+            System.out.print("[#" + i + "]");
             printTile(sequence.getTile(i));
-            System.out.println();
+            System.out.print(", ");
         }
     }
 
@@ -218,7 +220,9 @@ public class GameView {
          for (int i = 0; i < boardSequences.size(); i++) {
              System.out.print("[Sequence #" + i + "]");
              printSequene(boardSequences.get(i));
+             System.out.println();
          }
+         System.out.println();
     }
 
     private void printTile(Tile tile) {
@@ -243,10 +247,10 @@ public class GameView {
     }
 
     public MoveTileData getAddTileData() {
-         boolean isInputValid = false;
-        int sourceIndex = 0;
-        int targetSequenceIndex = 0;
-        int targetSequencePosition = 0;
+        boolean isInputValid = false;
+        int sourceIndex = INDEX_NOT_FOUND;
+        int targetSequenceIndex = INDEX_NOT_FOUND;
+        int targetSequencePosition = INDEX_NOT_FOUND;
         MoveTileData result = new MoveTileData();
 
         while (!isInputValid) {
@@ -260,11 +264,44 @@ public class GameView {
                 targetSequencePosition = scanner.nextInt();
                 isInputValid = true;
             } catch (Exception err) {
-                System.out.println("Wrong input. Please try again: ");
+                showWrongInputMessage();
                 scanner.next();
             }
         }
         result.setSourceSequencePosition(sourceIndex);
+        result.setTargetSequenceIndex(targetSequenceIndex);
+        result.setTargetSequencePosition(targetSequencePosition);
+        
+        return result;
+    }
+
+    public MoveTileData getMoveTileData() {
+        boolean isInputValid = false;
+        int sourceSequenceIndex = INDEX_NOT_FOUND;
+        int sourceSequencePosition = INDEX_NOT_FOUND;
+        int targetSequenceIndex = INDEX_NOT_FOUND;
+        int targetSequencePosition = INDEX_NOT_FOUND;
+        MoveTileData result = new MoveTileData();
+
+        while (!isInputValid) {
+            try {
+                scanner.nextLine(); //throw away the \n not consumed by nextInt()
+                System.out.print("Please enter the source sequence index in the board: ");
+                sourceSequenceIndex = scanner.nextInt();
+                System.out.print("Please enter the position in the sequence: ");
+                sourceSequencePosition = scanner.nextInt();
+                System.out.print("Please enter the target sequence index in the board: ");
+                targetSequenceIndex = scanner.nextInt();
+                System.out.print("Please enter the position in the sequence: ");
+                targetSequencePosition = scanner.nextInt();
+                isInputValid = true;
+            } catch (Exception err) {
+                showWrongInputMessage();
+                scanner.next();
+            }
+        }
+        result.setSourceSequenceIndex(sourceSequenceIndex);
+        result.setSourceSequencePosition(sourceSequencePosition);
         result.setTargetSequenceIndex(targetSequenceIndex);
         result.setTargetSequencePosition(targetSequencePosition);
         
