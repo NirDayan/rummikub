@@ -2,6 +2,7 @@ package controllers.console;
 
 import controllers.IControllerInputOutput;
 import java.util.ArrayList;
+import java.util.List;
 import logic.Board;
 import logic.GameDetails;
 import logic.MoveTileData;
@@ -53,8 +54,8 @@ public class InputOutputController implements IControllerInputOutput {
     }
 
     @Override
-    public FileDetails askUserToSaveGame(boolean isAlreadySaved) {
-        return view.askUserToSaveGame(isAlreadySaved);
+    public FileDetails askUserToSaveGame(boolean isAlreadySaved, Player player) {
+        return view.askUserToSaveGame(isAlreadySaved, player);
     }
 
     @Override
@@ -80,5 +81,20 @@ public class InputOutputController implements IControllerInputOutput {
     @Override
     public MoveTileData getMoveTileData() {
         return view.getMoveTileData();
+    }
+
+    @Override
+    public boolean askUserFirstSequenceAvailable(Player player) {
+        return view.askUserFirstSequenceAvailable(player);
+    }
+
+    @Override
+    public List<Integer> getOrderedTileIndicesForSequence(Player player) {
+        return view.getOrderedTileIndicesForSequence(player);
+    }
+
+    @Override
+    public void punishPlayerMessage(Player player) {
+        view.punishPlayerMessage(player);
     }
 }

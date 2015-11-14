@@ -3,6 +3,7 @@ package controllers.console;
 import controllers.IControllerInputOutput;
 import controllers.IControllerInputOutput.UserOptions;
 import java.util.ArrayList;
+import java.util.List;
 import logic.Game;
 import logic.GameDetails;
 import logic.HumanPlayer;
@@ -125,7 +126,7 @@ public class GameMainController {
         while (!game.checkIsGameOver()) {
             //loop over the players starting from the currentPlayer
             currentPlayer = game.getCurrentPlayer();
-            if (!currentPlayer.isResign()) {
+            if (!game.isPlayerResign(currentPlayer.getID())) {
                 performPlayerGameRound(currentPlayer);
             }
             game.moveToNextPlayer();
@@ -134,7 +135,7 @@ public class GameMainController {
     }
     
     private void handleGameSaving(Player player) {
-        FileDetails fileDetails = inputOutputController.askUserToSaveGame(isPersisted);
+        FileDetails fileDetails = inputOutputController.askUserToSaveGame(isPersisted, player);
         if (fileDetails != null && fileDetails.isNewFile()) {
             //TODO: implement - save game to XML file
             isPersisted = true;
@@ -145,8 +146,12 @@ public class GameMainController {
         if (player instanceof HumanPlayer) {
             handleGameSaving(player);
         }
-        
-        performPlayerStep(player);
+        if (game.isPlayerFirstStep(player.getID())) {
+            performFirstStep(player);
+        }
+        else {
+            performPlayerStep(player);
+        }
     }
     
     private void performPlayerStep(Player player) {
@@ -224,5 +229,31 @@ public class GameMainController {
         }
         
         return isValid;
+    }
+    
+    private void performFirstStep(Player player) {
+        inputOutputController.showGameStatus(game.getBoard(), player);
+        if (inputOutputController.askUserFirstSequenceAvailable(player)) {
+            if (createSequence(player)) {
+                player.setFirstStepCompleted(true);
+            }
+            else {
+                punishPlayer(player);
+            }
+        }
+        else {
+            game.pullTileFromDeck(player.getID());
+        }
+    }
+    
+    private boolean createSequence(Player player) {
+        List<Integer> tilesIndices = inputOutputController.getOrderedTileIndicesForSequence(player);
+
+        return game.createSequence(player.getID(), tilesIndices);
+    }
+    
+    private void punishPlayer(Player player) {
+        inputOutputController.punishPlayerMessage(player);
+        game.punishPlayer(player.getID());
     }
 }

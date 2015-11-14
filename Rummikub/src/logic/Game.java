@@ -1,6 +1,7 @@
 package logic;
 
 import java.util.ArrayList;
+import java.util.List;
 import logic.tile.*;
 
 public class Game {
@@ -10,9 +11,11 @@ public class Game {
     private Player currentPlayer;
     private Player winner;
     private static int nextPlayerID = 1;
-    private final String COMPUTER_NAME_PREFIX = "Computer#";
-    private final int INITIAL_TILES_COUNT = 14;
-
+    private static final String COMPUTER_NAME_PREFIX = "Computer#";
+    private static final int INITIAL_TILES_COUNT = 14;
+    private static final int PUNISH_TILES_NUMBER = 3;
+    private static final int MINIMUM_SUM_SEQUENCE_VALUE_FOR_FIRST_STEP = 30;
+    
     public Game(GameDetails gameDetails) {
         players = new ArrayList<>();
         currentPlayer = null;
@@ -91,6 +94,24 @@ public class Game {
             player.addTile(tilesDeck.pullTile());
     }
     
+    public boolean isPlayerFirstStep(int playerID) {
+        Player player = getPlayerByID(playerID);
+        
+        return player.isFirstStep();
+    }
+    
+    public boolean isPlayerResign(int playerID) {
+        Player player = getPlayerByID(playerID);
+        
+        return player.isResign();
+    }
+    
+    public void punishPlayer(int id) {
+        for (int i = 0; i < PUNISH_TILES_NUMBER; i++) {
+            pullTileFromDeck(id);
+        }
+    }
+    
     private void distributeTiles() {
         for (Player player : players) {
             for (int i = 0; i < INITIAL_TILES_COUNT; i++) {
@@ -150,6 +171,35 @@ public class Game {
         if (player != null) {
             player.setIsResign(true);
         }
+    }
+
+    public boolean createSequence(int playerID, List<Integer> tilesIndices) {
+        Player player = getPlayerByID(playerID);
+        if (player == null || tilesIndices == null)
+            return false;
+        
+        return createSequenceFromTileIndices(player, tilesIndices);
+    }
+    
+    private boolean createSequenceFromTileIndices(Player player, List<Integer> tilesIndices) {
+        List<Tile> preSequence = player.getTilesByIndices(tilesIndices);
+        if (preSequence == null)
+            return false;
+        
+        Sequence sequence = new Sequence(preSequence);
+        if(!sequence.isValid())
+            return false;
+        if (player.isFirstStep() && !isFirstSequenceValid(sequence))
+            return false;
+        
+        player.removeTiles(tilesIndices);
+        board.addSequence(sequence);
+                
+        return true;
+    }
+    
+    private boolean isFirstSequenceValid(Sequence sequence) {
+        return (sequence.getValueSum() >= MINIMUM_SUM_SEQUENCE_VALUE_FOR_FIRST_STEP);
     }
 
     private int generatePlayerId() {

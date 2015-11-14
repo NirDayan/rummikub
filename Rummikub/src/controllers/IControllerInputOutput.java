@@ -2,6 +2,7 @@ package controllers;
 
 import java.util.ArrayList;
 import java.util.InputMismatchException;
+import java.util.List;
 import logic.Board;
 import logic.GameDetails;
 import logic.MoveTileData;
@@ -9,7 +10,6 @@ import logic.Player;
 import logic.persistency.FileDetails;
 
 public interface IControllerInputOutput {    
-
     public enum UserOptions {
         ONE(1),
         TWO(2),
@@ -67,7 +67,7 @@ public interface IControllerInputOutput {
     
     public void showUserActionsMenu(Player player);
     
-    public FileDetails askUserToSaveGame(boolean isAlreadySaved);
+    public FileDetails askUserToSaveGame(boolean isAlreadySaved, Player player);
     
     public void showGameStatus(Board board, Player player);
     
@@ -76,4 +76,10 @@ public interface IControllerInputOutput {
     public MoveTileData getAddTileData();
     
     public MoveTileData getMoveTileData();
+    
+    public boolean askUserFirstSequenceAvailable(Player player);
+    
+    public List<Integer> getOrderedTileIndicesForSequence(Player player);
+    
+    public void punishPlayerMessage(Player player);
 }

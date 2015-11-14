@@ -21,6 +21,7 @@ public class GameView {
     private static final String ANSI_YELLOW = "\u001B[33m";
     private static final String ANSI_BLUE = "\u001B[34m";
     private static final int INDEX_NOT_FOUND = -1;
+    private static final int END_OF_INPUT = -1;
 
     public GameView() {
         this.scanner = new Scanner(System.in);
@@ -63,9 +64,6 @@ public class GameView {
     }
 
     public void showUserActionsMenu(Player player) {
-        System.out.println("=========================================");
-        System.out.println("*****  Player " + player.getName() + "  *****");
-        System.out.println("=========================================");
         System.out.println(" What would you like to do?");
         System.out.println("1. Resign from game");
         System.out.println("2. Add tile into the board");
@@ -117,9 +115,10 @@ public class GameView {
         return UserOptions.ONE;
     }
 
-    public FileDetails askUserToSaveGame(boolean isAlreadySaved) {
+    public FileDetails askUserToSaveGame(boolean isAlreadySaved, Player player) {
         FileDetails result = null;
-
+        
+        printPlayerName(player);
         System.out.println("Would you like to save the game? Please choose one option: ");
         System.out.println("1. Save");
         System.out.println("2. Continue without saving");
@@ -190,6 +189,7 @@ public class GameView {
     }
 
     public void showGameStatus(Board board, Player player) {
+        printPlayerName(player);
         System.out.println("------- " + player.getName() + " tiles start -------");
         printTiles(player.getTiles());
         System.out.println("------- " + player.getName() + " tiles end -------");
@@ -306,5 +306,59 @@ public class GameView {
         result.setTargetSequencePosition(targetSequencePosition);
         
         return result;
+    }
+
+    public boolean askUserFirstSequenceAvailable(Player player) {
+        System.out.println("What would you like to do?");
+        System.out.println("1. Create your first sequence and start play!");
+        System.out.println("2. Take one tile from the deck");
+
+        ArrayList<Integer> options = new ArrayList<>();
+        options.add(UserOptions.ONE.getOption());
+        options.add(UserOptions.TWO.getOption());
+
+        UserOptions option = askUserChooseOption(options);
+        if (option.equals(UserOptions.ONE))
+            return true;
+        
+        return false;
+    }
+
+    public List<Integer> getOrderedTileIndicesForSequence(Player player) {
+        List<Integer> list = new ArrayList<>();
+        boolean isFinished = false;
+        int index;
+        System.out.println("Please enter tile indices in the correct order, one by one. Finish with " + END_OF_INPUT);
+        
+        while (!isFinished) {
+            try {
+                index = scanner.nextInt();
+                if (index != END_OF_INPUT) {
+                    if (!list.contains(index))
+                        list.add(index);
+                    else
+                        System.out.println(index + " already entered, please enter another input:");                    
+                }
+                else {
+                    isFinished = true;
+                }
+            }
+            catch (Exception err) {
+                showWrongInputMessage();
+            }
+        }
+        
+        return list;
+    }
+    
+    private void printPlayerName(Player player) {
+        System.out.println("=========================================");
+        System.out.println("*****  Player " + player.getName() + "  *****");
+        System.out.println("=========================================");
+    }
+
+    public void punishPlayerMessage(Player player) {
+        System.out.println("Invalid sequence on the board.");
+        System.out.println("Player " + player.getName() + " is punished!");
     }
 }
