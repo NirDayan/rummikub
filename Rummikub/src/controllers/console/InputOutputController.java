@@ -37,6 +37,11 @@ public class InputOutputController implements IControllerInputOutput {
     public void showWrongInputMessage() {
         view.showWrongInputMessage();
     }
+    
+    @Override
+    public void showErrorMessage(String message){
+        view.showErrorMessage(message);
+    }
 
     @Override
     public UserOptions askUserChooseOption(ArrayList<Integer> availableOptions) {

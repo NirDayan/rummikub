@@ -2,43 +2,48 @@ package controllers.console;
 
 import controllers.IControllerInputOutput;
 import controllers.IControllerInputOutput.UserOptions;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import logic.Game;
 import logic.GameDetails;
 import logic.HumanPlayer;
 import logic.MoveTileData;
 import logic.Player;
 import logic.persistency.FileDetails;
+import logic.persistency.GamePersistency;
+import org.xml.sax.SAXException;
 
 public class GameMainController {
     private final int MAX_PLAYERS_NUM = 4;
     private final IControllerInputOutput inputOutputController;
     private Game game;
     private boolean isPersisted;
-    
+
     public GameMainController(IControllerInputOutput inputOutputController) {
         this.inputOutputController = inputOutputController;
         this.isPersisted = false;
     }
-    
+
     public void start() {
         boolean exitGame = false;
-        
-        createNewGame();        
+
+        createNewGame();
         while (!exitGame) {
             playGame(game);
-            exitGame = startNewGameOrExit();            
+            exitGame = startNewGameOrExit();
         }
     }
-    
-    public Game createGameFromXML (String xmlData) {
+
+    public Game createGameFromXML(String xmlData) {
         //TODO: implement
         GameDetails gameDetails = new GameDetails();
         game = new Game(gameDetails);
         return game;
     }
-    
+
     private void createNewGame() {
         if (inputOutputController.isGameFromFile()) {
             game = createGameFromXML(inputOutputController.getGameFilePath());
@@ -47,12 +52,11 @@ public class GameMainController {
             createGameFromUserInput();
         }
     }
-    
+
     /**
-     * Ask the user to choose between:
-     * 1) Replay last game
-     * 2) Create a new game
+     * Ask the user to choose between: 1) Replay last game 2) Create a new game
      * 3) Exit Game
+     *
      * @return true if Exit Game, otherwise false
      */
     private boolean startNewGameOrExit() {
@@ -60,10 +64,10 @@ public class GameMainController {
         options.add(IControllerInputOutput.UserOptions.ONE.getOption());
         options.add(IControllerInputOutput.UserOptions.TWO.getOption());
         options.add(IControllerInputOutput.UserOptions.THREE.getOption());
-        
+
         inputOutputController.showEndOfGameMenu();
         IControllerInputOutput.UserOptions option = inputOutputController.askUserChooseOption(options);
-        
+
         if (option == IControllerInputOutput.UserOptions.ONE) {
             replayGame();
             return false;
@@ -72,10 +76,10 @@ public class GameMainController {
             createNewGame();
             return false;
         }
-        
+
         return true;
     }
-    
+
     private void replayGame() {
         game.reset();
     }
@@ -88,12 +92,13 @@ public class GameMainController {
             if (isGameInputValid(initialUserInput)) {
                 game = new Game(initialUserInput);
                 isGameInitialized = true;
-            } else {
+            }
+            else {
                 inputOutputController.showWrongInputMessage();
             }
         }
     }
-    
+
     //TODO: more edge cases???
     //TODO: check load from file flow.. currently it unhandeled
     private boolean isGameInputValid(GameDetails input) {
@@ -130,15 +135,27 @@ public class GameMainController {
                 performPlayerGameRound(currentPlayer);
             }
             game.moveToNextPlayer();
-        }        
+        }
         inputOutputController.showEndOfGame(game.getWinner());
     }
-    
+
     private void handleGameSaving(Player player) {
-        FileDetails fileDetails = inputOutputController.askUserToSaveGame(isPersisted, player);
-        if (fileDetails != null && fileDetails.isNewFile()) {
-            //TODO: implement - save game to XML file
-            isPersisted = true;
+        FileDetails fileDetails;
+        boolean isInputValid = false;
+
+        while (!isInputValid) {
+            fileDetails = inputOutputController.askUserToSaveGame(isPersisted, player);
+            if (fileDetails != null) {
+                try {
+                    GamePersistency.save(fileDetails, game);
+                    isPersisted = true;
+                    isInputValid = true;
+                } catch (Exception ex) {
+                    inputOutputController.showErrorMessage(ex.getMessage());
+                }
+            }
+            else
+                isInputValid = true;
         }
     }
 
@@ -153,7 +170,7 @@ public class GameMainController {
             performPlayerStep(player);
         }
     }
-    
+
     private void performPlayerStep(Player player) {
         ArrayList<Integer> options = new ArrayList<>();
         options.add(IControllerInputOutput.UserOptions.ONE.getOption());
@@ -164,7 +181,7 @@ public class GameMainController {
         UserOptions option;
         boolean isPlayerFinished = false;
         boolean isPlayerPerformAnyChange = false;
-        
+
         do {
             inputOutputController.showGameStatus(game.getBoard(), player);
             inputOutputController.showUserActionsMenu(player);
@@ -198,9 +215,8 @@ public class GameMainController {
                 else {
                     inputOutputController.showFinishTurnWithoutAction();
                 }
-            }            
-        }
-        while (!isPlayerFinished);
+            }
+        } while (!isPlayerFinished);
     }
 
     private boolean handleAddTile(Player player) {
@@ -213,7 +229,7 @@ public class GameMainController {
                 inputOutputController.showWrongInputMessage();
             }
         }
-        
+
         return isValid;
     }
 
@@ -227,10 +243,10 @@ public class GameMainController {
                 inputOutputController.showWrongInputMessage();
             }
         }
-        
+
         return isValid;
     }
-    
+
     private void performFirstStep(Player player) {
         inputOutputController.showGameStatus(game.getBoard(), player);
         if (inputOutputController.askUserFirstSequenceAvailable(player)) {
@@ -245,13 +261,13 @@ public class GameMainController {
             game.pullTileFromDeck(player.getID());
         }
     }
-    
+
     private boolean createSequence(Player player) {
         List<Integer> tilesIndices = inputOutputController.getOrderedTileIndicesForSequence(player);
 
         return game.createSequence(player.getID(), tilesIndices);
     }
-    
+
     private void punishPlayer(Player player) {
         inputOutputController.punishPlayerMessage(player);
         game.punishPlayer(player.getID());

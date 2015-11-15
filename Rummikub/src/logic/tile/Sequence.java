@@ -39,42 +39,46 @@ public class Sequence {
         }
         return sum;
     }
-    
+
     public boolean addTile(int index, Tile tile) {
         if (tile != null && (index <= tiles.size() && index >= 0)) {
             tiles.add(index, tile);
-            
+
             return true;
         }
         return false;
     }
-    
+
     public Tile removeTile(int index) {
         Tile tile = null;
         if (index < tiles.size() && index >= 0) {
             tile = tiles.remove(index);
         }
-        
+
         return tile;
     }
-    
+
     public Tile getTile(int index) {
         Tile tile = null;
         if (index < tiles.size() && index >= 0) {
             tile = tiles.get(index);
         }
-        
+
         return tile;
     }
-    
+
     public Sequence split(int index) {
         Sequence newSequence = null;
-        
+
         if (index < tiles.size() && index >= 1) {
             newSequence = new Sequence(new ArrayList<>(tiles.subList(index, tiles.size())));
             tiles = new ArrayList<>(tiles.subList(0, index));
         }
-        
+
         return newSequence;
+    }
+
+    public List<Tile> toList() {
+        return tiles;
     }
 }

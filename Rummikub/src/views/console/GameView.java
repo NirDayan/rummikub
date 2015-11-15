@@ -9,6 +9,7 @@ import logic.Board;
 import logic.MoveTileData;
 import logic.Player;
 import logic.persistency.FileDetails;
+import logic.tile.JokerTile;
 import logic.tile.Sequence;
 import logic.tile.Tile;
 
@@ -42,6 +43,10 @@ public class GameView {
 
     public void showWrongInputMessage() {
         System.out.println("Wrong input, please try again:");
+    }
+
+    public void showErrorMessage(String message) {
+        System.out.println("Error. " + message + ", please try again:");
     }
 
     public boolean isGameFromFile() {
@@ -89,7 +94,8 @@ public class GameView {
             chooseOptions += availableOptions.get(i);
             if (i < availableOptions.size() - 1) {
                 chooseOptions += ", ";
-            } else {
+            }
+            else {
                 chooseOptions += ": ";
             }
         }
@@ -100,7 +106,8 @@ public class GameView {
                 option = scanner.nextInt();
                 if (availableOptions.contains(option)) {
                     return UserOptions.getOptionByInt(option);
-                } else {
+                }
+                else {
                     System.out.println(wrongInputStr);
                     System.out.print(chooseOptions);
                 }
@@ -117,7 +124,7 @@ public class GameView {
 
     public FileDetails askUserToSaveGame(boolean isAlreadySaved, Player player) {
         FileDetails result = null;
-        
+
         printPlayerName(player);
         System.out.println("Would you like to save the game? Please choose one option: ");
         System.out.println("1. Save");
@@ -141,17 +148,19 @@ public class GameView {
                 option = askUserChooseOption(options);
                 if (option.equals(UserOptions.ONE)) {
                     result = new FileDetails(null, null, false);
-                } else {
+                }
+                else {
                     return getNewFileDetails();
                 }
-            } else {
+            }
+            else {
                 return getNewFileDetails();
             }
         }
 
         return result;
     }
-    
+
     public void showFinishTurnWithoutAction() {
         System.out.println("You must perform any action before you can finish your turn!");
     }
@@ -183,7 +192,8 @@ public class GameView {
         System.out.println("GAME OVER!");
         if (winner != null) {
             System.out.println("The winner is: " + winner.getName());
-        } else {
+        }
+        else {
             System.out.println("There is no winner");
         }
     }
@@ -206,9 +216,9 @@ public class GameView {
         }
         System.out.println();
     }
-    
+
     private void printSequene(Sequence sequence) {
-        for (int i = 0; i < sequence.getSize(); i++) {   
+        for (int i = 0; i < sequence.getSize(); i++) {
             System.out.print("[#" + i + "]");
             printTile(sequence.getTile(i));
             System.out.print(", ");
@@ -217,15 +227,19 @@ public class GameView {
 
     private void printBoard(Board board) {
         List<Sequence> boardSequences = board.getSequences();
-         for (int i = 0; i < boardSequences.size(); i++) {
-             System.out.print("[Sequence #" + i + "]");
-             printSequene(boardSequences.get(i));
-             System.out.println();
-         }
-         System.out.println();
+        for (int i = 0; i < boardSequences.size(); i++) {
+            System.out.print("[Sequence #" + i + "]");
+            printSequene(boardSequences.get(i));
+            System.out.println();
+        }
+        System.out.println();
     }
 
     private void printTile(Tile tile) {
+        if (tile instanceof JokerTile) {
+            System.out.print("J");
+            return;
+        }
         String color;
         switch (tile.getColor()) {
             case Black:
@@ -271,7 +285,7 @@ public class GameView {
         result.setSourceSequencePosition(sourceIndex);
         result.setTargetSequenceIndex(targetSequenceIndex);
         result.setTargetSequencePosition(targetSequencePosition);
-        
+
         return result;
     }
 
@@ -304,7 +318,7 @@ public class GameView {
         result.setSourceSequencePosition(sourceSequencePosition);
         result.setTargetSequenceIndex(targetSequenceIndex);
         result.setTargetSequencePosition(targetSequencePosition);
-        
+
         return result;
     }
 
@@ -318,9 +332,10 @@ public class GameView {
         options.add(UserOptions.TWO.getOption());
 
         UserOptions option = askUserChooseOption(options);
-        if (option.equals(UserOptions.ONE))
+        if (option.equals(UserOptions.ONE)) {
             return true;
-        
+        }
+
         return false;
     }
 
@@ -329,28 +344,29 @@ public class GameView {
         boolean isFinished = false;
         int index;
         System.out.println("Please enter tile indices in the correct order, one by one. Finish with " + END_OF_INPUT);
-        
+
         while (!isFinished) {
             try {
                 index = scanner.nextInt();
                 if (index != END_OF_INPUT) {
-                    if (!list.contains(index))
+                    if (!list.contains(index)) {
                         list.add(index);
-                    else
-                        System.out.println(index + " already entered, please enter another input:");                    
+                    }
+                    else {
+                        System.out.println(index + " already entered, please enter another input:");
+                    }
                 }
                 else {
                     isFinished = true;
                 }
-            }
-            catch (Exception err) {
+            } catch (Exception err) {
                 showWrongInputMessage();
             }
         }
-        
+
         return list;
     }
-    
+
     private void printPlayerName(Player player) {
         System.out.println("=========================================");
         System.out.println("*****  Player " + player.getName() + "  *****");

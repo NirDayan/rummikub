@@ -1,11 +1,11 @@
 package logic.persistency;
 
 public class FileDetails {
-    private final String path, fileName;
+    private final String folderPath, fileName;
     private final boolean isNewFile;
 
-    public FileDetails(String path, String fileName, boolean isNewFile) {
-        this.path = path;
+    public FileDetails(String folderPath, String fileName, boolean isNewFile) {
+        this.folderPath = folderPath;
         this.fileName = fileName;
         this.isNewFile = isNewFile;
     }
@@ -14,8 +14,8 @@ public class FileDetails {
         return isNewFile;
     }
 
-    public String getPath() {
-        return path;
+    public String getFolderPath() {
+        return folderPath;
     }
 
     public String getFileName() {

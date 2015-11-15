@@ -70,6 +70,10 @@ public class Game {
         return currentPlayer;
     }
     
+    public List<Player> getPlayers(){
+        return players;
+    }
+    
     public Board getBoard() {
         return board;
     }
