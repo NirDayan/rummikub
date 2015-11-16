@@ -26,13 +26,13 @@ public abstract class Player {
 
     public boolean isResign() {
         return isResign;
-    }   
-    
+    }
+
     public void addTile(Tile tile) {
-        if (tile != null) 
+        if (tile != null)
             tiles.add(tile);
     }
-        
+
     public boolean isFinished() {
         return tiles.isEmpty();
     }
@@ -40,65 +40,67 @@ public abstract class Player {
     public String getName() {
         return name;
     }
-    
+
     public int getID() {
         return ID;
     }
-    
+
     public void reset() {
         tiles.clear();
         isResign = false;
     }
-    
+
     public ArrayList<Tile> getTiles() {
         return tiles;
     }
-    
+
     public Tile removeTile(int index) {
-        if (index < tiles.size() && index >=0) {
+        if (index < tiles.size() && index >= 0) {
             return tiles.remove(index);
         }
-        
+
         return null;
     }
 
     public boolean isFirstStep() {
         return isFirstStep;
     }
-    
+
     public void setFirstStepCompleted(boolean isCompleted) {
         isFirstStep = !isCompleted;
     }
-    
+
     public List<Tile> getTilesByIndices(List<Integer> tilesIndices) {
         if (!isTileIndicesValid(tilesIndices))
             return null;
-        
+
         List<Tile> list = new ArrayList<>();
         for (Integer index : tilesIndices) {
             list.add(tiles.get(index));
         }
-        
+
         return list;
     }
-    
+
     public void removeTiles(List<Integer> tilesIndices) {
         if (tilesIndices != null) {
+            List<Tile> tilesToRemove = new ArrayList<>();
             for (Integer index : tilesIndices) {
-                tiles.remove(index.intValue());
+                tilesToRemove.add(tiles.get(index));
             }
+            tiles.removeAll(tilesToRemove);
         }
     }
-    
+
     private boolean isTileIndicesValid(List<Integer> tilesIndices) {
         if (tilesIndices == null)
             return false;
-        
+
         for (Integer index : tilesIndices) {
             if (index < 0 || index >= tiles.size())
                 return false;
         }
-        
+
         return true;
     }
 }

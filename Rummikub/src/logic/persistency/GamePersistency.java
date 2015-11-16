@@ -43,7 +43,7 @@ public class GamePersistency {
         File folder = file.getParentFile();
         if (!folder.mkdirs() && !folder.exists())
             throw new IOException("Cannot create: " + folder);
-        
+        file.createNewFile();
         if (file.canWrite() == false && file.setWritable(true) == false)
             throw new IOException("Access Denied");
         // Write the XSD object to the file specified

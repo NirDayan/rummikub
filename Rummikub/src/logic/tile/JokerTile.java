@@ -2,7 +2,7 @@ package logic.tile;
 
 public class JokerTile extends Tile {
 
-    public static final int JOKER_INITIAL_VALUE = 14;
+    public static final int JOKER_INITIAL_VALUE = 0;
 
     public JokerTile() {
         super(Color.Black, JOKER_INITIAL_VALUE);
