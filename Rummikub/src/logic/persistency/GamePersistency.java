@@ -14,14 +14,6 @@ import logic.Board;
 import logic.ComputerPlayer;
 import logic.Game;
 import logic.Player;
-import rummikubxml.Board.Sequence;
-import rummikubxml.Color;
-import rummikubxml.PlayerType;
-import rummikubxml.Players;
-import rummikubxml.Players.Player.Tiles;
-import rummikubxml.Rummikub;
-import rummikubxml.Tile;
-
 public class GamePersistency {
     private static final String RESOURCES = "resources";
 
@@ -63,9 +55,9 @@ public class GamePersistency {
         return rummikubXSD;
     }
 
-    static private rummikubxml.Board getBoardXSDObj(Board gameBoard) {
-        rummikubxml.Board boardXSD = new rummikubxml.Board();
-        List<rummikubxml.Board.Sequence> xsdSequences = boardXSD.getSequence();
+    static private logic.persistency.Board getBoardXSDObj(Board gameBoard) {
+        logic.persistency.Board boardXSD = new logic.persistency.Board();
+        List<logic.persistency.Board.Sequence> xsdSequences = boardXSD.getSequence();
         List<logic.tile.Sequence> gameSequences = gameBoard.getSequences();
         for (logic.tile.Sequence gameSeq : gameSequences) {
             xsdSequences.add(convertRealSequenceToXSD(gameSeq));
@@ -82,8 +74,8 @@ public class GamePersistency {
         return xsdPlayersContiner;
     }
 
-    static private Sequence convertRealSequenceToXSD(logic.tile.Sequence gameSeq) {
-        rummikubxml.Board.Sequence xsdSeq = new Sequence();
+    static private logic.persistency.Board.Sequence convertRealSequenceToXSD(logic.tile.Sequence gameSeq) {
+        logic.persistency.Board.Sequence xsdSeq = new logic.persistency.Board.Sequence();
         xsdSeq.getTile().addAll(convertGameTileListToXSD(gameSeq.toList()));
         return xsdSeq;
     }
@@ -104,7 +96,7 @@ public class GamePersistency {
     }
 
     static private Players.Player.Tiles convertGameTilesToXSDPlayerTiles(ArrayList<logic.tile.Tile> gameTiles) {
-        Tiles xsdTiles = new Players.Player.Tiles();
+        Players.Player.Tiles xsdTiles = new Players.Player.Tiles();
         xsdTiles.getTile().addAll(convertGameTileListToXSD(gameTiles));
         return xsdTiles;
     }
@@ -124,7 +116,7 @@ public class GamePersistency {
         return xsdTile;
     }
 
-    static private Color convertGameColorToXSD(logic.tile.Color gameColor) {
+    static private logic.persistency.Color convertGameColorToXSD(logic.tile.Color gameColor) {
         switch (gameColor) {
             case Black:
                 return Color.BLACK;
