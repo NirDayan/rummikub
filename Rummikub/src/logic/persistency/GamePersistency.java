@@ -1,16 +1,12 @@
 package logic.persistency;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URL;
-import java.nio.file.FileAlreadyExistsException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
@@ -18,7 +14,6 @@ import logic.Board;
 import logic.ComputerPlayer;
 import logic.Game;
 import logic.Player;
-import org.xml.sax.SAXException;
 import rummikubxml.Board.Sequence;
 import rummikubxml.Color;
 import rummikubxml.PlayerType;
