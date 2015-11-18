@@ -20,17 +20,13 @@ public class Deck {
         return deck.remove(0);
     }
 
+    // Returns null if not exist in deck
     public Tile pullTile(Color color, int value) {
-        Tile tileToPull;
-        if (value == 0) {//XML Joker tiles are marked with value 0
-            tileToPull = new JokerTile();
-        }
-        else {
-            tileToPull = new Tile(color, value);
-        }
+        Tile tileToPull = new Tile(color, value);
         if (deck.isEmpty() == true || deck.contains(tileToPull) == false)
-            throw new DeckUnderflow();
-        return deck.get(deck.indexOf(tileToPull));
+            return null;
+        deck.remove(tileToPull);
+        return tileToPull;
     }
 
     public boolean isEmpty() {
@@ -52,7 +48,7 @@ public class Deck {
                 deck.add(tile);
             }
         }
-        JokerTile joker = new JokerTile();
+        Tile joker = new Tile(Color.Black, Tile.JOKER_VALUE);
         deck.add(joker);
         deck.add(joker);
     }

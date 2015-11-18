@@ -1,5 +1,11 @@
 package logic.persistency;
 
+import logic.persistency.generated.Rummikub;
+import logic.persistency.generated.Tile;
+import logic.persistency.generated.Players;
+import logic.persistency.generated.PlayerType;
+import logic.persistency.generated.Color;
+import logic.persistency.generated.Board;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,7 +27,7 @@ class XSDObjToGameObjConverter {
         int humanPlayersCount = 0;
         int computerPlayersCount = 0;
         LinkedList<String> names = new LinkedList<>();
-        for (Players.Player player : rummikubXSDObj.players.getPlayer()) {
+        for (Players.Player player : rummikubXSDObj.getPlayers().getPlayer()) {
             if (player.getType() == PlayerType.HUMAN) {
                 humanPlayersCount++;
                 names.addFirst(player.getName());
@@ -43,9 +49,26 @@ class XSDObjToGameObjConverter {
         game.setCurrentPlayer(currPlayer);
     }
 
+    private static void distributeTilesToPlayers() {
+        for (Players.Player player : rummikubXSDObj.getPlayers().getPlayer()) {
+            logic.Player gamePlayer = getGamePlayerByName(player.getName());
+            List<Tile> xsdTiles = player.getTiles().getTile();
+
+            addTilesToGamePlayer(gamePlayer, xsdTiles);
+        }
+    }
+
+    private static void distributeTilesToBoard() {
+        for (Board.Sequence xsdSeq : rummikubXSDObj.getBoard().getSequence()) {
+            List<logic.tile.Tile> gameSeqTiles = getGameSeqTilesFromXSDSeq(xsdSeq);
+            logic.tile.Sequence gameSequence = new Sequence(gameSeqTiles);
+            game.getBoard().addSequence(gameSequence);
+        }
+    }
+
     private static Player getCurrPlayerFromXSDObj() {
         for (Player player : game.getPlayers()) {
-            if (player.getName().equals(rummikubXSDObj.currentPlayer))
+            if (player.getName().equals(rummikubXSDObj.getCurrentPlayer()))
                 return player;
         }
         throw new RuntimeException("Current player name not found");
@@ -59,22 +82,37 @@ class XSDObjToGameObjConverter {
         throw new RuntimeException("getGamePlayerByName did not find the player");
     }
 
-    private static void distributeTilesToPlayers() {
-        for (Players.Player player : rummikubXSDObj.getPlayers().getPlayer()) {
-            logic.Player gamePlayer = getGamePlayerByName(player.getName());
-            List<Tile> xsdTiles = player.getTiles().getTile();
-
-            addTilesToGamePlayer(gamePlayer, xsdTiles);
-        }
-    }
-
     private static void addTilesToGamePlayer(Player gamePlayer, List<Tile> xsdTiles) {
         for (Tile xsdTile : xsdTiles) {
 
             logic.tile.Tile gameTile = pullTileFromDeckByXSDTile(xsdTile);
-
+            if (gameTile == null) {
+                throw new RuntimeException(getErrorMsg_TileAppearTooMuch(xsdTile));
+            }
             gamePlayer.addTile(gameTile);
         }
+    }
+
+    private static List<logic.tile.Tile> getGameSeqTilesFromXSDSeq(Board.Sequence xsdSeq) {
+        List<logic.tile.Tile> gameSeqTiles = new ArrayList<>();
+        for (Tile xsdTile : xsdSeq.getTile()) {
+            logic.tile.Tile gameTile = pullTileFromDeckByXSDTile(xsdTile);
+            if (gameTile == null) {
+                throw new RuntimeException(getErrorMsg_TileAppearTooMuch(xsdTile));
+            }
+            gameSeqTiles.add(gameTile);
+        }
+        return gameSeqTiles;
+    }
+
+    private static logic.tile.Tile pullTileFromDeckByXSDTile(Tile xsdTile) {
+        logic.tile.Color tileColor = xsdToGameColorConverter(xsdTile.getColor());
+        int tileValue = xsdTile.getValue();
+        return game.getTilesDeck().pullTile(tileColor, tileValue);
+    }
+
+    private static String getErrorMsg_TileAppearTooMuch(Tile xsdTile) {
+        return "The tile " + xsdTile.getValue() + " " + xsdTile.getColor().name() + " appear too much times";
     }
 
     private static logic.tile.Color xsdToGameColorConverter(Color color) {
@@ -91,28 +129,4 @@ class XSDObjToGameObjConverter {
                 return logic.tile.Color.Black;
         }
     }
-
-    private static void distributeTilesToBoard() {
-        for (Board.Sequence xsdSeq : rummikubXSDObj.getBoard().getSequence()) {
-            List<logic.tile.Tile> gameSeqTiles = getGameSeqTilesFromXSDSeq(xsdSeq);
-            logic.tile.Sequence gameSequence = new Sequence(gameSeqTiles);
-            game.getBoard().addSequence(gameSequence);
-        }
-    }
-
-    private static List<logic.tile.Tile> getGameSeqTilesFromXSDSeq(Board.Sequence xsdSeq) {
-        List<logic.tile.Tile> gameSeqTiles = new ArrayList<>();
-        for (Tile xsdTile : xsdSeq.getTile()) {
-            logic.tile.Tile gameTile = pullTileFromDeckByXSDTile(xsdTile);
-            gameSeqTiles.add(gameTile);
-        }
-        return gameSeqTiles;
-    }
-
-    private static logic.tile.Tile pullTileFromDeckByXSDTile(Tile xsdTile) {
-        logic.tile.Color tileColor = xsdToGameColorConverter(xsdTile.getColor());
-        int tileValue = xsdTile.getValue();
-        return game.getTilesDeck().pullTile(tileColor, tileValue);
-    }
-
 }

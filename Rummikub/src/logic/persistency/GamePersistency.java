@@ -1,5 +1,10 @@
 package logic.persistency;
 
+import logic.persistency.generated.Rummikub;
+import logic.persistency.generated.Tile;
+import logic.persistency.generated.Players;
+import logic.persistency.generated.PlayerType;
+import logic.persistency.generated.Color;
 import static controllers.console.GameMainController.checkPlayersNameValidity;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -17,7 +22,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import logic.Board;
-import logic.ComputerPlayer;
 import logic.Game;
 import logic.GameDetails;
 import logic.Player;
@@ -25,10 +29,6 @@ import org.xml.sax.SAXException;
 
 public class GamePersistency {
     private static final String RESOURCES = "resources";
-
-    public enum PersistencyOptions {
-        SAVE, SAVE_AS;
-    }
     
     public static Game load(String filePath) throws Exception {
         Schema schema = GamePersistency.getSchemaFromXSD();
@@ -40,6 +40,8 @@ public class GamePersistency {
         checkPlayersNameValidity(gameDetails.getPlayersNames());
         Game game = new Game(gameDetails);
         XSDObjToGameObjConverter.createGameFromXSDObj(game, rummikubXSDObj);
+        if (game.getBoard().isValid() == false)
+            throw new Exception("Board is invalid"); 
         return game;
     }
 
@@ -104,9 +106,9 @@ public class GamePersistency {
         marshaller.marshal(rummikubXSDObj, file);
     }
 
-    static private logic.persistency.Board getBoardXSDObj(Board gameBoard) {
-        logic.persistency.Board boardXSD = new logic.persistency.Board();
-        List<logic.persistency.Board.Sequence> xsdSequences = boardXSD.getSequence();
+    static private logic.persistency.generated.Board getBoardXSDObj(Board gameBoard) {
+        logic.persistency.generated.Board boardXSD = new logic.persistency.generated.Board();
+        List<logic.persistency.generated.Board.Sequence> xsdSequences = boardXSD.getSequence();
         List<logic.tile.Sequence> gameSequences = gameBoard.getSequences();
         for (logic.tile.Sequence gameSeq : gameSequences) {
             xsdSequences.add(convertRealSequenceToXSD(gameSeq));
@@ -123,8 +125,8 @@ public class GamePersistency {
         return xsdPlayersContiner;
     }
 
-    static private logic.persistency.Board.Sequence convertRealSequenceToXSD(logic.tile.Sequence gameSeq) {
-        logic.persistency.Board.Sequence xsdSeq = new logic.persistency.Board.Sequence();
+    static private logic.persistency.generated.Board.Sequence convertRealSequenceToXSD(logic.tile.Sequence gameSeq) {
+        logic.persistency.generated.Board.Sequence xsdSeq = new logic.persistency.generated.Board.Sequence();
         xsdSeq.getTile().addAll(convertGameTileListToXSD(gameSeq.toList()));
         return xsdSeq;
     }
@@ -138,10 +140,10 @@ public class GamePersistency {
     }
 
     static private PlayerType getXSDPlayerTypeFromGamePlayer(Player gamePlayer) {
-        if (gamePlayer instanceof ComputerPlayer)
-            return PlayerType.COMPUTER;
-        else
+        if (gamePlayer.isHuman())
             return PlayerType.HUMAN;
+        else
+            return PlayerType.COMPUTER;
     }
 
     static private Players.Player.Tiles convertGameTilesToXSDPlayerTiles(ArrayList<logic.tile.Tile> gameTiles) {
@@ -165,7 +167,7 @@ public class GamePersistency {
         return xsdTile;
     }
 
-    static private logic.persistency.Color convertGameColorToXSD(logic.tile.Color gameColor) {
+    static private logic.persistency.generated.Color convertGameColorToXSD(logic.tile.Color gameColor) {
         switch (gameColor) {
             case Black:
                 return Color.BLACK;

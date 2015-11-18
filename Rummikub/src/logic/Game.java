@@ -5,6 +5,7 @@ import java.util.List;
 import logic.tile.*;
 
 public class Game {
+    private String name;
     private final ArrayList<Player> players;
     private final Deck tilesDeck;
     private final Board board;
@@ -21,6 +22,7 @@ public class Game {
         currentPlayer = null;
         tilesDeck = new Deck();
         board = new Board();
+        name = gameDetails.getGameName();
         
         createPlayers(gameDetails);
     }
@@ -144,7 +146,7 @@ public class Game {
             //first create human players
             if (humanPlayersNum > 0) {
                 currPlayerName = gameDetails.getPlayersNames().get(i);
-                currPlayer = new HumanPlayer(currPlayerID, currPlayerName);
+                currPlayer = new Player(currPlayerID, currPlayerName,true);
                 humanPlayersNum--;
             } else {
                 //create computer player
@@ -154,7 +156,7 @@ public class Game {
                 else{
                     currPlayerName = COMPUTER_NAME_PREFIX + computerPlayerIndex;
                 }
-                currPlayer = new ComputerPlayer(currPlayerID, currPlayerName);
+                currPlayer = new Player(currPlayerID, currPlayerName,false);
                 computerPlayerIndex++;
             }
 

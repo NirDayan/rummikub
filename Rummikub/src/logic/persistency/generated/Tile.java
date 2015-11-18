@@ -6,8 +6,9 @@
 //
 
 
-package logic.persistency;
+package logic.persistency.generated;
 
+import logic.persistency.generated.Color;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;

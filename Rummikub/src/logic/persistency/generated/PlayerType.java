@@ -6,7 +6,7 @@
 //
 
 
-package logic.persistency;
+package logic.persistency.generated;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlType;

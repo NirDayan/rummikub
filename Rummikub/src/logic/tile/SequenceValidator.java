@@ -30,7 +30,7 @@ class SequenceValidator {
         while (iterator.hasNext()) {
             Tile tile = iterator.next();
 
-            if (tile instanceof JokerTile) {
+            if (tile.isJoker()) {
                 jokerCounter++;
             } else if (valueIndex == -1) {
                 setValueIndexAndSeqColor(tile);
@@ -74,7 +74,7 @@ class SequenceValidator {
     }
 
     private boolean isTileInStraightOrder(Tile tile) {
-        if (!(tile instanceof JokerTile)) {
+        if (!(tile.isJoker())) {
             if (!isNormalTileInStraight(tile)) {
                 return false;
             }

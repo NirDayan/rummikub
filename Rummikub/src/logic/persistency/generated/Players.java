@@ -6,8 +6,9 @@
 //
 
 
-package logic.persistency;
+package logic.persistency.generated;
 
+import logic.persistency.generated.PlayerType;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;

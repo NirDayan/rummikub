@@ -21,16 +21,16 @@ public class Board {
     public void reset() {
         sequencesArray = new ArrayList<>();
     }
-    
+
     public boolean moveTile(MoveTileData data) {
         if (isMoveValid(data)) {
             Tile tile = removeTile(data.getSourceSequenceIndex(), data.getSourceSequencePosition());
             return addTile(data.getTargetSequenceIndex(), data.getTargetSequencePosition(), tile);
-       }
-        
+        }
+
         return false;
     }
-    
+
     public Tile removeTile(int sequenceIndex, int indexInSequence) {
         Sequence sequence;
         Tile tile = null;
@@ -41,8 +41,8 @@ public class Board {
                 sequencesArray.remove(sequenceIndex);
             }
         }
-        
-        return tile;        
+
+        return tile;
     }
 
     public boolean addTile(int sequenceIndex, int indexInSequence, Tile tile) {
@@ -50,7 +50,7 @@ public class Board {
             sequencesArray.add(new Sequence(tile));
             return true;
         }
-        else if (tile!= null && sequenceIndex < sequencesArray.size() && sequenceIndex >= 0) {
+        else if (tile != null && sequenceIndex < sequencesArray.size() && sequenceIndex >= 0) {
             Sequence sequence = sequencesArray.get(sequenceIndex);
             if (indexInSequence == 0) {//add at the beginning of the sequence
                 return sequence.addTile(0, tile);
@@ -62,13 +62,13 @@ public class Board {
                 return split(sequenceIndex, indexInSequence, tile);
             }
         }
-        
+
         return false;
     }
 
     public boolean isValid() {
         for (Sequence sequence : sequencesArray) {
-            if(sequence.isValid() == false)
+            if (sequence.isValid() == false)
                 return false;
         }
         return true;
@@ -82,63 +82,63 @@ public class Board {
 
     public Sequence getSequence(int index) {
         Sequence res = null;
-        
-        if (index >=0 && index < sequencesArray.size()) {
+
+        if (index >= 0 && index < sequencesArray.size()) {
             res = sequencesArray.get(index);
         }
-        
+
         return res;
     }
-    
-    public List<Sequence> getSequences(){
+
+    public List<Sequence> getSequences() {
         return sequencesArray;
     }
-    
-    public boolean isTargetValid (int sequenceIndex, int sequencePosition) {
+
+    public boolean isTargetValid(int sequenceIndex, int sequencePosition) {
         if (sequenceIndex == 0 && sequencesArray.size() == 0)
             return true;
-        if (sequenceIndex < sequencesArray.size() &&
-                sequencePosition <= sequencesArray.get(sequenceIndex).getSize() &&
-                sequenceIndex >= 0 && sequencePosition >= 0)
+        if (sequenceIndex < sequencesArray.size()
+                && sequencePosition <= sequencesArray.get(sequenceIndex).getSize()
+                && sequenceIndex >= 0 && sequencePosition >= 0)
             return true;
-        
+
         return false;
     }
-    
-    private boolean isMovePositionValid (int sequenceIndex, int sequencePosition) {
+
+    private boolean isMovePositionValid(int sequenceIndex, int sequencePosition) {
         boolean isSequenceExist = sequenceIndex < sequencesArray.size();
         boolean isPositionValid;
-        
+
         if (!isSequenceExist)
             return false;
-        
-        isPositionValid = (sequencePosition == 0) || 
-                (sequencePosition == sequencesArray.get(sequenceIndex).getSize());
-                
+
+        isPositionValid = (sequencePosition == 0)
+                || (sequencePosition == sequencesArray.get(sequenceIndex).getSize());
+
         return isPositionValid;
     }
-    
+
     public boolean isMoveValid(MoveTileData data) {
         int sourceSeqIndex = data.getSourceSequenceIndex();
         int sourceSeqPosition = data.getSourceSequencePosition();
         int targetSeqIndex = data.getTargetSequenceIndex();
         int targetSeqPosition = data.getTargetSequencePosition();
-        
-        return isMovePositionValid(sourceSeqIndex, sourceSeqPosition) &&
-                isTargetValid(targetSeqIndex, targetSeqPosition);
+
+        return isMovePositionValid(sourceSeqIndex, sourceSeqPosition)
+                && isTargetValid(targetSeqIndex, targetSeqPosition);
     }
 
     private boolean split(int sequenceIndex, int indexInSequence, Tile tile) {
         if (!isTargetValid(sequenceIndex, indexInSequence))
             return false;
-        
+
         Sequence sequence = sequencesArray.get(sequenceIndex);
         Sequence newSequence = sequence.split(indexInSequence);
         if (newSequence == null)
             return false;
         sequence.addTile(indexInSequence, tile);
         sequencesArray.add(newSequence);
-        
+
         return true;
     }
 }

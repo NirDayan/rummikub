@@ -6,8 +6,10 @@
 //
 
 
-package logic.persistency;
+package logic.persistency.generated;
 
+import logic.persistency.generated.Players;
+import logic.persistency.generated.Board;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;

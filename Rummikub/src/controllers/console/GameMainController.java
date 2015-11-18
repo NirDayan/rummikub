@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 import logic.Game;
 import logic.GameDetails;
-import logic.HumanPlayer;
 import logic.MoveTileData;
 import logic.Player;
 import logic.persistency.FileDetails;
@@ -51,10 +50,8 @@ public class GameMainController {
                     createGameFromUserInput();
                 }
                 isInputValid = true;
-            } catch (FileNotFoundException e) {
-                inputOutputController.showErrorMessage(e.getMessage());
             } catch (Exception e) {
-                inputOutputController.showWrongInputMessage();
+                inputOutputController.showErrorMessage(e.getMessage());
             }
         }
     }
@@ -113,7 +110,7 @@ public class GameMainController {
         if (input.getPlayersNames().size() < input.getHumenPlayersNum()) {
             return false;
         }
-        if (checkPlayersNameValidity(input.getPlayersNames()))
+        if (!checkPlayersNameValidity(input.getPlayersNames()))
             return false;
 
         return true;
@@ -167,7 +164,7 @@ public class GameMainController {
     }
 
     private void performPlayerGameRound(Player player) {
-        if (player instanceof HumanPlayer) {
+        if (player.isHuman()) {
             handleGameSaving(player);
         }
         if (game.isPlayerFirstStep(player.getID())) {
@@ -192,7 +189,7 @@ public class GameMainController {
         do {
             inputOutputController.showGameStatus(game.getBoard(), player);
             inputOutputController.showUserActionsMenu(player);
-            if (player instanceof HumanPlayer) {
+            if (player.isHuman()) {
                 option = inputOutputController.askUserChooseOption(options);
             }
             else {

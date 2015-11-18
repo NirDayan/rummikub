@@ -2,20 +2,17 @@ package logic;
 
 import java.util.ArrayList;
 import java.util.List;
-import logic.tile.Sequence;
 import logic.tile.Tile;
 
-public abstract class Player {
+public class Player {
 
-    private final String name;
-    private final int ID;
+    private final PlayerDetails details;
     private final ArrayList<Tile> tiles;
     private boolean isResign;
     private boolean isFirstStep;
 
-    Player(int ID, String name) {
-        this.ID = ID;
-        this.name = name;
+    Player(int ID, String name, boolean isHuman) {
+        this.details = new PlayerDetails(ID, name, isHuman);
         this.tiles = new ArrayList<>();
         this.isFirstStep = true;
     }
@@ -38,11 +35,11 @@ public abstract class Player {
     }
 
     public String getName() {
-        return name;
+        return details.name;
     }
 
     public int getID() {
-        return ID;
+        return details.ID;
     }
 
     public void reset() {
@@ -102,5 +99,9 @@ public abstract class Player {
         }
 
         return true;
+    }
+    
+    public boolean isHuman(){
+        return details.isHuman;
     }
 }

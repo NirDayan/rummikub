@@ -6,8 +6,9 @@
 //
 
 
-package logic.persistency;
+package logic.persistency.generated;
 
+import logic.persistency.generated.Board;
 import javax.xml.bind.annotation.XmlRegistry;
 
 

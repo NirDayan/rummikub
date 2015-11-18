@@ -9,7 +9,6 @@ import logic.Board;
 import logic.MoveTileData;
 import logic.Player;
 import logic.persistency.FileDetails;
-import logic.tile.JokerTile;
 import logic.tile.Sequence;
 import logic.tile.Tile;
 
@@ -34,8 +33,6 @@ public class GameView {
         List<String> playersNames = new ArrayList<>();
         playersNames.add("player1");
         playersNames.add("player2");
-        playersNames.add("player3");
-        playersNames.add("player4");
         return new GameDetails(0, 2, "GameName", playersNames, null);
     }
 
@@ -248,11 +245,10 @@ public class GameView {
             printSequene(boardSequences.get(i));
             System.out.println();
         }
-        System.out.println();
     }
 
     private void printTile(Tile tile) {
-        if (tile instanceof JokerTile) {
+        if (tile.isJoker()) {
             System.out.print("J");
             return;
         }

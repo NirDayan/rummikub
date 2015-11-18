@@ -1,6 +1,5 @@
 package logic;
 
-// TODO: need to find a better location for this object
 public class MoveTileData {
 
     private int playerID;

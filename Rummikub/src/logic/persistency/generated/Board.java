@@ -6,7 +6,7 @@
 //
 
 
-package logic.persistency;
+package logic.persistency.generated;
 
 import java.util.ArrayList;
 import java.util.List;
