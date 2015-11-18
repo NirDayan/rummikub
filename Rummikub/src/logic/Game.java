@@ -23,7 +23,6 @@ public class Game {
         board = new Board();
         
         createPlayers(gameDetails);
-        distributeTiles();
     }
 
     public void reset() {
@@ -31,14 +30,15 @@ public class Game {
             player.reset();
         }
         board.reset();
-        tilesDeck.reset();
+        getTilesDeck().reset();
         winner = null;
-        currentPlayer = players.get(0);
+        setCurrentPlayer(players.get(0));
+        distributeTiles();
     }
 
     public void addPlayer(Player player) {
         if (currentPlayer == null) {
-            currentPlayer = player;
+            setCurrentPlayer(player);
         }
         players.add(player);
     }
@@ -50,7 +50,7 @@ public class Game {
             return true;
         }
         //if the deck is empty
-        if (tilesDeck.isEmpty()) {
+        if (getTilesDeck().isEmpty()) {
             return true;
         }
         //if all players resigned
@@ -85,17 +85,17 @@ public class Game {
     public void moveToNextPlayer() {
         int currPlayerIndex = players.indexOf(currentPlayer);
         if (currPlayerIndex == players.size() - 1) {
-            currentPlayer = players.get(0);
+            setCurrentPlayer(players.get(0));
         }
         else {
-            currentPlayer = players.get(currPlayerIndex + 1);
+            setCurrentPlayer(players.get(currPlayerIndex + 1));
         }
     }
     
     public void pullTileFromDeck(int playerID) {
         Player player = getPlayerByID(playerID);
         if (player != null)
-            player.addTile(tilesDeck.pullTile());
+            player.addTile(getTilesDeck().pullTile());
     }
     
     public boolean isPlayerFirstStep(int playerID) {
@@ -115,11 +115,19 @@ public class Game {
             pullTileFromDeck(id);
         }
     }
+
+    public void setCurrentPlayer(Player currentPlayer) {
+        this.currentPlayer = currentPlayer;
+    }
+
+    public Deck getTilesDeck() {
+        return tilesDeck;
+    }
     
     private void distributeTiles() {
         for (Player player : players) {
             for (int i = 0; i < INITIAL_TILES_COUNT; i++) {
-                player.addTile(tilesDeck.pullTile());
+                player.addTile(getTilesDeck().pullTile());
             }
         }
     }
@@ -135,12 +143,17 @@ public class Game {
             currPlayerID = generatePlayerId();
             //first create human players
             if (humanPlayersNum > 0) {
-                currPlayerName = gameDetails.getPlayersNames()[i];
+                currPlayerName = gameDetails.getPlayersNames().get(i);
                 currPlayer = new HumanPlayer(currPlayerID, currPlayerName);
                 humanPlayersNum--;
             } else {
                 //create computer player
-                currPlayerName = COMPUTER_NAME_PREFIX + computerPlayerIndex;
+                if (gameDetails.getPlayersNames().size() < i){
+                    currPlayerName = gameDetails.getPlayersNames().get(i);
+                }
+                else{
+                    currPlayerName = COMPUTER_NAME_PREFIX + computerPlayerIndex;
+                }
                 currPlayer = new ComputerPlayer(currPlayerID, currPlayerName);
                 computerPlayerIndex++;
             }

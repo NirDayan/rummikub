@@ -31,8 +31,12 @@ public class GameView {
     public GameDetails getNewGameInput() {
         //TODO: get new game input from the user an check input validity
         //      Currently use a mock
-        String[] playersNames = {"player1", "player2", "player3", "player"};
-        return new GameDetails(2, 0, 2, "GameName", playersNames, null);
+        List<String> playersNames = new ArrayList<>();
+        playersNames.add("player1");
+        playersNames.add("player2");
+        playersNames.add("player3");
+        playersNames.add("player4");
+        return new GameDetails(0, 2, "GameName", playersNames, null);
     }
 
     public String getSavedFilePath() {
@@ -163,6 +167,18 @@ public class GameView {
 
     public void showFinishTurnWithoutAction() {
         System.out.println("You must perform any action before you can finish your turn!");
+    }
+
+    public String getXMLFilePath() {
+        String fileFullPath = "";
+        scanner.nextLine(); //throw away the \n not consumed by nextInt()
+        System.out.print("Please enter the file path: ");
+        fileFullPath += scanner.nextLine();
+        fileFullPath += "\\";
+        System.out.print("Please enter the file name: ");
+        fileFullPath += scanner.nextLine();
+        fileFullPath += ".xml";
+        return fileFullPath;
     }
 
     private FileDetails getNewFileDetails() {

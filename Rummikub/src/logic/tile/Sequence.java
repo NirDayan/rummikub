@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-// This class might be redundent. need to consider removing it.
 public class Sequence {
 
     private List<Tile> tiles;

@@ -19,8 +19,7 @@ public class InputOutputController implements IControllerInputOutput {
 
     @Override
     public String getGameFilePath() {
-       //TODO: implement
-        return "path";
+        return view.getXMLFilePath();
     }
 
     @Override

@@ -1,19 +1,19 @@
 package logic;
 
+import java.util.List;
+
 public class GameDetails {
     private String gameName;
-    private int totalPlayersNumber;//between 2-4
     private int computerPlayersNum;//between 0 to playersNumber
     private int humenPlayersNum;
-    private String[] playersNames;
+    private List<String> playersNames;
     private String savedFilePath;
     
     public GameDetails() {}
     
-    public GameDetails(int totalPlayersNumber, int computerPlayersNum,
-            int humenPlayersNum, String gameName, String[] playersNames, 
+    public GameDetails(int computerPlayersNum,
+            int humenPlayersNum, String gameName, List<String> playersNames, 
             String savedFilePath) {
-        this.totalPlayersNumber = totalPlayersNumber;
         this.computerPlayersNum = computerPlayersNum;
         this.humenPlayersNum = humenPlayersNum;
         this.gameName = gameName;
@@ -29,7 +29,7 @@ public class GameDetails {
         return savedFilePath;
     }
     
-    public String[] getPlayersNames() {
+    public List<String> getPlayersNames() {
         return playersNames;
     }
 
@@ -38,7 +38,7 @@ public class GameDetails {
     }
 
     public int getTotalPlayersNumber() {
-        return totalPlayersNumber;
+        return computerPlayersNum + humenPlayersNum;
     }
     
     public int getHumenPlayersNum() {

@@ -2,11 +2,11 @@ package controllers.console;
 
 import controllers.IControllerInputOutput;
 import controllers.IControllerInputOutput.UserOptions;
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Set;
 import logic.Game;
 import logic.GameDetails;
 import logic.HumanPlayer;
@@ -14,7 +14,6 @@ import logic.MoveTileData;
 import logic.Player;
 import logic.persistency.FileDetails;
 import logic.persistency.GamePersistency;
-import org.xml.sax.SAXException;
 
 public class GameMainController {
     private final int MAX_PLAYERS_NUM = 4;
@@ -37,19 +36,26 @@ public class GameMainController {
         }
     }
 
-    public Game createGameFromXML(String xmlData) {
-        //TODO: implement
-        GameDetails gameDetails = new GameDetails();
-        game = new Game(gameDetails);
-        return game;
+    public Game createGameFromXML(String xmlPath) throws Exception {
+        return game = GamePersistency.load(xmlPath);
     }
 
     private void createNewGame() {
-        if (inputOutputController.isGameFromFile()) {
-            game = createGameFromXML(inputOutputController.getGameFilePath());
-        }
-        else {
-            createGameFromUserInput();
+        boolean isInputValid = false;
+        while (!isInputValid) {
+            try {
+                if (inputOutputController.isGameFromFile()) {
+                    game = createGameFromXML(inputOutputController.getGameFilePath());
+                }
+                else {
+                    createGameFromUserInput();
+                }
+                isInputValid = true;
+            } catch (FileNotFoundException e) {
+                inputOutputController.showErrorMessage(e.getMessage());
+            } catch (Exception e) {
+                inputOutputController.showWrongInputMessage();
+            }
         }
     }
 
@@ -91,6 +97,7 @@ public class GameMainController {
             GameDetails initialUserInput = inputOutputController.getNewGameInput();
             if (isGameInputValid(initialUserInput)) {
                 game = new Game(initialUserInput);
+                game.reset();
                 isGameInitialized = true;
             }
             else {
@@ -99,30 +106,30 @@ public class GameMainController {
         }
     }
 
-    //TODO: more edge cases???
-    //TODO: check load from file flow.. currently it unhandeled
     private boolean isGameInputValid(GameDetails input) {
-        String[] playerNames = input.getPlayersNames();
-
         if (input.getTotalPlayersNumber() < 2 || input.getTotalPlayersNumber() > MAX_PLAYERS_NUM) {
             return false;
         }
-        if (playerNames.length < input.getHumenPlayersNum()) {
+        if (input.getPlayersNames().size() < input.getHumenPlayersNum()) {
             return false;
         }
-        //check names validity and each name is unique
-        for (int i = 0; i < input.getHumenPlayersNum(); i++) {
-            if (playerNames[i].isEmpty()) {
+        if (checkPlayersNameValidity(input.getPlayersNames()))
+            return false;
+
+        return true;
+    }
+
+    public static boolean checkPlayersNameValidity(List<String> playersNames) {
+        for (String name : playersNames) {
+            if (name.isEmpty()) {
                 return false;
             }
-            //check names are unique
-            for (int j = i + 1; j < input.getHumenPlayersNum(); j++) {
-                if (playerNames[i].equals(playerNames[j])) {
-                    return false;
-                }
-            }
         }
-
+        //check names are unique
+        Set<String> namesSet = new HashSet<>(playersNames);
+        if (namesSet.size() < playersNames.size()) {
+            return false;
+        }
         return true;
     }
 
