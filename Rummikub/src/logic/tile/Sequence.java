@@ -2,7 +2,9 @@ package logic.tile;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Sequence {
 
@@ -28,14 +30,14 @@ public class Sequence {
     }
 
     public int getValueSum() {
-        if (isValid() == false) {
-            return -1; // TODO: I dont like this kind of error code passing. 
-        }// I think it should throw an exception. nir, what do you think?
-        //TODO: figure out a way to check the sum
         int sum = 0;
-        for (Tile tile : tiles) {
-            sum += tile.getValue();
+        if (isSameValue()) {
+            sum = getSameValueSum();
         }
+        else {
+            sum = getOrderedSum();
+        }        
+        
         return sum;
     }
 
@@ -79,5 +81,127 @@ public class Sequence {
 
     public List<Tile> toList() {
         return tiles;
+    }
+    
+    //Use this function with the assumption the sequence is Valid
+    private boolean isSameValue() {
+        Map<Color, Integer> mapColors = new HashMap<>();
+        Color color;
+        int count;
+        
+        for (Tile tile : tiles) {
+            if (!tile.isJoker()) {
+                color = tile.getColor();
+                if (mapColors.containsKey(color)) {
+                    count = mapColors.get(color);
+                    mapColors.put(color, count + 1);
+                }
+                else {
+                    mapColors.put(tile.getColor(), 1);
+                } 
+            }                       
+        }
+        
+        for (Integer ammount : mapColors.values()) {
+            if (ammount > 1) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    //Use this function with the assumption the sequence is Valid
+    private int getSameValueSum() {
+        int value = 0;
+        for (Tile tile : tiles) {
+            if (!tile.isJoker()) {
+                value = tile.getValue();
+                break;
+            }            
+        }
+        
+        return (tiles.size() * value);
+    }
+
+    /**
+     * Use this function with the assumption the sequence is Valid
+     * And the sequence is consisted of different colors
+     * @return true if sequence is ascending, otherwise false
+     */
+    private boolean isAscending() {
+        if (!tiles.get(0).isJoker()) {//First tile is not Joker
+            if (!tiles.get(1).isJoker()) { // First and second tiles are not Joker
+                return tiles.get(1).getValue() > tiles.get(0).getValue();
+            }
+            else {
+                if (!tiles.get(2).isJoker()) { //First and third tile are not Joker, second is Joker
+                    return tiles.get(2).getValue() > tiles.get(0).getValue();
+                }
+                else {//First tile is not Joker, second tile is Joker, third tile is Joker
+                    if (tiles.size() > 3) {//{Num1, J, J, ...}
+                        return tiles.get(3).getValue() > tiles.get(0).getValue();
+                    }                    
+                    else {//{Number, J, J} and size is 3
+                        return true;
+                    }
+                }
+            }            
+        }
+        else {//First tile is Joker
+            if (!tiles.get(1).isJoker()) {//First tile is Joker and second tile is not Joker
+                if (!tiles.get(2).isJoker()) {//{J, Num1, Num2, ...}
+                    return tiles.get(2).getValue() > tiles.get(1).getValue();
+                }
+                else {//First and third tiles are Joker and second tile is not Joker
+                    if (tiles.size() > 3) {//{J, Number, J, ...}
+                        return tiles.get(3).getValue() > tiles.get(1).getValue();                         
+                    }
+                    else {//{J, Number, J} and size is 3
+                        return true;
+                    }
+                }
+            }
+            else {//First and second tiles are Joker
+                if (tiles.size() > 3) {//{J, J, Num, ...}
+                    return tiles.get(3).getValue() > tiles.get(2).getValue() ;
+                }
+                else { //{J, J, Num} and size is 3
+                    return tiles.get(2).getValue() >= 3;
+                }
+            }
+        }
+    }
+    
+    //Use this function with the assumption the sequence is Valid
+    private int getOrderedSum() {
+        int sum = 0;
+        boolean isAscending = isAscending();
+        int factor = (isAscending) ? (1) : (-1);
+        if (!tiles.get(0).isJoker()) {
+            int firstValue = tiles.get(0).getValue();
+            for (int i = 0; i < tiles.size(); i++) {
+               sum += firstValue + (factor * i);
+            }
+        }
+        else if (!tiles.get(1).isJoker()) {
+            int secondValue = tiles.get(1).getValue();
+            sum += secondValue + (factor);
+            for (int i = 0; i < tiles.size() - 1; i++) {
+               sum += secondValue + (factor * i);
+            }
+        }
+        else if (tiles.size() == 3) {//{J, J, Number}
+            sum = 3 * tiles.get(2).getValue();               
+        }
+        else {// {J, J, Num, Num, ...}
+            int thirdValue = tiles.get(2).getValue();
+            sum += thirdValue + (2 * factor) + (factor);            
+            for (int i = 0; i < tiles.size() - 2; i++) {
+               sum += thirdValue + (factor * i);
+            }
+        }
+        
+        return sum;
     }
 }
