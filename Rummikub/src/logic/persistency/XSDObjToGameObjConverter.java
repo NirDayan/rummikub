@@ -7,11 +7,11 @@ import logic.persistency.generated.PlayerType;
 import logic.persistency.generated.Color;
 import logic.persistency.generated.Board;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import logic.Game;
 import logic.GameDetails;
 import logic.Player;
+import logic.PlayerDetails;
 import logic.tile.Sequence;
 
 class XSDObjToGameObjConverter {
@@ -24,20 +24,18 @@ class XSDObjToGameObjConverter {
     }
 
     static GameDetails getGameDetailsFromXSDObj(Rummikub rummikubXSDObj) {
-        int humanPlayersCount = 0;
-        int computerPlayersCount = 0;
-        LinkedList<String> names = new LinkedList<>();
+        int ID = 1;
+        List<logic.PlayerDetails> gamePlayersDetails = new ArrayList<>();
         for (Players.Player player : rummikubXSDObj.getPlayers().getPlayer()) {
             if (player.getType() == PlayerType.HUMAN) {
-                humanPlayersCount++;
-                names.addFirst(player.getName());
+                gamePlayersDetails.add(new PlayerDetails(ID, player.getName(), true));
             }
             else {
-                computerPlayersCount++;
-                names.addLast(player.getName());
+                gamePlayersDetails.add(new PlayerDetails(ID, player.getName(), false));
             }
+            ID++;
         }
-        return new GameDetails(computerPlayersCount, humanPlayersCount, rummikubXSDObj.getName(), names, null);
+        return new GameDetails(rummikubXSDObj.getName(), gamePlayersDetails, null);
     }
 
     static void createGameFromXSDObj(Game game, Rummikub rummikubXSDObj) {
@@ -47,6 +45,7 @@ class XSDObjToGameObjConverter {
         distributeTilesToBoard();
         Player currPlayer = getCurrPlayerFromXSDObj();
         game.setCurrentPlayer(currPlayer);
+        setAllPlayerFirstStep(false);
     }
 
     private static void distributeTilesToPlayers() {
@@ -127,6 +126,12 @@ class XSDObjToGameObjConverter {
                 return logic.tile.Color.Yellow;
             default:
                 return logic.tile.Color.Black;
+        }
+    }
+
+    private static void setAllPlayerFirstStep(boolean firstStep) {
+        for (logic.Player player : game.getPlayers()) {
+            player.setFirstStepCompleted(firstStep);
         }
     }
 }

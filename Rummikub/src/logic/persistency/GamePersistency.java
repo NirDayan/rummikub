@@ -9,6 +9,7 @@ import static controllers.console.GameMainController.checkPlayersNameValidity;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -29,23 +30,22 @@ import org.xml.sax.SAXException;
 
 public class GamePersistency {
     private static final String RESOURCES = "resources";
-    
+
     public static Game load(String filePath) throws Exception {
         Schema schema = GamePersistency.getSchemaFromXSD();
         InputStream xmlInputStream = new BufferedInputStream(
                 new FileInputStream(filePath));
-        
+
         Rummikub rummikubXSDObj = GamePersistency.readXMLAndCreateRummikubXSDOBj(schema, xmlInputStream);
         GameDetails gameDetails = XSDObjToGameObjConverter.getGameDetailsFromXSDObj(rummikubXSDObj);
         checkPlayersNameValidity(gameDetails.getPlayersNames());
         Game game = new Game(gameDetails);
         XSDObjToGameObjConverter.createGameFromXSDObj(game, rummikubXSDObj);
         if (game.getBoard().isValid() == false)
-            throw new Exception("Board is invalid"); 
+            throw new Exception("Board is invalid");
+        game.setSavedFilePath(filePath);
         return game;
     }
-
-
 
     public static void save(FileDetails fileDetails, Game game) throws Exception {
         Schema schema = getSchemaFromXSD();
@@ -53,17 +53,14 @@ public class GamePersistency {
         // Copy the real game object to an XSD format object
         Rummikub rummikubXSDObj = getRummikubXSDObject(game);
 
-        File file = createFileIfNotExist(fileDetails);
+        File file = getFileFromFileDetails(fileDetails, game);
         writeXSDObjToFile(schema, rummikubXSDObj, file);
     }
-
-
 
     private static Rummikub readXMLAndCreateRummikubXSDOBj(Schema schema, InputStream xmlInputStream) throws JAXBException {
         JAXBContext context = JAXBContext.newInstance(Rummikub.class);
         Unmarshaller unmarshaller = context.createUnmarshaller();
-        //attach the Schema to the unmarshaller so it will use it to run validations
-        //on the content of the XML
+        //attach the Schema to the unmarshaller so it will use it to run validation.
         unmarshaller.setSchema(schema);
 
         return (Rummikub) unmarshaller.unmarshal(xmlInputStream);
@@ -79,15 +76,26 @@ public class GamePersistency {
 
     static private Rummikub getRummikubXSDObject(Game game) {
         Rummikub rummikubXSD = new Rummikub();
-        rummikubXSD.setName("Rummikub#1");//Temp for exercise 1&2 - need to change when multiple games are available
+        rummikubXSD.setName(game.getName());
         rummikubXSD.setCurrentPlayer(game.getCurrentPlayer().getName());
         rummikubXSD.setBoard(getBoardXSDObj(game.getBoard()));
         rummikubXSD.setPlayers(getPlayersXSDObj(game.getPlayers()));
         return rummikubXSD;
     }
 
-    private static File createFileIfNotExist(FileDetails fileDetails) throws IOException {
-        // Create the file if not exist
+    private static File getFileFromFileDetails(FileDetails fileDetails, Game game) throws IOException {
+        if (fileDetails.isNewFile()) {
+            return createFile(fileDetails);
+        }
+        else {
+            File file = new File(game.getSavedFilePath());
+            if (file.canWrite() == false && file.setWritable(true) == false)
+                throw new IOException("Access Denied");
+            return file;
+        }
+    }
+
+    private static File createFile(FileDetails fileDetails) throws IOException {
         File file = new File(fileDetails.getFolderPath(), fileDetails.getFileName() + ".xml");
         File folder = file.getParentFile();
         if (!folder.mkdirs() && !folder.exists())

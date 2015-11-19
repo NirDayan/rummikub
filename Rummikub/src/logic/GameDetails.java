@@ -1,23 +1,28 @@
 package logic;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GameDetails {
     private String gameName;
     private int computerPlayersNum;//between 0 to playersNumber
     private int humenPlayersNum;
-    private List<String> playersNames;
+    private List<PlayerDetails> playersDetails;
     private String savedFilePath;
     
     public GameDetails() {}
     
-    public GameDetails(int computerPlayersNum,
-            int humenPlayersNum, String gameName, List<String> playersNames, 
+    public GameDetails(String gameName, List<PlayerDetails> playerDetails, 
             String savedFilePath) {
-        this.computerPlayersNum = computerPlayersNum;
-        this.humenPlayersNum = humenPlayersNum;
         this.gameName = gameName;
-        this.playersNames = playersNames;
+        this.playersDetails = playerDetails;
+        humenPlayersNum=0; computerPlayersNum=0;
+        for (PlayerDetails details : playerDetails){
+            if (details.isHuman)
+                humenPlayersNum++;
+            else
+                computerPlayersNum++;
+        }
         this.savedFilePath = savedFilePath;
     }
 
@@ -30,7 +35,9 @@ public class GameDetails {
     }
     
     public List<String> getPlayersNames() {
-        return playersNames;
+        List<String> names = new ArrayList<>();
+        getPlayersDetails().stream().forEach(p -> names.add(p.name));
+        return names;
     }
 
     public int getComputerPlayersNum() {
@@ -55,5 +62,9 @@ public class GameDetails {
 
     public void setHumenPlayersNum(int humenPlayersNum) {
         this.humenPlayersNum = humenPlayersNum;
+    }
+
+    public List<PlayerDetails> getPlayersDetails() {
+        return playersDetails;
     }
 }

@@ -16,6 +16,12 @@ public class Player {
         this.tiles = new ArrayList<>();
         this.isFirstStep = true;
     }
+    
+    Player(PlayerDetails playerDetails) {
+        this.details = playerDetails;
+        this.tiles = new ArrayList<>();
+        this.isFirstStep = true;
+    }
 
     public void setIsResign(boolean isResign) {
         this.isResign = isResign;

@@ -2,7 +2,6 @@ package controllers.console;
 
 import controllers.IControllerInputOutput;
 import controllers.IControllerInputOutput.UserOptions;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -19,39 +18,40 @@ public class GameMainController {
     private final IControllerInputOutput inputOutputController;
     private Game game;
     private boolean isPersisted;
-
+    
     public GameMainController(IControllerInputOutput inputOutputController) {
         this.inputOutputController = inputOutputController;
         this.isPersisted = false;
     }
-
+    
     public void start() {
         boolean exitGame = false;
-
+        
         createNewGame();
         while (!exitGame) {
             playGame(game);
             exitGame = startNewGameOrExit();
         }
     }
-
+    
     public Game createGameFromXML(String xmlPath) throws Exception {
-        return game = GamePersistency.load(xmlPath);
+        return GamePersistency.load(xmlPath);
     }
-
+    
     private void createNewGame() {
         boolean isInputValid = false;
         while (!isInputValid) {
             try {
                 if (inputOutputController.isGameFromFile()) {
                     game = createGameFromXML(inputOutputController.getGameFilePath());
+                    isPersisted = true;
                 }
                 else {
                     createGameFromUserInput();
                 }
                 isInputValid = true;
             } catch (Exception e) {
-                inputOutputController.showErrorMessage(e.getMessage());
+                inputOutputController.showErrorMessage(e);
             }
         }
     }
@@ -67,10 +67,10 @@ public class GameMainController {
         options.add(IControllerInputOutput.UserOptions.ONE.getOption());
         options.add(IControllerInputOutput.UserOptions.TWO.getOption());
         options.add(IControllerInputOutput.UserOptions.THREE.getOption());
-
+        
         inputOutputController.showEndOfGameMenu();
         IControllerInputOutput.UserOptions option = inputOutputController.askUserChooseOption(options);
-
+        
         if (option == IControllerInputOutput.UserOptions.ONE) {
             replayGame();
             return false;
@@ -79,17 +79,17 @@ public class GameMainController {
             createNewGame();
             return false;
         }
-
+        
         return true;
     }
-
+    
     private void replayGame() {
         game.reset();
     }
-
+    
     private void createGameFromUserInput() {
         boolean isGameInitialized = false;
-
+        
         while (!isGameInitialized) {
             GameDetails initialUserInput = inputOutputController.getNewGameInput();
             if (isGameInputValid(initialUserInput)) {
@@ -102,7 +102,7 @@ public class GameMainController {
             }
         }
     }
-
+    
     private boolean isGameInputValid(GameDetails input) {
         if (input.getTotalPlayersNumber() < 2 || input.getTotalPlayersNumber() > MAX_PLAYERS_NUM) {
             return false;
@@ -112,10 +112,10 @@ public class GameMainController {
         }
         if (!checkPlayersNameValidity(input.getPlayersNames()))
             return false;
-
+        
         return true;
     }
-
+    
     public static boolean checkPlayersNameValidity(List<String> playersNames) {
         for (String name : playersNames) {
             if (name.isEmpty()) {
@@ -129,7 +129,7 @@ public class GameMainController {
         }
         return true;
     }
-
+    
     private void playGame(Game game) {
         Player currentPlayer;
         while (!game.checkIsGameOver()) {
@@ -142,27 +142,28 @@ public class GameMainController {
         }
         inputOutputController.showEndOfGame(game.getWinner());
     }
-
+    
     private void handleGameSaving(Player player) {
         FileDetails fileDetails;
         boolean isInputValid = false;
-
+        
         while (!isInputValid) {
             fileDetails = inputOutputController.askUserToSaveGame(isPersisted, player);
             if (fileDetails != null) {
                 try {
                     GamePersistency.save(fileDetails, game);
+                    setLastSavedFilePath(fileDetails);
                     isPersisted = true;
                     isInputValid = true;
                 } catch (Exception ex) {
-                    inputOutputController.showErrorMessage(ex.getMessage());
+                    inputOutputController.showErrorMessage(ex);
                 }
             }
             else
                 isInputValid = true;
         }
     }
-
+    
     private void performPlayerGameRound(Player player) {
         if (player.isHuman()) {
             handleGameSaving(player);
@@ -174,7 +175,7 @@ public class GameMainController {
             performPlayerStep(player);
         }
     }
-
+    
     private void performPlayerStep(Player player) {
         ArrayList<Integer> options = new ArrayList<>();
         options.add(IControllerInputOutput.UserOptions.ONE.getOption());
@@ -185,7 +186,7 @@ public class GameMainController {
         UserOptions option;
         boolean isPlayerFinished = false;
         boolean isPlayerPerformAnyChange = false;
-
+        
         do {
             inputOutputController.showGameStatus(game.getBoard(), player);
             inputOutputController.showUserActionsMenu(player);
@@ -196,7 +197,7 @@ public class GameMainController {
                 //TODO: implement ComputerPlayer actions
                 option = UserOptions.ONE;
             }
-
+            
             if (option == UserOptions.ONE) {//Resign
                 //TODO: What do we need to do with the player tiles?
                 game.playerResign(player.getID());
@@ -222,7 +223,7 @@ public class GameMainController {
             }
         } while (!isPlayerFinished);
     }
-
+    
     private boolean handleAddTile(Player player) {
         boolean isValid = false;
         MoveTileData addTileData;
@@ -233,10 +234,10 @@ public class GameMainController {
                 inputOutputController.showWrongInputMessage();
             }
         }
-
+        
         return isValid;
     }
-
+    
     private boolean handleMoveTile(Player player) {
         boolean isValid = false;
         MoveTileData moveTileData;
@@ -247,10 +248,10 @@ public class GameMainController {
                 inputOutputController.showWrongInputMessage();
             }
         }
-
+        
         return isValid;
     }
-
+    
     private void performFirstStep(Player player) {
         inputOutputController.showGameStatus(game.getBoard(), player);
         if (inputOutputController.askUserFirstSequenceAvailable(player)) {
@@ -265,15 +266,21 @@ public class GameMainController {
             game.pullTileFromDeck(player.getID());
         }
     }
-
+    
     private boolean createSequence(Player player) {
         List<Integer> tilesIndices = inputOutputController.getOrderedTileIndicesForSequence(player);
-
+        
         return game.createSequence(player.getID(), tilesIndices);
     }
-
+    
     private void punishPlayer(Player player) {
         inputOutputController.punishPlayerMessage(player);
         game.punishPlayer(player.getID());
+    }
+    
+    private void setLastSavedFilePath(FileDetails fileDetails) {
+        if (fileDetails.isNewFile()) {
+            game.setSavedFilePath(fileDetails.getFolderPath() + "\\" + fileDetails.getFileName() + ".xml");
+        }
     }
 }

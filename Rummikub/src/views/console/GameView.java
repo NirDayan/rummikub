@@ -8,6 +8,7 @@ import java.util.List;
 import logic.Board;
 import logic.MoveTileData;
 import logic.Player;
+import logic.PlayerDetails;
 import logic.persistency.FileDetails;
 import logic.tile.Sequence;
 import logic.tile.Tile;
@@ -30,24 +31,27 @@ public class GameView {
     public GameDetails getNewGameInput() {
         //TODO: get new game input from the user an check input validity
         //      Currently use a mock
-        List<String> playersNames = new ArrayList<>();
-        playersNames.add("player1");
-        playersNames.add("player2");
-        return new GameDetails(0, 2, "GameName", playersNames, null);
-    }
-
-    public String getSavedFilePath() {
-        //TODO: get new file path from the user an check input validity
-        //      Currently use a mock
-        return "filePath";
+        List<PlayerDetails> playersDetails = new ArrayList<>();
+        playersDetails.add(new PlayerDetails(0, "player1", true));
+        playersDetails.add(new PlayerDetails(0, "player2", true));
+        return new GameDetails("Rummikub #1", playersDetails, null);
     }
 
     public void showWrongInputMessage() {
         System.out.println("Wrong input, please try again:");
     }
 
-    public void showErrorMessage(String message) {
-        System.out.println("Error. " + message + ", please try again:");
+    public void showErrorMessage(Exception ex) {
+        if (ex != null)
+            if (ex.getMessage() != null) {
+                System.out.println("Error. " + ex.getMessage() + ", please try again:");
+            }
+            else {
+                System.out.println("Error. " + ex.getCause().getMessage() + ", please try again:");
+            }
+        else {
+            System.out.println("Error, please try again:");
+        }
     }
 
     public boolean isGameFromFile() {

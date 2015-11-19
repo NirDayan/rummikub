@@ -38,8 +38,8 @@ public class InputOutputController implements IControllerInputOutput {
     }
     
     @Override
-    public void showErrorMessage(String message){
-        view.showErrorMessage(message);
+    public void showErrorMessage(Exception ex){
+        view.showErrorMessage(ex);
     }
 
     @Override
