@@ -45,7 +45,7 @@ class XSDObjToGameObjConverter {
         distributeTilesToBoard();
         Player currPlayer = getCurrPlayerFromXSDObj();
         game.setCurrentPlayer(currPlayer);
-        setAllPlayerFirstStep(false);
+        setAllPlayerFirstStep(true);
     }
 
     private static void distributeTilesToPlayers() {

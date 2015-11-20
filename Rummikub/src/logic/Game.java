@@ -180,6 +180,12 @@ public class Game {
         }
     }
 
+    /**
+     * player creates a new sequence on the board.
+     * @param playerID
+     * @param tilesIndices
+     * @return true if a new sequence was created, false otherwise
+     */
     public boolean createSequence(int playerID, List<Integer> tilesIndices) {
         Player player = getPlayerByID(playerID);
         if (player == null || tilesIndices == null)

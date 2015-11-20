@@ -186,6 +186,7 @@ public class GameMainController {
         options.add(IControllerInputOutput.UserOptions.THREE.getOption());
         options.add(IControllerInputOutput.UserOptions.FOUR.getOption());
         options.add(IControllerInputOutput.UserOptions.FIVE.getOption());
+        options.add(IControllerInputOutput.UserOptions.SIX.getOption());
         UserOptions option;
         boolean isPlayerFinished = false;
         boolean isPlayerPerformAnyChange = false;
@@ -216,7 +217,11 @@ public class GameMainController {
                 game.pullTileFromDeck(player.getID());
                 isPlayerFinished = true;
             }
-            else if (option == UserOptions.FIVE) {//Finish turn
+            else if (option == UserOptions.FIVE) {
+                createSequence(player);
+                isPlayerPerformAnyChange = true;
+            }
+            else if (option == UserOptions.SIX) {//Finish turn
                 if (isPlayerPerformAnyChange) {
                     isPlayerFinished = true;
                 }

@@ -15,7 +15,8 @@ public interface IControllerInputOutput {
         TWO(2),
         THREE(3),
         FOUR(4),
-        FIVE(5);
+        FIVE(5),
+        SIX(6);
         
         private final int option;
         
@@ -42,6 +43,9 @@ public interface IControllerInputOutput {
                     break;
                 case 5:
                     res = FIVE;
+                    break;
+                case 6:
+                    res = SIX;
                     break;
                 default:
                     throw new InputMismatchException();

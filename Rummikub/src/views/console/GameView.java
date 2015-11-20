@@ -79,7 +79,8 @@ public class GameView {
         System.out.println("2. Add tile into the board");
         System.out.println("3. Move tile in the board");
         System.out.println("4. Take one tile from the deck");
-        System.out.println("5. Finish your turn");
+        System.out.println("5. Add sequence to the board");
+        System.out.println("6. Finish your turn");
     }
 
     public void showEndOfGameMenu() {
