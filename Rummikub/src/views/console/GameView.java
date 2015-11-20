@@ -28,13 +28,13 @@ public class GameView {
         this.scanner = new Scanner(System.in);
     }
 
-    public GameDetails getNewGameInput() {
-        //TODO: get new game input from the user an check input validity
-        //      Currently use a mock
-        List<PlayerDetails> playersDetails = new ArrayList<>();
-        playersDetails.add(new PlayerDetails(0, "player1", true));
-        playersDetails.add(new PlayerDetails(0, "player2", true));
-        return new GameDetails("Rummikub #1", playersDetails, null);
+    public GameDetails getNewGameInput(int minPlayersNum, int maxPlayersNum) {
+        int playersNumber = getPlayersNumber(minPlayersNum, maxPlayersNum);
+        int computerPlayersNumber = getComputerPlayersNumber(playersNumber);
+        String gameName = getGameName();
+        List<PlayerDetails> playersDetails = getPlayersDetails(playersNumber, computerPlayersNumber);
+        
+        return new GameDetails("Rummikub", playersDetails, null);
     }
 
     public void showWrongInputMessage() {
@@ -393,5 +393,126 @@ public class GameView {
     public void punishPlayerMessage(Player player) {
         System.out.println("Invalid sequence on the board.");
         System.out.println("Player " + player.getName() + " is punished!");
+    }
+
+    private int getPlayersNumber(int minPlayersNum, int maxPlayersNum) {
+        boolean isValid = false;
+        int playersNumber = 0;
+        
+        System.out.println("How many players are participating in the game?");
+        while(!isValid) {
+            System.out.print("Please choose a number between 2-4: ");
+            try{
+                playersNumber = scanner.nextInt();
+                if (playersNumber >= minPlayersNum && playersNumber <= maxPlayersNum) {
+                    isValid = true;
+                }
+                else {                    
+                    showWrongInputMessage();
+                }
+            }
+            catch(Exception e) {
+                showWrongInputMessage();
+            }
+        }
+        
+        return playersNumber;
+    }
+
+    private int getComputerPlayersNumber(int playersNumber) {
+        boolean isValid = false;
+        int compPlayersNum = 0;
+        
+        System.out.println("How many computer players are participating in the game?");
+        while(!isValid) {
+            System.out.print("Please choose a number between 0-" +  playersNumber + ": ");
+            try{
+                compPlayersNum = scanner.nextInt();
+                if (compPlayersNum >= 0 && compPlayersNum <= playersNumber) {
+                    isValid = true;
+                }
+                else {                    
+                    showWrongInputMessage();
+                }
+            }
+            catch(Exception e) {
+                showWrongInputMessage();
+            }
+        }
+        
+        return compPlayersNum;
+    }
+
+    private String getGameName() {
+        boolean isValid = false;
+        String gameName = "Game Name";//default value
+        
+        scanner.nextLine(); //throw away the \n not consumed by nextInt()
+        while(!isValid) {
+            System.out.print("Please enter the game name: ");
+            try{
+                gameName = scanner.nextLine();
+                if (!gameName.isEmpty()) {
+                    isValid = true;
+                }
+                else {
+                    showWrongInputMessage();
+                }
+            }
+            catch(Exception e) {
+                showWrongInputMessage();
+            }
+        }
+        
+        return gameName;
+    }
+
+    private List<PlayerDetails> getPlayersDetails(int playersNumber, int computerPlayersNumber) {
+        List<PlayerDetails> playersDetails = new ArrayList<>();
+        int currPlayerID;
+        String currPlayerName;
+        PlayerDetails currPlayerDetails;
+        int humanPlayerIndex = 0;
+        int humanPlayersNum = playersNumber - computerPlayersNumber;
+        
+        for (int i = 0; i < playersNumber; i++) {
+            //first create human players
+            if (humanPlayerIndex < humanPlayersNum) {
+                currPlayerName = getPlayerName(humanPlayerIndex);
+                currPlayerDetails = new PlayerDetails(0, currPlayerName, true);
+                humanPlayerIndex++;
+            } else {
+                //create computer player
+                currPlayerDetails = new PlayerDetails(0, "computer" + i, false);
+            }
+            
+            playersDetails.add(currPlayerDetails);
+        }
+        
+        return playersDetails;
+    }
+
+    private String getPlayerName(int playerIndex) {
+        boolean isValid = false;
+        int playerValue = (playerIndex + 1);
+        String playerName = "Player #" + playerValue;//Default player name
+        
+        while (!isValid) {
+            System.out.print("Please enter the name of human player #" + playerValue + ": ");
+            try{
+                playerName = scanner.nextLine();
+                if (!playerName.isEmpty()) {
+                    isValid = true;
+                }
+                else {
+                    showWrongInputMessage();
+                }
+            }
+            catch (Exception e) {
+                showWrongInputMessage();
+            }
+        }   
+        
+        return playerName;
     }
 }

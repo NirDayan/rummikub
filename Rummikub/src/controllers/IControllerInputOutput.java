@@ -55,7 +55,7 @@ public interface IControllerInputOutput {
         }
     }
     
-    public GameDetails getNewGameInput();
+    public GameDetails getNewGameInput(int minPlayersNum, int maxPlayersNum);
     
     public void showWrongInputMessage();
     

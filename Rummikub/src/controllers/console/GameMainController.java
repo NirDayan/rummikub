@@ -15,7 +15,9 @@ import logic.persistency.FileDetails;
 import logic.persistency.GamePersistency;
 
 public class GameMainController {
-    private final int MAX_PLAYERS_NUM = 4;
+    private static final int MAX_PLAYERS_NUM = 4;
+    private static final int MIN_PLAYERS_NUM = 2;
+    private static final String COMPUTER_NAME_PREFIX = "Computer #";
     private final IControllerInputOutput inputOutputController;
     private Game game;
     private boolean isPersisted;
@@ -93,9 +95,10 @@ public class GameMainController {
         boolean isGameInitialized = false;
         
         while (!isGameInitialized) {
-            GameDetails initialUserInput = inputOutputController.getNewGameInput();
+            GameDetails initialUserInput = inputOutputController.getNewGameInput(MIN_PLAYERS_NUM, MAX_PLAYERS_NUM);
             if (isGameInputValid(initialUserInput)) {
                 generateIDsForPlayers(initialUserInput);
+                generateComputerPlayersNames(initialUserInput);
                 game = new Game(initialUserInput);
                 game.reset();
                 isGameInitialized = true;
@@ -106,7 +109,7 @@ public class GameMainController {
         }
     }
     
-    private boolean isGameInputValid(GameDetails input) {
+    private boolean isGameInputValid(GameDetails input) {        
         if (input.getTotalPlayersNumber() < 2 || input.getTotalPlayersNumber() > MAX_PLAYERS_NUM) {
             return false;
         }
@@ -296,5 +299,15 @@ public class GameMainController {
         for (PlayerDetails playerDetails : gameDetails.getPlayersDetails()) {
             playerDetails.setID(nextPlayerID++);
         }        
+    }
+    
+    private void generateComputerPlayersNames(GameDetails gameDetails) {
+        int computerPlayerIndex = 0;
+        for (PlayerDetails playerDetails : gameDetails.getPlayersDetails()) {
+            if (!playerDetails.isHuman()) {
+                 playerDetails.setName(COMPUTER_NAME_PREFIX + (computerPlayerIndex + 1));
+                 computerPlayerIndex++;
+            }            
+        }
     }
 }

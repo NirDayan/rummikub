@@ -39,7 +39,6 @@ public class GameDetails {
         for (PlayerDetails p : playersDetails) {
             names.add(p.getName());
         }
-//        getPlayersDetails().stream().forEach(p -> names.add(p.name));
         return names;
     }
 

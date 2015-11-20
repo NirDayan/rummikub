@@ -23,8 +23,8 @@ public class InputOutputController implements IControllerInputOutput {
     }
 
     @Override
-    public GameDetails getNewGameInput() {
-        return view.getNewGameInput();
+    public GameDetails getNewGameInput(int minPlayersNum, int maxPlayersNum) {
+        return view.getNewGameInput(minPlayersNum, maxPlayersNum);
     }
     
     @Override
