@@ -11,8 +11,7 @@ public class Game {
     private final Board board;
     private Player currentPlayer;
     private Player winner;
-    private String savedFilePath;
-    private static int nextPlayerID = 1;
+    private String savedFilePath;    
     private static final String COMPUTER_NAME_PREFIX = "Computer#";
     private static final int INITIAL_TILES_COUNT = 14;
     private static final int PUNISH_TILES_NUMBER = 3;
@@ -208,10 +207,6 @@ public class Game {
 
     private boolean isFirstSequenceValid(Sequence sequence) {
         return (sequence.getValueSum() >= MINIMUM_SUM_SEQUENCE_VALUE_FOR_FIRST_STEP);
-    }
-
-    private int generatePlayerId() {
-        return (nextPlayerID)++;
     }
 
     private Player getPlayerByID(int playerID) {

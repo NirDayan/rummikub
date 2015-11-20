@@ -18,7 +18,7 @@ public class GameDetails {
         this.playersDetails = playerDetails;
         humenPlayersNum=0; computerPlayersNum=0;
         for (PlayerDetails details : playerDetails){
-            if (details.isHuman)
+            if (details.isHuman())
                 humenPlayersNum++;
             else
                 computerPlayersNum++;
@@ -36,7 +36,10 @@ public class GameDetails {
     
     public List<String> getPlayersNames() {
         List<String> names = new ArrayList<>();
-        getPlayersDetails().stream().forEach(p -> names.add(p.name));
+        for (PlayerDetails p : playersDetails) {
+            names.add(p.getName());
+        }
+//        getPlayersDetails().stream().forEach(p -> names.add(p.name));
         return names;
     }
 
@@ -56,7 +59,7 @@ public class GameDetails {
         this.gameName = gameName;
     }
 
-    public void setComputerPlayersNum(int computerPlayersNum) {
+        public void setComputerPlayersNum(int computerPlayersNum) {
         this.computerPlayersNum = computerPlayersNum;
     }
 

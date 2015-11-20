@@ -41,11 +41,11 @@ public class Player {
     }
 
     public String getName() {
-        return details.name;
+        return details.getName();
     }
 
     public int getID() {
-        return details.ID;
+        return details.getID();
     }
 
     public void reset() {
@@ -108,6 +108,6 @@ public class Player {
     }
     
     public boolean isHuman(){
-        return details.isHuman;
+        return details.isHuman();
     }
 }

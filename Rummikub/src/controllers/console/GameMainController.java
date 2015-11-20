@@ -10,6 +10,7 @@ import logic.Game;
 import logic.GameDetails;
 import logic.MoveTileData;
 import logic.Player;
+import logic.PlayerDetails;
 import logic.persistency.FileDetails;
 import logic.persistency.GamePersistency;
 
@@ -18,6 +19,7 @@ public class GameMainController {
     private final IControllerInputOutput inputOutputController;
     private Game game;
     private boolean isPersisted;
+    private static int nextPlayerID = 1;
     
     public GameMainController(IControllerInputOutput inputOutputController) {
         this.inputOutputController = inputOutputController;
@@ -93,6 +95,7 @@ public class GameMainController {
         while (!isGameInitialized) {
             GameDetails initialUserInput = inputOutputController.getNewGameInput();
             if (isGameInputValid(initialUserInput)) {
+                generateIDsForPlayers(initialUserInput);
                 game = new Game(initialUserInput);
                 game.reset();
                 isGameInitialized = true;
@@ -282,5 +285,11 @@ public class GameMainController {
         if (fileDetails.isNewFile()) {
             game.setSavedFilePath(fileDetails.getFolderPath() + "\\" + fileDetails.getFileName() + ".xml");
         }
+    }
+
+    private void generateIDsForPlayers(GameDetails gameDetails) {
+        for (PlayerDetails playerDetails : gameDetails.getPlayersDetails()) {
+            playerDetails.setID(nextPlayerID++);
+        }        
     }
 }
