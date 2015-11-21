@@ -88,8 +88,8 @@ public class InputOutputController implements IControllerInputOutput {
     }
 
     @Override
-    public UserOptions askUserFirstSequenceAvailable(Player player) {
-        return view.askUserFirstSequenceAvailable(player);
+    public void askUserFirstSequenceAvailable(Player player) {
+        view.askUserFirstSequenceAvailable(player);
     }
 
     @Override

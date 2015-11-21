@@ -270,12 +270,19 @@ public class GameMainController {
         UserOptions option;
         
         inputOutputController.showGameStatus(game.getBoard(), player);
-        option = inputOutputController.askUserFirstSequenceAvailable(player);
+        inputOutputController.askUserFirstSequenceAvailable(player);
+        if (player.isHuman()) {
+            option = inputOutputController.askUserChooseOption(options);
+        }
+        else {
+            option = UserOptions.THREE;
+        }
+        
         if (option == UserOptions.ONE) {//Resign            
             game.playerResign(player.getID());            
         }
         
-        else if(option == UserOptions.TWO) {
+        else if(option == UserOptions.TWO) {//Put the first sequence
             if (createSequence(player)) {
                 player.setFirstStepCompleted(true);
             }
@@ -283,7 +290,7 @@ public class GameMainController {
                 punishPlayer(player);
             }
         }
-        else {
+        else {//Take one tile from the deck
             game.pullTileFromDeck(player.getID());
         }
     }

@@ -339,18 +339,11 @@ public class GameView {
         return result;
     }
 
-    public UserOptions askUserFirstSequenceAvailable(Player player) {
+    public void askUserFirstSequenceAvailable(Player player) {
         System.out.println("What would you like to do?");
         System.out.println("1. Resign from the game");
         System.out.println("2. Create your first sequence and start play!");
         System.out.println("3. Take one tile from the deck");
-
-        ArrayList<Integer> options = new ArrayList<>();
-        options.add(UserOptions.ONE.getOption());
-        options.add(UserOptions.TWO.getOption());
-        options.add(UserOptions.THREE.getOption());
-
-        return askUserChooseOption(options);
     }
 
     public List<Integer> getOrderedTileIndicesForSequence(Player player) {
