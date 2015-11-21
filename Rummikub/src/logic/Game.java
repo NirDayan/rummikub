@@ -11,7 +11,7 @@ public class Game {
     private final Board board;
     private Player currentPlayer;
     private Player winner;
-    private String savedFilePath;    
+    private String savedFilePath;
     private static final String COMPUTER_NAME_PREFIX = "Computer#";
     private static final int INITIAL_TILES_COUNT = 14;
     private static final int PUNISH_TILES_NUMBER = 3;
@@ -182,6 +182,7 @@ public class Game {
 
     /**
      * player creates a new sequence on the board.
+     *
      * @param playerID
      * @param tilesIndices
      * @return true if a new sequence was created, false otherwise
@@ -192,6 +193,14 @@ public class Game {
             return false;
 
         return createSequenceFromTileIndices(player, tilesIndices);
+    }
+
+    public boolean createSequenceByTilesList(int playerID, List<Tile> tiles) {
+        Player player = getPlayerByID(playerID);
+        if (player == null || tiles == null)
+            return false;
+
+        return createSequenceFromTilesList(player, tiles);
     }
 
     private boolean createSequenceFromTileIndices(Player player, List<Integer> tilesIndices) {
@@ -205,7 +214,23 @@ public class Game {
         if (player.isFirstStep() && !isFirstSequenceValid(sequence))
             return false;
 
-        player.removeTiles(tilesIndices);
+        player.removeTilesByIndices(tilesIndices);
+        board.addSequence(sequence);
+
+        return true;
+    }
+
+    private boolean createSequenceFromTilesList(Player player, List<Tile> tiles) {
+        if (tiles == null)
+            return false;
+
+        Sequence sequence = new Sequence(tiles);
+        if (!sequence.isValid())
+            return false;
+        if (player.isFirstStep() && !isFirstSequenceValid(sequence))
+            return false;
+
+        player.removeTiles(tiles);
         board.addSequence(sequence);
 
         return true;

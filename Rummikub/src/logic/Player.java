@@ -87,7 +87,7 @@ public class Player {
         return list;
     }
 
-    public void removeTiles(List<Integer> tilesIndices) {
+    public void removeTilesByIndices(List<Integer> tilesIndices) {
         if (tilesIndices != null) {
             List<Tile> tilesToRemove = new ArrayList<>();
             for (Integer index : tilesIndices) {
@@ -95,6 +95,10 @@ public class Player {
             }
             tiles.removeAll(tilesToRemove);
         }
+    }
+    
+    public void removeTiles(List<Tile> tilesToRemove) {
+        tiles.removeAll(tilesToRemove);
     }
 
     private boolean isTileIndicesValid(List<Integer> tilesIndices) {

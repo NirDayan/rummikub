@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import logic.ComputerAI;
 import logic.Game;
 import logic.GameDetails;
 import logic.MoveTileData;
@@ -13,6 +14,7 @@ import logic.Player;
 import logic.PlayerDetails;
 import logic.persistency.FileDetails;
 import logic.persistency.GamePersistency;
+import logic.tile.Tile;
 
 public class GameMainController {
     private static final int MAX_PLAYERS_NUM = 4;
@@ -22,26 +24,28 @@ public class GameMainController {
     private Game game;
     private boolean isPersisted;
     private static int nextPlayerID = 1;
-    
+    private final ComputerAI computerAI;
+
     public GameMainController(IControllerInputOutput inputOutputController) {
         this.inputOutputController = inputOutputController;
         this.isPersisted = false;
+        this.computerAI = new ComputerAI();
     }
-    
+
     public void start() {
         boolean exitGame = false;
-        
+
         createNewGame();
         while (!exitGame) {
             playGame(game);
             exitGame = startNewGameOrExit();
         }
     }
-    
+
     public Game createGameFromXML(String xmlPath) throws Exception {
         return GamePersistency.load(xmlPath);
     }
-    
+
     private void createNewGame() {
         boolean isInputValid = false;
         while (!isInputValid) {
@@ -71,10 +75,10 @@ public class GameMainController {
         options.add(IControllerInputOutput.UserOptions.ONE.getOption());
         options.add(IControllerInputOutput.UserOptions.TWO.getOption());
         options.add(IControllerInputOutput.UserOptions.THREE.getOption());
-        
+
         inputOutputController.showEndOfGameMenu();
         IControllerInputOutput.UserOptions option = inputOutputController.askUserChooseOption(options);
-        
+
         if (option == IControllerInputOutput.UserOptions.ONE) {
             replayGame();
             return false;
@@ -83,17 +87,17 @@ public class GameMainController {
             createNewGame();
             return false;
         }
-        
+
         return true;
     }
-    
+
     private void replayGame() {
         game.reset();
     }
-    
+
     private void createGameFromUserInput() {
         boolean isGameInitialized = false;
-        
+
         while (!isGameInitialized) {
             GameDetails initialUserInput = inputOutputController.getNewGameInput(MIN_PLAYERS_NUM, MAX_PLAYERS_NUM);
             if (isGameInputValid(initialUserInput)) {
@@ -108,8 +112,8 @@ public class GameMainController {
             }
         }
     }
-    
-    private boolean isGameInputValid(GameDetails input) {        
+
+    private boolean isGameInputValid(GameDetails input) {
         if (input.getTotalPlayersNumber() < 2 || input.getTotalPlayersNumber() > MAX_PLAYERS_NUM) {
             return false;
         }
@@ -118,10 +122,10 @@ public class GameMainController {
         }
         if (!checkPlayersNameValidity(input.getPlayersNames()))
             return false;
-        
+
         return true;
     }
-    
+
     public static boolean checkPlayersNameValidity(List<String> playersNames) {
         for (String name : playersNames) {
             if (name.isEmpty()) {
@@ -135,7 +139,7 @@ public class GameMainController {
         }
         return true;
     }
-    
+
     private void playGame(Game game) {
         Player currentPlayer;
         while (!game.checkIsGameOver()) {
@@ -148,11 +152,11 @@ public class GameMainController {
         }
         inputOutputController.showEndOfGame(game.getWinner());
     }
-    
+
     private void handleGameSaving(Player player) {
         FileDetails fileDetails;
         boolean isInputValid = false;
-        
+
         while (!isInputValid) {
             fileDetails = inputOutputController.askUserToSaveGame(isPersisted, player);
             if (fileDetails != null) {
@@ -169,7 +173,7 @@ public class GameMainController {
                 isInputValid = true;
         }
     }
-    
+
     private void performPlayerGameRound(Player player) {
         if (player.isHuman()) {
             handleGameSaving(player);
@@ -181,7 +185,7 @@ public class GameMainController {
             performPlayerStep(player);
         }
     }
-    
+
     private void performPlayerStep(Player player) {
         ArrayList<Integer> options = new ArrayList<>();
         options.add(IControllerInputOutput.UserOptions.ONE.getOption());
@@ -194,10 +198,25 @@ public class GameMainController {
         boolean isPlayerFinished = false;
         boolean isPlayerPerformAnyChange = false;
         boolean isBackupNeeded = true;
-        
+        List<Tile> computerSequence = null;
+
         do {
-            option = getPlayerOption(player, options);
-            
+            if (player.isHuman()) {
+                option = getPlayerOption(player, options);
+            }
+            else {
+                computerSequence = computerAI.getRelevantTiles(player.getTiles());
+                if (computerSequence != null) {
+                    option = UserOptions.FIVE; //Create a new sequence
+                }
+                else if (isPlayerPerformAnyChange) {
+                    option = UserOptions.SIX; //Finish turn
+                }
+                else {
+                    option = UserOptions.FOUR; // Take Tile From Deck
+                }
+            }
+
             if (option == UserOptions.ONE) {//Resign                
                 handlePlayerResign(player);
                 isPlayerFinished = true;
@@ -221,12 +240,17 @@ public class GameMainController {
                 else {
                     handlePlayerTakeTileFromDeck(player);
                     isPlayerFinished = true;
-                }                
+                }
             }
-            else if (option == UserOptions.FIVE) {//Create a new dquence
+            else if (option == UserOptions.FIVE) {//Create a new sequence
                 backupTurn(player, isBackupNeeded);
                 isBackupNeeded = false;
-                createSequence(player);
+                if (player.isHuman()) {
+                    createSequence(player);
+                }
+                else {
+                    game.createSequenceByTilesList(player.getID(), computerSequence);
+                }
                 inputOutputController.showGameStatus(game.getBoard(), player);
                 isPlayerPerformAnyChange = true;
             }
@@ -235,7 +259,7 @@ public class GameMainController {
             }
         } while (!isPlayerFinished);
     }
-    
+
     private boolean handleAddTile(Player player) {
         boolean isValid = false;
         MoveTileData addTileData;
@@ -247,10 +271,10 @@ public class GameMainController {
                 inputOutputController.showWrongInputMessage();
             }
         }
-        
+
         return isValid;
     }
-    
+
     private boolean handleMoveTile(Player player) {
         boolean isValid = false;
         MoveTileData moveTileData;
@@ -262,35 +286,50 @@ public class GameMainController {
                 inputOutputController.showWrongInputMessage();
             }
         }
-        
+
         return isValid;
     }
-    
+
     private void performFirstStep(Player player) {
         ArrayList<Integer> options = new ArrayList<>();
         options.add(IControllerInputOutput.UserOptions.ONE.getOption());
         options.add(IControllerInputOutput.UserOptions.TWO.getOption());
         options.add(IControllerInputOutput.UserOptions.THREE.getOption());
         UserOptions option;
-        
+        List<Tile> computerSequence = null;
+
         inputOutputController.showGameStatus(game.getBoard(), player);
         inputOutputController.askUserFirstSequenceAvailable(player);
         if (player.isHuman()) {
             option = inputOutputController.askUserChooseOption(options);
         }
         else {
-            option = UserOptions.THREE;
+            computerSequence = computerAI.getRelevantTiles(player.getTiles());
+            if (computerSequence != null) {
+                option = UserOptions.TWO;
+            }
+            else {
+                option = UserOptions.THREE;
+            }
         }
-        
+
         if (option == UserOptions.ONE) {//Resign            
             handlePlayerResign(player);
         }
-        
-        else if(option == UserOptions.TWO) {//Put the first sequence
+
+        else if (option == UserOptions.TWO) {//Put the first sequence
             //If the user creates a wrong sequence, the board won't be changed, so we don't need to restore it
-            if (createSequence(player)) {
+            if (player.isHuman()) {
+                if (createSequence(player)) {
+                    player.setFirstStepCompleted(true);
+                    inputOutputController.showGameStatus(game.getBoard(), player);
+                }
+                else {
+                    punishPlayer(player);
+                }
+            }
+            else if (game.createSequenceByTilesList(player.getID(), computerSequence)) {
                 player.setFirstStepCompleted(true);
-                inputOutputController.showGameStatus(game.getBoard(), player);
             }
             else {
                 punishPlayer(player);
@@ -300,18 +339,18 @@ public class GameMainController {
             handlePlayerTakeTileFromDeck(player);
         }
     }
-    
+
     private boolean createSequence(Player player) {
         List<Integer> tilesIndices = inputOutputController.getOrderedTileIndicesForSequence(player);
-        
+
         return game.createSequence(player.getID(), tilesIndices);
     }
-    
+
     private void punishPlayer(Player player) {
         inputOutputController.punishPlayerMessage(player);
         game.punishPlayer(player.getID());
     }
-    
+
     private void setLastSavedFilePath(FileDetails fileDetails) {
         if (fileDetails.isNewFile()) {
             game.setSavedFilePath(fileDetails.getFolderPath() + "\\" + fileDetails.getFileName() + ".xml");
@@ -321,16 +360,16 @@ public class GameMainController {
     private void generateIDsForPlayers(GameDetails gameDetails) {
         for (PlayerDetails playerDetails : gameDetails.getPlayersDetails()) {
             playerDetails.setID(nextPlayerID++);
-        }        
+        }
     }
-    
+
     private void generateComputerPlayersNames(GameDetails gameDetails) {
         int computerPlayerIndex = 0;
         for (PlayerDetails playerDetails : gameDetails.getPlayersDetails()) {
             if (!playerDetails.isHuman()) {
-                 playerDetails.setName(COMPUTER_NAME_PREFIX + (computerPlayerIndex + 1));
-                 computerPlayerIndex++;
-            }            
+                playerDetails.setName(COMPUTER_NAME_PREFIX + (computerPlayerIndex + 1));
+                computerPlayerIndex++;
+            }
         }
     }
 
@@ -338,7 +377,7 @@ public class GameMainController {
         game.pullTileFromDeck(player.getID());
         inputOutputController.announcePlayerTakeTileFromDeck(player);
     }
-    
+
     private void backupTurn(Player player, boolean isBackupNeeded) {
         if (isBackupNeeded) {
             game.getBoard().storeBackup();
@@ -348,14 +387,14 @@ public class GameMainController {
 
     private UserOptions getPlayerOption(Player player, ArrayList<Integer> options) {
         inputOutputController.showGameStatus(game.getBoard(), player);
-            inputOutputController.showUserActionsMenu(player);
-            if (player.isHuman()) {
-                return inputOutputController.askUserChooseOption(options);
-            }
-            else {
-                //TODO: implement ComputerPlayer actions
-                return UserOptions.ONE;
-            }
+        inputOutputController.showUserActionsMenu(player);
+        if (player.isHuman()) {
+            return inputOutputController.askUserChooseOption(options);
+        }
+        else {
+            //TODO: implement ComputerPlayer actions
+            return UserOptions.ONE;
+        }
     }
 
     private void handlePlayerResign(Player player) {

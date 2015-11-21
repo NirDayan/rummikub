@@ -7,8 +7,9 @@ class SequenceValidator {
 
     private List<Tile> tileList;
     private Color sequnceColor;
-    private int valueIndex;
+    private int currValue;
     private ListIterator<Tile> iterator;
+    private int jokerCounter;
 
     public SequenceValidator(List tileList) {
         this.tileList = tileList;
@@ -24,20 +25,23 @@ class SequenceValidator {
     }
 
     private boolean validateSameValues() {
-        initIteratorAndValueIndex(tileList.listIterator(), -1);
+        initIteratorAndCurrValue(tileList.listIterator(), -1);
         List unusedColors = Color.getColorsList();
-        int jokerCounter = 0;
+        jokerCounter = 0;
         while (iterator.hasNext()) {
             Tile tile = iterator.next();
 
             if (tile.isJoker()) {
                 jokerCounter++;
-            } else if (valueIndex == -1) {
-                setValueIndexAndSeqColor(tile);
+            }
+            else if (currValue == -1) {
+                setCurrValueAndSeqColor(tile);
                 unusedColors.remove(tile.getColor());
-            } else if (!isTileSameValueAndUnusedColor(unusedColors, tile)) {
+            }
+            else if (!isTileSameValueAndUnusedColor(unusedColors, tile)) {
                 return false;
-            } else {
+            }
+            else {
                 unusedColors.remove(tile.getColor());
             }
         }
@@ -45,7 +49,9 @@ class SequenceValidator {
     }
 
     private boolean validateValuesAscending() {
-        initIteratorAndValueIndex(tileList.listIterator(), -1);
+        initIteratorAndCurrValue(tileList.listIterator(), -1);
+        jokerCounter = 0;
+
         while (iterator.hasNext()) {
             Tile tile = iterator.next();
 
@@ -56,8 +62,11 @@ class SequenceValidator {
         return true;
     }
 
+    //Same logic as Ascending by iterating the sequecne backwards.
     private boolean validateValuesDescending() {
-        initIteratorAndValueIndex(tileList.listIterator(tileList.size()), -1);
+        initIteratorAndCurrValue(tileList.listIterator(tileList.size()), -1);
+        jokerCounter = 0;
+
         while (iterator.hasPrevious()) {
             Tile tile = iterator.previous();
 
@@ -68,9 +77,9 @@ class SequenceValidator {
         return true;
     }
 
-    private void initIteratorAndValueIndex(ListIterator<Tile> iterator, int valueIndex) {
+    private void initIteratorAndCurrValue(ListIterator<Tile> iterator, int valueIndex) {
         this.iterator = iterator;
-        this.valueIndex = valueIndex;
+        this.currValue = valueIndex;
     }
 
     private boolean isTileInStraightOrder(Tile tile) {
@@ -78,33 +87,45 @@ class SequenceValidator {
             if (!isNormalTileInStraight(tile)) {
                 return false;
             }
-        } else if (valueIndex != -1) {
-            valueIndex++;
+        }
+        else {
+            jokerCounter++;
+            if (currValue != -1) {
+                if (currValue == 13) {
+                    return false;
+                }
+                currValue++;
+            }
         }
         return true;
     }
 
     private boolean isNormalTileInStraight(Tile tile) {
-        if (valueIndex == -1) {
-            setValueIndexAndSeqColor(tile);
+        if (currValue == -1) {
+            setCurrValueAndSeqColor(tile);
             return true;
         }
-        if (tile.getColor() != sequnceColor
-                || tile.getValue() != valueIndex + 1) {
+        else if (currValue == 1 && jokerCounter > 0) {
             return false;
         }
-        valueIndex++;
-        return true;
+        else if (tile.getColor() != sequnceColor
+                || tile.getValue() != currValue + 1) {
+            return false;
+        }
+        else {
+            currValue++;
+            return true;
+        }
     }
 
-    private void setValueIndexAndSeqColor(Tile tile) {
+    private void setCurrValueAndSeqColor(Tile tile) {
         //init value Index and sequenceColor
-        valueIndex = tile.getValue();
+        currValue = tile.getValue();
         sequnceColor = tile.getColor();
     }
 
     private boolean isTileSameValueAndUnusedColor(List unusedColors, Tile tile) {
-        return tile.getValue() == valueIndex
+        return tile.getValue() == currValue
                 && unusedColors.contains(tile.getColor());
     }
 }
