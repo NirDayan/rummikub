@@ -225,7 +225,11 @@ public class GameView {
         printBoard(board);
         System.out.println("------- Board end -------");
     }
-
+    
+    public void announcePlayerResigned(Player player) {
+        System.out.println("Player " + player.getName() + " chose to resign from game.");
+    }
+    
     private void printTiles(List<Tile> tiles) {
         for (int i = 0; i < tiles.size(); i++) {
             System.out.print("[#" + i + "]: ");
@@ -383,6 +387,37 @@ public class GameView {
     public void punishPlayerMessage(Player player) {
         System.out.println("Invalid sequence on the board.");
         System.out.println("Player " + player.getName() + " is punished!");
+    }
+    
+    public void playerTryToAddTileToBoard(Player player, MoveTileData addTileData) {
+        System.out.println("Player " + player.getName() + " is tring to add tile: ");
+        System.out.println("index: " + addTileData.getSourceSequencePosition() + " from his hand into ");
+        System.out.println("board index: " + addTileData.getTargetSequenceIndex()+ ", board position: " +
+                addTileData.getTargetSequencePosition());
+    }
+    
+    public void announcePlayerTakeTileFromDeck(Player player) {
+        System.out.println("Player " + player.getName() + " took one tile from the deck.");
+    }
+
+    public void announcePlayerFinishTurn(Player player) {
+        System.out.println("Player " + player.getName() + " chose to finish his turn.");
+    }
+
+    public void showPlayerCantTakeTileAfterChange(Player player) {
+        System.out.println("Player " + player.getName() +
+                " already performed change in the board, so you can't take tile from deck.");
+    }
+    
+    public void playerTryToMoveTile(Player player, MoveTileData moveTileData) {
+        System.out.println("Player " + player.getName() + " is tring to move tile: ");
+        System.out.println("from index: " + moveTileData.getSourceSequenceIndex()+ ", position: " + moveTileData.getSourceSequencePosition());
+        System.out.println("to index: " + moveTileData.getTargetSequenceIndex()+ ", position: " +
+                moveTileData.getTargetSequencePosition());
+    }
+    
+    public void announceWrongBoard(Player player) {
+        System.out.println("Player " + player.getName() + " caused the board to be invalid!");
     }
 
     private int getPlayersNumber(int minPlayersNum, int maxPlayersNum) {

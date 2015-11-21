@@ -83,6 +83,15 @@ public class Sequence {
         return tiles;
     }
     
+    @Override
+    public Sequence clone() {
+        List<Tile> result = new ArrayList<>(tiles.size());
+        for (Tile tile : tiles) {
+            result.add(tile.clone());
+        }
+        return new Sequence(result);
+    }
+    
     //Use this function with the assumption the sequence is Valid
     private boolean isSameValue() {
         Map<Color, Integer> mapColors = new HashMap<>();

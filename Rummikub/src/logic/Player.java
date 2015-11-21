@@ -7,7 +7,8 @@ import logic.tile.Tile;
 public class Player {
 
     private final PlayerDetails details;
-    private final ArrayList<Tile> tiles;
+    private ArrayList<Tile> tiles;
+    private ArrayList<Tile> backupTiles;
     private boolean isResign;
     private boolean isFirstStep;
 
@@ -51,6 +52,7 @@ public class Player {
     public void reset() {
         tiles.clear();
         isResign = false;
+        isFirstStep = true;
     }
 
     public ArrayList<Tile> getTiles() {
@@ -109,5 +111,18 @@ public class Player {
     
     public boolean isHuman(){
         return details.isHuman();
+    }
+
+    public void storeBackup() {
+        backupTiles = new ArrayList<>(tiles.size());
+        for (Tile tile : tiles) {
+            backupTiles.add(tile.clone());
+        }
+    }
+    
+    public void restoreFromBackup() {
+        if (backupTiles != null) {
+            tiles = backupTiles;
+        }        
     }
 }

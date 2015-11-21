@@ -10,3 +10,4 @@ Assumptions:
 4. Joker is counted as the tile it replace in the first added sequence.
 5. If player chooses to resign from the game, his tiles are staying with him and don't return back to the game.
 6. If player creates a wrong sequence on his first step, he will be punished by taking 3 tiles from the deck.
+7. If player performed any change on the board, he can't take tile from deck on the same step.

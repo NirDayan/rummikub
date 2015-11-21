@@ -101,4 +101,39 @@ public class InputOutputController implements IControllerInputOutput {
     public void punishPlayerMessage(Player player) {
         view.punishPlayerMessage(player);
     }
+    
+    @Override
+    public void announcePlayerResigned(Player player) {
+        view.announcePlayerResigned(player);
+    }
+
+    @Override
+    public void playerTryToAddTileToBoard(Player player, MoveTileData addTileData) {
+        view.playerTryToAddTileToBoard(player, addTileData);
+    }
+
+    @Override
+    public void playerTryToMoveTile(Player player, MoveTileData moveTileData) {
+        view.playerTryToMoveTile(player, moveTileData);
+    }
+
+    @Override
+    public void announcePlayerTakeTileFromDeck(Player player) {
+        view.announcePlayerTakeTileFromDeck(player);
+    }
+
+    @Override
+    public void announcePlayerFinishTurn(Player player) {
+        view.announcePlayerFinishTurn(player);
+    }
+
+    @Override
+    public void showPlayerCantTakeTileAfterChange(Player player) {
+        view.showPlayerCantTakeTileAfterChange(player);
+    }
+
+    @Override
+    public void announceWrongBoard(Player player) {
+        view.announceWrongBoard(player);
+    }
 }

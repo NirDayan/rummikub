@@ -88,4 +88,18 @@ public interface IControllerInputOutput {
     public List<Integer> getOrderedTileIndicesForSequence(Player player);
     
     public void punishPlayerMessage(Player player);
+    
+    public void announcePlayerResigned(Player player);
+    
+    public void playerTryToAddTileToBoard(Player player, MoveTileData addTileData);
+    
+    public void playerTryToMoveTile(Player player, MoveTileData moveTileData);
+    
+    public void announcePlayerTakeTileFromDeck(Player player);
+    
+    public void announcePlayerFinishTurn(Player player);
+    
+    public void showPlayerCantTakeTileAfterChange(Player player);
+    
+    public void announceWrongBoard(Player player);
 }

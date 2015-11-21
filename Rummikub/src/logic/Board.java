@@ -13,6 +13,9 @@ import logic.tile.Tile;
 public class Board {
 
     private List<Sequence> sequencesArray;
+    //This member is required when the user performs his step and the board is not valid,
+    //So we need to restore the board to the last valid state
+    private List<Sequence> sequencesArrayBackup;
 
     Board() {
         reset();
@@ -140,5 +143,18 @@ public class Board {
         sequencesArray.add(newSequence);
 
         return true;
+    }
+
+    public void storeBackup() {
+        sequencesArrayBackup = new ArrayList<>(sequencesArray.size());
+        for (Sequence sequence : sequencesArray) {
+            sequencesArrayBackup.add(sequence.clone());
+        }
+    }
+    
+    public void restoreFromBackup() {
+        if (sequencesArrayBackup != null) {
+            sequencesArray = sequencesArrayBackup;
+        }
     }
 }

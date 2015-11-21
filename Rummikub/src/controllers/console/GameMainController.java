@@ -193,43 +193,45 @@ public class GameMainController {
         UserOptions option;
         boolean isPlayerFinished = false;
         boolean isPlayerPerformAnyChange = false;
+        boolean isBackupNeeded = true;
         
         do {
-            inputOutputController.showGameStatus(game.getBoard(), player);
-            inputOutputController.showUserActionsMenu(player);
-            if (player.isHuman()) {
-                option = inputOutputController.askUserChooseOption(options);
-            }
-            else {
-                //TODO: implement ComputerPlayer actions
-                option = UserOptions.ONE;
-            }
+            option = getPlayerOption(player, options);
             
             if (option == UserOptions.ONE) {//Resign                
-                game.playerResign(player.getID());
+                handlePlayerResign(player);
                 isPlayerFinished = true;
             }
             else if (option == UserOptions.TWO) {//Add tile into the board
+                backupTurn(player, isBackupNeeded);
+                isBackupNeeded = false;
                 isPlayerPerformAnyChange = handleAddTile(player);
+                inputOutputController.showGameStatus(game.getBoard(), player);
             }
             else if (option == UserOptions.THREE) {//Move tile in the board
+                backupTurn(player, isBackupNeeded);
+                isBackupNeeded = false;
                 isPlayerPerformAnyChange = handleMoveTile(player);
+                inputOutputController.showGameStatus(game.getBoard(), player);
             }
             else if (option == UserOptions.FOUR) {//Take one tile from the deck
-                game.pullTileFromDeck(player.getID());
-                isPlayerFinished = true;
+                if (isPlayerPerformAnyChange) {
+                    inputOutputController.showPlayerCantTakeTileAfterChange(player);
+                }
+                else {
+                    handlePlayerTakeTileFromDeck(player);
+                    isPlayerFinished = true;
+                }                
             }
-            else if (option == UserOptions.FIVE) {
+            else if (option == UserOptions.FIVE) {//Create a new dquence
+                backupTurn(player, isBackupNeeded);
+                isBackupNeeded = false;
                 createSequence(player);
+                inputOutputController.showGameStatus(game.getBoard(), player);
                 isPlayerPerformAnyChange = true;
             }
             else if (option == UserOptions.SIX) {//Finish turn
-                if (isPlayerPerformAnyChange) {
-                    isPlayerFinished = true;
-                }
-                else {
-                    inputOutputController.showFinishTurnWithoutAction();
-                }
+                isPlayerFinished = handlePlayerFinishTurn(player, isPlayerPerformAnyChange);
             }
         } while (!isPlayerFinished);
     }
@@ -239,6 +241,7 @@ public class GameMainController {
         MoveTileData addTileData;
         while (!isValid) {
             addTileData = inputOutputController.getAddTileData();
+            inputOutputController.playerTryToAddTileToBoard(player, addTileData);
             isValid = game.addTile(player.getID(), addTileData);
             if (!isValid) {
                 inputOutputController.showWrongInputMessage();
@@ -253,6 +256,7 @@ public class GameMainController {
         MoveTileData moveTileData;
         while (!isValid) {
             moveTileData = inputOutputController.getMoveTileData();
+            inputOutputController.playerTryToMoveTile(player, moveTileData);
             isValid = game.moveTile(moveTileData);
             if (!isValid) {
                 inputOutputController.showWrongInputMessage();
@@ -279,19 +283,21 @@ public class GameMainController {
         }
         
         if (option == UserOptions.ONE) {//Resign            
-            game.playerResign(player.getID());            
+            handlePlayerResign(player);
         }
         
         else if(option == UserOptions.TWO) {//Put the first sequence
+            //If the user creates a wrong sequence, the board won't be changed, so we don't need to restore it
             if (createSequence(player)) {
                 player.setFirstStepCompleted(true);
+                inputOutputController.showGameStatus(game.getBoard(), player);
             }
             else {
                 punishPlayer(player);
             }
         }
         else {//Take one tile from the deck
-            game.pullTileFromDeck(player.getID());
+            handlePlayerTakeTileFromDeck(player);
         }
     }
     
@@ -325,6 +331,52 @@ public class GameMainController {
                  playerDetails.setName(COMPUTER_NAME_PREFIX + (computerPlayerIndex + 1));
                  computerPlayerIndex++;
             }            
+        }
+    }
+
+    private void handlePlayerTakeTileFromDeck(Player player) {
+        game.pullTileFromDeck(player.getID());
+        inputOutputController.announcePlayerTakeTileFromDeck(player);
+    }
+    
+    private void backupTurn(Player player, boolean isBackupNeeded) {
+        if (isBackupNeeded) {
+            game.getBoard().storeBackup();
+            player.storeBackup();
+        }
+    }
+
+    private UserOptions getPlayerOption(Player player, ArrayList<Integer> options) {
+        inputOutputController.showGameStatus(game.getBoard(), player);
+            inputOutputController.showUserActionsMenu(player);
+            if (player.isHuman()) {
+                return inputOutputController.askUserChooseOption(options);
+            }
+            else {
+                //TODO: implement ComputerPlayer actions
+                return UserOptions.ONE;
+            }
+    }
+
+    private void handlePlayerResign(Player player) {
+        game.playerResign(player.getID());
+        inputOutputController.announcePlayerResigned(player);
+    }
+
+    private boolean handlePlayerFinishTurn(Player player, boolean playerPerformAnyChange) {
+        inputOutputController.announcePlayerFinishTurn(player);
+        if (playerPerformAnyChange) {
+            if (!game.getBoard().isValid()) {
+                game.getBoard().restoreFromBackup();
+                player.restoreFromBackup();
+                inputOutputController.announceWrongBoard(player);
+                punishPlayer(player);
+            }
+            return true;
+        }
+        else {
+            inputOutputController.showFinishTurnWithoutAction();
+            return false;
         }
     }
 }
