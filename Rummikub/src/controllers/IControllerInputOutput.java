@@ -83,7 +83,7 @@ public interface IControllerInputOutput {
     
     public MoveTileData getMoveTileData();
     
-    public boolean askUserFirstSequenceAvailable(Player player);
+    public UserOptions askUserFirstSequenceAvailable(Player player);
     
     public List<Integer> getOrderedTileIndicesForSequence(Player player);
     

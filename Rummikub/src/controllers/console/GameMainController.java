@@ -205,8 +205,7 @@ public class GameMainController {
                 option = UserOptions.ONE;
             }
             
-            if (option == UserOptions.ONE) {//Resign
-                //TODO: What do we need to do with the player tiles?
+            if (option == UserOptions.ONE) {//Resign                
                 game.playerResign(player.getID());
                 isPlayerFinished = true;
             }
@@ -264,8 +263,19 @@ public class GameMainController {
     }
     
     private void performFirstStep(Player player) {
+        ArrayList<Integer> options = new ArrayList<>();
+        options.add(IControllerInputOutput.UserOptions.ONE.getOption());
+        options.add(IControllerInputOutput.UserOptions.TWO.getOption());
+        options.add(IControllerInputOutput.UserOptions.THREE.getOption());
+        UserOptions option;
+        
         inputOutputController.showGameStatus(game.getBoard(), player);
-        if (inputOutputController.askUserFirstSequenceAvailable(player)) {
+        option = inputOutputController.askUserFirstSequenceAvailable(player);
+        if (option == UserOptions.ONE) {//Resign            
+            game.playerResign(player.getID());            
+        }
+        
+        else if(option == UserOptions.TWO) {
             if (createSequence(player)) {
                 player.setFirstStepCompleted(true);
             }
