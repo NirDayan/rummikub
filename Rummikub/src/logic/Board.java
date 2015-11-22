@@ -116,7 +116,7 @@ public class Board {
             return false;
 
         isPositionValid = (sequencePosition == 0)
-                || (sequencePosition == sequencesArray.get(sequenceIndex).getSize());
+                || (sequencePosition == sequencesArray.get(sequenceIndex).getSize() - 1);
 
         return isPositionValid;
     }
