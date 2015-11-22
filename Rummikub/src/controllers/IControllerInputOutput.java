@@ -59,7 +59,7 @@ public interface IControllerInputOutput {
     
     public void showWrongInputMessage();
     
-    public void showErrorMessage(Exception ex);
+    public void showMessage(String msg);
     
     public boolean isGameFromFile();
     

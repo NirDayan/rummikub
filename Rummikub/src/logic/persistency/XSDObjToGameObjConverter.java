@@ -12,6 +12,7 @@ import logic.Game;
 import logic.GameDetails;
 import logic.Player;
 import logic.PlayerDetails;
+import logic.persistency.GamePersistency.PersistencyException;
 import logic.tile.Sequence;
 
 class XSDObjToGameObjConverter {
@@ -70,7 +71,7 @@ class XSDObjToGameObjConverter {
             if (player.getName().equals(rummikubXSDObj.getCurrentPlayer()))
                 return player;
         }
-        throw new RuntimeException("Current player name not found");
+        throw new PersistencyException("Current player name is not one of the players");
     }
 
     private static Player getGamePlayerByName(String name) {
@@ -86,7 +87,7 @@ class XSDObjToGameObjConverter {
 
             logic.tile.Tile gameTile = pullTileFromDeckByXSDTile(xsdTile);
             if (gameTile == null) {
-                throw new RuntimeException(getErrorMsg_TileAppearTooMuch(xsdTile));
+                throw new PersistencyException(getErrorMsg_TileAppearTooMuch(xsdTile));
             }
             gamePlayer.addTile(gameTile);
         }
@@ -97,7 +98,7 @@ class XSDObjToGameObjConverter {
         for (Tile xsdTile : xsdSeq.getTile()) {
             logic.tile.Tile gameTile = pullTileFromDeckByXSDTile(xsdTile);
             if (gameTile == null) {
-                throw new RuntimeException(getErrorMsg_TileAppearTooMuch(xsdTile));
+                throw new PersistencyException(getErrorMsg_TileAppearTooMuch(xsdTile));
             }
             gameSeqTiles.add(gameTile);
         }

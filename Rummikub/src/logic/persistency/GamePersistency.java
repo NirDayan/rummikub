@@ -41,7 +41,7 @@ public class GamePersistency {
         Game game = new Game(gameDetails);
         XSDObjToGameObjConverter.createGameFromXSDObj(game, rummikubXSDObj);
         if (game.getBoard().isValid() == false)
-            throw new Exception("Board is invalid");
+            throw new PersistencyException("The Board is invalid in the given file.");
         game.setSavedFileDetails(fileDetails);
         return game;
     }
@@ -89,7 +89,7 @@ public class GamePersistency {
         else {
             File file = new File(game.getSavedFileDetails().getFullPath());
             if (file.canWrite() == false && file.setWritable(true) == false)
-                throw new IOException("Access Denied");
+                throw new PersistencyException("Access To File Denied");
             return file;
         }
     }
@@ -98,10 +98,10 @@ public class GamePersistency {
         File file = new File(fileDetails.getFolderPath(), fileDetails.getFileName());
         File folder = file.getParentFile();
         if (!folder.mkdirs() && !folder.exists())
-            throw new IOException("Cannot create: " + folder);
+            throw new PersistencyException("Cannot create the folder: " + folder);
         file.createNewFile();
         if (file.canWrite() == false && file.setWritable(true) == false)
-            throw new IOException("Access Denied");
+            throw new PersistencyException("Access To File Denied");
         return file;
     }
 
@@ -186,6 +186,12 @@ public class GamePersistency {
                 return Color.YELLOW;
             default:
                 return Color.BLACK;
+        }
+    }
+
+    public static class PersistencyException extends RuntimeException {
+        public PersistencyException(String msg) {
+            super(msg);
         }
     }
 }

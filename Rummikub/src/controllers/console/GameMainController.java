@@ -14,6 +14,7 @@ import logic.Player;
 import logic.PlayerDetails;
 import logic.persistency.FileDetails;
 import logic.persistency.GamePersistency;
+import logic.persistency.GamePersistency.PersistencyException;
 import logic.tile.Tile;
 
 public class GameMainController {
@@ -58,8 +59,10 @@ public class GameMainController {
                     createGameFromUserInput();
                 }
                 isInputValid = true;
-            } catch (Exception e) {
-                inputOutputController.showErrorMessage(e);
+            } catch (PersistencyException ex) {
+                inputOutputController.showMessage(ex.getMessage());
+            } catch (Exception ex) {
+                inputOutputController.showMessage("File is not valid, Please try again.");
             }
         }
     }
@@ -165,8 +168,10 @@ public class GameMainController {
                     setLastSavedFilePath(fileDetails);
                     isPersisted = true;
                     isInputValid = true;
+                } catch (PersistencyException ex) {
+                    inputOutputController.showMessage(ex.getMessage());
                 } catch (Exception ex) {
-                    inputOutputController.showErrorMessage(ex);
+                    inputOutputController.showMessage("Saving failed, Please try again.");
                 }
             }
             else

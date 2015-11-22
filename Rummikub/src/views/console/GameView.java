@@ -41,17 +41,8 @@ public class GameView {
         System.out.println("Wrong input, please try again:");
     }
 
-    public void showErrorMessage(Exception ex) {
-        if (ex != null)
-            if (ex.getMessage() != null) {
-                System.out.println("Error. " + ex.getMessage() + ", please try again:");
-            }
-            else if (ex.getCause() != null){
-                System.out.println("Error. " + ex.getCause().getMessage() + ", please try again:");
-            }
-        else {
-            System.out.println("Error, please try again:");
-        }
+    public void showMessage(String msg) {
+        System.out.println(msg);
     }
 
     public boolean isGameFromFile() {
