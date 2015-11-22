@@ -63,7 +63,7 @@ public class Game {
                 resignedPlayersCount++;
             }
         }
-        if (resignedPlayersCount == players.size())
+        if (resignedPlayersCount == players.size() - 1)
             return true;
 
         return false;

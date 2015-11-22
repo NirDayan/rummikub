@@ -111,7 +111,7 @@ public class GameView {
             } catch (Exception e) {
                 System.out.println(wrongInputStr);
                 System.out.print(chooseOptions);
-                scanner.next();
+                scanner.nextLine(); //throw away the \n not consumed by nextInt()
             }
         }
 
@@ -178,7 +178,7 @@ public class GameView {
                 isInputValid = true;
             } catch (Exception err) {
                 showWrongInputMessage();
-                scanner.next();
+                scanner.nextLine(); //throw away the \n not consumed by nextInt()
             }
         }
 
@@ -279,7 +279,7 @@ public class GameView {
                 isInputValid = true;
             } catch (Exception err) {
                 showWrongInputMessage();
-                scanner.next();
+                scanner.nextLine(); //throw away the \n not consumed by nextInt()
             }
         }
         result.setSourceSequencePosition(sourceIndex);
@@ -311,7 +311,7 @@ public class GameView {
                 isInputValid = true;
             } catch (Exception err) {
                 showWrongInputMessage();
-                scanner.next();
+                scanner.nextLine(); //throw away the \n not consumed by nextInt()
             }
         }
         result.setSourceSequenceIndex(sourceSequenceIndex);
@@ -350,6 +350,7 @@ public class GameView {
                     isFinished = true;
                 }
             } catch (Exception err) {
+                scanner.nextLine(); //throw away the \n not consumed by nextInt()
                 showWrongInputMessage();
             }
         }
@@ -416,6 +417,7 @@ public class GameView {
                 }
             } catch (Exception e) {
                 showWrongInputMessage();
+                scanner.nextLine(); //throw away the \n not consumed by nextInt()
             }
         }
 
@@ -439,6 +441,7 @@ public class GameView {
                 }
             } catch (Exception e) {
                 showWrongInputMessage();
+                scanner.nextLine(); //throw away the \n not consumed by nextInt()
             }
         }
 
@@ -462,6 +465,7 @@ public class GameView {
                 }
             } catch (Exception e) {
                 showWrongInputMessage();
+                scanner.nextLine(); //throw away the \n not consumed by nextInt()
             }
         }
 
@@ -511,6 +515,7 @@ public class GameView {
                 }
             } catch (Exception e) {
                 showWrongInputMessage();
+                scanner.nextLine(); //throw away the \n not consumed by nextInt()
             }
         }
 

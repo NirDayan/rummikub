@@ -251,7 +251,9 @@ public class GameMainController {
                 backupTurn(player, isBackupNeeded);
                 isBackupNeeded = false;
                 if (player.isHuman()) {
-                    createSequence(player);
+                    if (!createSequence(player)) {
+                        inputOutputController.showWrongInputMessage();
+                    }
                 }
                 else {
                     game.createSequenceByTilesList(player.getID(), computerSequence);
