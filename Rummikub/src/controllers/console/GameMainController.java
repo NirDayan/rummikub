@@ -145,13 +145,16 @@ public class GameMainController {
 
     private void playGame(Game game) {
         Player currentPlayer;
-        while (!game.checkIsGameOver()) {
+        boolean isGameOver = false;
+        while (!isGameOver) {
             //loop over the players starting from the currentPlayer
             currentPlayer = game.getCurrentPlayer();
             if (!game.isPlayerResign(currentPlayer.getID())) {
                 performPlayerGameRound(currentPlayer);
             }
-            game.moveToNextPlayer();
+            if (!( isGameOver = game.checkIsGameOver())) {
+                game.moveToNextPlayer();
+            }            
         }
         inputOutputController.showEndOfGame(game.getWinner());
     }
