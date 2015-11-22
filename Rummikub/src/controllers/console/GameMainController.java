@@ -42,8 +42,8 @@ public class GameMainController {
         }
     }
 
-    public Game createGameFromXML(String xmlPath) throws Exception {
-        return GamePersistency.load(xmlPath);
+    public Game createGameFromXML(FileDetails fileDetails) throws Exception {
+        return GamePersistency.load(fileDetails);
     }
 
     private void createNewGame() {
@@ -51,7 +51,7 @@ public class GameMainController {
         while (!isInputValid) {
             try {
                 if (inputOutputController.isGameFromFile()) {
-                    game = createGameFromXML(inputOutputController.getGameFilePath());
+                    game = createGameFromXML(inputOutputController.getFileDetails());
                     isPersisted = true;
                 }
                 else {
@@ -224,13 +224,13 @@ public class GameMainController {
             else if (option == UserOptions.TWO) {//Add tile into the board
                 backupTurn(player, isBackupNeeded);
                 isBackupNeeded = false;
-                isPlayerPerformAnyChange = handleAddTile(player);
+                isPlayerPerformAnyChange |= handleAddTile(player);
                 inputOutputController.showGameStatus(game.getBoard(), player);
             }
             else if (option == UserOptions.THREE) {//Move tile in the board
                 backupTurn(player, isBackupNeeded);
                 isBackupNeeded = false;
-                isPlayerPerformAnyChange = handleMoveTile(player);
+                handleMoveTile(player);
                 inputOutputController.showGameStatus(game.getBoard(), player);
             }
             else if (option == UserOptions.FOUR) {//Take one tile from the deck
@@ -353,7 +353,7 @@ public class GameMainController {
 
     private void setLastSavedFilePath(FileDetails fileDetails) {
         if (fileDetails.isNewFile()) {
-            game.setSavedFilePath(fileDetails.getFolderPath() + "\\" + fileDetails.getFileName() + ".xml");
+            game.setSavedFileDetails(fileDetails);
         }
     }
 

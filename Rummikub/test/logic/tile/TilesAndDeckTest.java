@@ -50,13 +50,13 @@ public class TilesAndDeckTest {
         assertFalse(!testDeck.isEmpty());
     }
 
-    @Test(expected = Deck.DeckUnderflow.class)
+    @Test
     public void whenNoTilesInDeckAndPulling_throwUnderFlow() {
         Deck testDeck = new Deck();
         while (!testDeck.isEmpty())
             testDeck.pullTile();
 
-        testDeck.pullTile();
+        assertNull(testDeck.pullTile());
     }
 
 }

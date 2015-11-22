@@ -2,6 +2,7 @@ package logic;
 
 import java.util.ArrayList;
 import java.util.List;
+import logic.persistency.FileDetails;
 import logic.tile.*;
 
 public class Game {
@@ -11,8 +12,7 @@ public class Game {
     private final Board board;
     private Player currentPlayer;
     private Player winner;
-    private String savedFilePath;
-    private static final String COMPUTER_NAME_PREFIX = "Computer#";
+    private FileDetails savedFileDetails;
     private static final int INITIAL_TILES_COUNT = 14;
     private static final int PUNISH_TILES_NUMBER = 3;
     private static final int MINIMUM_SUM_SEQUENCE_VALUE_FOR_FIRST_STEP = 30;
@@ -23,7 +23,7 @@ public class Game {
         tilesDeck = new Deck();
         board = new Board();
         name = gameDetails.getGameName();
-        savedFilePath = gameDetails.getSavedFilePath();
+        savedFileDetails = gameDetails.getSavedFileDetails();
 
         createPlayers(gameDetails);
     }
@@ -97,7 +97,7 @@ public class Game {
 
     public void pullTileFromDeck(int playerID) {
         Player player = getPlayerByID(playerID);
-        if (player != null)
+        if (player != null && !getTilesDeck().isEmpty())
             player.addTile(getTilesDeck().pullTile());
     }
 
@@ -127,12 +127,12 @@ public class Game {
         return tilesDeck;
     }
 
-    public String getSavedFilePath() {
-        return savedFilePath;
+    public FileDetails getSavedFileDetails() {
+        return savedFileDetails;
     }
 
-    public void setSavedFilePath(String savedFilePath) {
-        this.savedFilePath = savedFilePath;
+    public void setSavedFileDetails(FileDetails savedFileDetails) {
+        this.savedFileDetails = savedFileDetails;
     }
 
     private void distributeTiles() {

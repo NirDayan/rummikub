@@ -35,7 +35,7 @@ class XSDObjToGameObjConverter {
             }
             ID++;
         }
-        return new GameDetails(rummikubXSDObj.getName(), gamePlayersDetails, null);
+        return new GameDetails(rummikubXSDObj.getName(), gamePlayersDetails, new FileDetails(null, null, true));
     }
 
     static void createGameFromXSDObj(Game game, Rummikub rummikubXSDObj) {

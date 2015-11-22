@@ -33,8 +33,8 @@ public class GameView {
         int computerPlayersNumber = getComputerPlayersNumber(playersNumber);
         String gameName = getGameName();
         List<PlayerDetails> playersDetails = getPlayersDetails(playersNumber, computerPlayersNumber);
-        
-        return new GameDetails("Rummikub", playersDetails, null);
+
+        return new GameDetails(gameName, playersDetails, new FileDetails(null, null, true));
     }
 
     public void showWrongInputMessage() {
@@ -46,7 +46,7 @@ public class GameView {
             if (ex.getMessage() != null) {
                 System.out.println("Error. " + ex.getMessage() + ", please try again:");
             }
-            else {
+            else if (ex.getCause() != null){
                 System.out.println("Error. " + ex.getCause().getMessage() + ", please try again:");
             }
         else {
@@ -171,19 +171,7 @@ public class GameView {
         System.out.println("You must perform any action before you can finish your turn!");
     }
 
-    public String getXMLFilePath() {
-        String fileFullPath = "";
-        scanner.nextLine(); //throw away the \n not consumed by nextInt()
-        System.out.print("Please enter the file path: ");
-        fileFullPath += scanner.nextLine();
-        fileFullPath += "\\";
-        System.out.print("Please enter the file name: ");
-        fileFullPath += scanner.nextLine();
-        fileFullPath += ".xml";
-        return fileFullPath;
-    }
-
-    private FileDetails getNewFileDetails() {
+    public FileDetails getNewFileDetails() {
         boolean isInputValid = false;
         String filePath, fileName;
         FileDetails fileDetails = null;
@@ -225,11 +213,11 @@ public class GameView {
         printBoard(board);
         System.out.println("------- Board end -------");
     }
-    
+
     public void announcePlayerResigned(Player player) {
         System.out.println("Player " + player.getName() + " chose to resign from game.");
     }
-    
+
     private void printTiles(List<Tile> tiles) {
         for (int i = 0; i < tiles.size(); i++) {
             System.out.print("[#" + i + "]: ");
@@ -388,14 +376,14 @@ public class GameView {
         System.out.println("Invalid sequence on the board.");
         System.out.println("Player " + player.getName() + " is punished!");
     }
-    
+
     public void playerTryToAddTileToBoard(Player player, MoveTileData addTileData) {
-        System.out.println("Player " + player.getName() + " is tring to add tile: ");
+        System.out.println("Player " + player.getName() + " is trying to add tile: ");
         System.out.println("index: " + addTileData.getSourceSequencePosition() + " from his hand into ");
-        System.out.println("board index: " + addTileData.getTargetSequenceIndex()+ ", board position: " +
-                addTileData.getTargetSequencePosition());
+        System.out.println("board index: " + addTileData.getTargetSequenceIndex() + ", board position: "
+                + addTileData.getTargetSequencePosition());
     }
-    
+
     public void announcePlayerTakeTileFromDeck(Player player) {
         System.out.println("Player " + player.getName() + " took one tile from the deck.");
     }
@@ -405,17 +393,17 @@ public class GameView {
     }
 
     public void showPlayerCantTakeTileAfterChange(Player player) {
-        System.out.println("Player " + player.getName() +
-                " already performed change in the board, so you can't take tile from deck.");
+        System.out.println("Player " + player.getName()
+                + " already performed change in the board, so you can't take tile from deck.");
     }
-    
+
     public void playerTryToMoveTile(Player player, MoveTileData moveTileData) {
-        System.out.println("Player " + player.getName() + " is tring to move tile: ");
-        System.out.println("from index: " + moveTileData.getSourceSequenceIndex()+ ", position: " + moveTileData.getSourceSequencePosition());
-        System.out.println("to index: " + moveTileData.getTargetSequenceIndex()+ ", position: " +
-                moveTileData.getTargetSequencePosition());
+        System.out.println("Player " + player.getName() + " is trying to move tile: ");
+        System.out.println("from index: " + moveTileData.getSourceSequenceIndex() + ", position: " + moveTileData.getSourceSequencePosition());
+        System.out.println("to index: " + moveTileData.getTargetSequenceIndex() + ", position: "
+                + moveTileData.getTargetSequencePosition());
     }
-    
+
     public void announceWrongBoard(Player player) {
         System.out.println("Player " + player.getName() + " caused the board to be invalid!");
     }
@@ -423,59 +411,57 @@ public class GameView {
     private int getPlayersNumber(int minPlayersNum, int maxPlayersNum) {
         boolean isValid = false;
         int playersNumber = 0;
-        
+
         System.out.println("How many players are participating in the game?");
-        while(!isValid) {
+        while (!isValid) {
             System.out.print("Please choose a number between 2-4: ");
-            try{
+            try {
                 playersNumber = scanner.nextInt();
                 if (playersNumber >= minPlayersNum && playersNumber <= maxPlayersNum) {
                     isValid = true;
                 }
-                else {                    
+                else {
                     showWrongInputMessage();
                 }
-            }
-            catch(Exception e) {
+            } catch (Exception e) {
                 showWrongInputMessage();
             }
         }
-        
+
         return playersNumber;
     }
 
     private int getComputerPlayersNumber(int playersNumber) {
         boolean isValid = false;
         int compPlayersNum = 0;
-        
+
         System.out.println("How many computer players are participating in the game?");
-        while(!isValid) {
-            System.out.print("Please choose a number between 0-" +  playersNumber + ": ");
-            try{
+        while (!isValid) {
+            System.out.print("Please choose a number between 0-" + playersNumber + ": ");
+            try {
                 compPlayersNum = scanner.nextInt();
                 if (compPlayersNum >= 0 && compPlayersNum <= playersNumber) {
                     isValid = true;
                 }
-                else {                    
+                else {
                     showWrongInputMessage();
                 }
-            }
-            catch(Exception e) {
+            } catch (Exception e) {
                 showWrongInputMessage();
             }
         }
-        
+
         return compPlayersNum;
     }
 
     private String getGameName() {
         boolean isValid = false;
         String gameName = "Game Name";//default value
-        
+
         scanner.nextLine(); //throw away the \n not consumed by nextInt()
-        while(!isValid) {
+        while (!isValid) {
             System.out.print("Please enter the game name: ");
-            try{
+            try {
                 gameName = scanner.nextLine();
                 if (!gameName.isEmpty()) {
                     isValid = true;
@@ -483,12 +469,11 @@ public class GameView {
                 else {
                     showWrongInputMessage();
                 }
-            }
-            catch(Exception e) {
+            } catch (Exception e) {
                 showWrongInputMessage();
             }
         }
-        
+
         return gameName;
     }
 
@@ -499,21 +484,22 @@ public class GameView {
         PlayerDetails currPlayerDetails;
         int humanPlayerIndex = 0;
         int humanPlayersNum = playersNumber - computerPlayersNumber;
-        
+
         for (int i = 0; i < playersNumber; i++) {
             //first create human players
             if (humanPlayerIndex < humanPlayersNum) {
                 currPlayerName = getPlayerName(humanPlayerIndex);
                 currPlayerDetails = new PlayerDetails(0, currPlayerName, true);
                 humanPlayerIndex++;
-            } else {
+            }
+            else {
                 //create computer player
                 currPlayerDetails = new PlayerDetails(0, "computer" + i, false);
             }
-            
+
             playersDetails.add(currPlayerDetails);
         }
-        
+
         return playersDetails;
     }
 
@@ -521,10 +507,10 @@ public class GameView {
         boolean isValid = false;
         int playerValue = (playerIndex + 1);
         String playerName = "Player #" + playerValue;//Default player name
-        
+
         while (!isValid) {
             System.out.print("Please enter the name of human player #" + playerValue + ": ");
-            try{
+            try {
                 playerName = scanner.nextLine();
                 if (!playerName.isEmpty()) {
                     isValid = true;
@@ -532,12 +518,11 @@ public class GameView {
                 else {
                     showWrongInputMessage();
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 showWrongInputMessage();
             }
-        }   
-        
+        }
+
         return playerName;
     }
 }

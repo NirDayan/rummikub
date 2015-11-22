@@ -16,7 +16,7 @@ public class Deck {
 
     public Tile pullTile() {
         if (deck.isEmpty() == true)
-            throw new DeckUnderflow();
+            return null;
         return deck.remove(0);
     }
 
@@ -51,8 +51,5 @@ public class Deck {
         Tile joker = new Tile(Color.Black, Tile.JOKER_VALUE);
         deck.add(joker);
         deck.add(joker);
-    }
-
-    public static class DeckUnderflow extends RuntimeException {
     }
 }

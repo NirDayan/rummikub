@@ -11,3 +11,4 @@ Assumptions:
 5. If player chooses to resign from the game, his tiles are staying with him and don't return back to the game.
 6. If player creates a wrong sequence on his first step, he will be punished by taking 3 tiles from the deck.
 7. If player performed any change on the board, he can't take tile from deck on the same step.
+8. Computer status and tiles are shown to the console. 

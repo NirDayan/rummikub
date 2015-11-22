@@ -58,7 +58,7 @@ public class Board {
             if (indexInSequence == 0) {//add at the beginning of the sequence
                 return sequence.addTile(0, tile);
             }
-            else if (indexInSequence == sequence.getSize()) {//edd at the end of the sequence
+            else if (indexInSequence == sequence.getSize()) {//add at the end of the sequence
                 return sequence.addTile(sequence.getSize(), tile);
             }
             else {//Split flow
@@ -116,7 +116,7 @@ public class Board {
             return false;
 
         isPositionValid = (sequencePosition == 0)
-                || (sequencePosition == sequencesArray.get(sequenceIndex).getSize() - 1);
+                || (sequencePosition == sequencesArray.get(sequenceIndex).getSize()-1);
 
         return isPositionValid;
     }

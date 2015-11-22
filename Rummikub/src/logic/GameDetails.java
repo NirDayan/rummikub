@@ -2,18 +2,19 @@ package logic;
 
 import java.util.ArrayList;
 import java.util.List;
+import logic.persistency.FileDetails;
 
 public class GameDetails {
     private String gameName;
     private int computerPlayersNum;//between 0 to playersNumber
     private int humenPlayersNum;
     private List<PlayerDetails> playersDetails;
-    private String savedFilePath;
+    private FileDetails savedFileDetails;
     
     public GameDetails() {}
     
     public GameDetails(String gameName, List<PlayerDetails> playerDetails, 
-            String savedFilePath) {
+            FileDetails savedFileDetails) {
         this.gameName = gameName;
         this.playersDetails = playerDetails;
         humenPlayersNum=0; computerPlayersNum=0;
@@ -23,15 +24,15 @@ public class GameDetails {
             else
                 computerPlayersNum++;
         }
-        this.savedFilePath = savedFilePath;
+        this.savedFileDetails = savedFileDetails;
     }
 
     public String getGameName() {
         return gameName;
     }
     
-    public String getSavedFilePath() {
-        return savedFilePath;
+    public FileDetails getSavedFileDetails() {
+        return savedFileDetails;
     }
     
     public List<String> getPlayersNames() {

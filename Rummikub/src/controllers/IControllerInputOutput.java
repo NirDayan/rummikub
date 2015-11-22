@@ -63,7 +63,7 @@ public interface IControllerInputOutput {
     
     public boolean isGameFromFile();
     
-    public String getGameFilePath();
+    public FileDetails getFileDetails();
     
     public UserOptions askUserChooseOption(ArrayList<Integer> availableOptions);
     

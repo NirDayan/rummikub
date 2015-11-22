@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import logic.tile.Color;
+import logic.tile.Sequence;
 import logic.tile.Tile;
 import static logic.tile.Tile.JOKER_VALUE;
 
@@ -24,7 +25,7 @@ public class ComputerAI {
         List<Tile> setResultTiles = findSet();
         List<Tile> sequenceResultTiles = findSequence();
         if ((setResultTiles != null) && (sequenceResultTiles != null)) {
-            if (setResultTiles.size() > sequenceResultTiles.size()) {
+            if (getTilesSum(setResultTiles) > getTilesSum(sequenceResultTiles)) {
                 return setResultTiles;
             }
             else {
@@ -162,8 +163,8 @@ public class ComputerAI {
                 currSequence.add(playerTiles.get(0));
             }
         }
-        
-        if (currSequence.size() > 2 && currSequence.size() > maxSequenceTiles.size()) {
+
+        if (currSequence.size() > 2 && getTilesSum(currSequence) > getTilesSum(maxSequenceTiles)) {
             maxSequenceTiles = (ArrayList<Tile>) currSequence.clone();
         }
     }
@@ -171,5 +172,13 @@ public class ComputerAI {
     private void resetCurrSequence() {
         numOfUsedJokers = 0;
         currSequence.clear();
+    }
+
+    private int getTilesSum(List<Tile> tiles) {
+        Sequence seq = new Sequence(tiles);
+        if (seq.isValid()) {
+            return seq.getValueSum();
+        }
+        return 0;
     }
 }

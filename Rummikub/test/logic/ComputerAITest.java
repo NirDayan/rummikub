@@ -39,6 +39,7 @@ public class ComputerAITest {
         assertNotNull(result);
         Sequence seq = new Sequence(result);
         assertTrue(seq.isValid());
+        assertEquals(seq.getValueSum(), 4*4);
     }
 
     @Test
@@ -63,6 +64,7 @@ public class ComputerAITest {
         Sequence seq = new Sequence(result);
         assertTrue(seq.isValid());
         assertEquals(result.size(), 4);
+        assertEquals(seq.getValueSum(), 6+7+8+9);
     }
 
     @Test
@@ -80,13 +82,14 @@ public class ComputerAITest {
         tiles.add(generate(Blue, 9));
         tiles.add(generate(Black, 2));
         tiles.add(generate(Blue, 8));
-        tiles.add(generate(Red, 4));
+        tiles.add(generate(Yellow, 4));
 
         List<Tile> result = comp.getRelevantTiles(tiles);
         assertNotNull(result);
         Sequence seq = new Sequence(result);
         assertTrue(seq.isValid());
         assertEquals(result.size(), 3);
+        assertEquals(seq.getValueSum(), 4+4+4);
     }
 
     @Test
@@ -95,7 +98,7 @@ public class ComputerAITest {
 
         tiles.add(generate(Yellow, 6));
         tiles.add(generate(Black, 3));
-        tiles.add(generate(Red, 4));
+        tiles.add(generate(Red, 5));
         tiles.add(generate(Blue, 12));
         tiles.add(generateJoker());
         tiles.add(generate(Red, 7));
@@ -104,13 +107,14 @@ public class ComputerAITest {
         tiles.add(generate(Blue, 9));
         tiles.add(generate(Black, 2));
         tiles.add(generate(Blue, 1));
-        tiles.add(generate(Red, 4));
+        tiles.add(generate(Red, 5));
 
         List<Tile> result = comp.getRelevantTiles(tiles);
         assertNotNull(result);
         Sequence seq = new Sequence(result);
         assertTrue(seq.isValid());
         assertEquals(result.size(), 3);
+        assertEquals(seq.getValueSum(), 5+6+7);
     }
 
     @Test
@@ -156,6 +160,7 @@ public class ComputerAITest {
         Sequence seq = new Sequence(result);
         assertTrue(seq.isValid());
         assertEquals(result.size(), 4);
+        assertEquals(seq.getValueSum(), 10+11+12+13);
     }
 
 }

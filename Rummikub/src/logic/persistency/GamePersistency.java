@@ -9,7 +9,6 @@ import static controllers.console.GameMainController.checkPlayersNameValidity;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -31,10 +30,10 @@ import org.xml.sax.SAXException;
 public class GamePersistency {
     private static final String RESOURCES = "resources";
 
-    public static Game load(String filePath) throws Exception {
+    public static Game load(FileDetails fileDetails) throws Exception {
         Schema schema = GamePersistency.getSchemaFromXSD();
         InputStream xmlInputStream = new BufferedInputStream(
-                new FileInputStream(filePath));
+                new FileInputStream(fileDetails.getFullPath()));
 
         Rummikub rummikubXSDObj = GamePersistency.readXMLAndCreateRummikubXSDOBj(schema, xmlInputStream);
         GameDetails gameDetails = XSDObjToGameObjConverter.getGameDetailsFromXSDObj(rummikubXSDObj);
@@ -43,7 +42,7 @@ public class GamePersistency {
         XSDObjToGameObjConverter.createGameFromXSDObj(game, rummikubXSDObj);
         if (game.getBoard().isValid() == false)
             throw new Exception("Board is invalid");
-        game.setSavedFilePath(filePath);
+        game.setSavedFileDetails(fileDetails);
         return game;
     }
 
@@ -88,7 +87,7 @@ public class GamePersistency {
             return createFile(fileDetails);
         }
         else {
-            File file = new File(game.getSavedFilePath());
+            File file = new File(game.getSavedFileDetails().getFullPath());
             if (file.canWrite() == false && file.setWritable(true) == false)
                 throw new IOException("Access Denied");
             return file;
@@ -96,7 +95,7 @@ public class GamePersistency {
     }
 
     private static File createFile(FileDetails fileDetails) throws IOException {
-        File file = new File(fileDetails.getFolderPath(), fileDetails.getFileName() + ".xml");
+        File file = new File(fileDetails.getFolderPath(), fileDetails.getFileName());
         File folder = file.getParentFile();
         if (!folder.mkdirs() && !folder.exists())
             throw new IOException("Cannot create: " + folder);
