@@ -85,10 +85,7 @@ public class Sequence {
     
     @Override
     public Sequence clone() {
-        List<Tile> result = new ArrayList<>(tiles.size());
-        for (Tile tile : tiles) {
-            result.add(tile.clone());
-        }
+        List<Tile> result = new ArrayList<>(tiles);
         return new Sequence(result);
     }
     

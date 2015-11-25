@@ -118,10 +118,7 @@ public class Player {
     }
 
     public void storeBackup() {
-        backupTiles = new ArrayList<>(tiles.size());
-        for (Tile tile : tiles) {
-            backupTiles.add(tile.clone());
-        }
+        backupTiles = new ArrayList<>(tiles);
     }
     
     public void restoreFromBackup() {

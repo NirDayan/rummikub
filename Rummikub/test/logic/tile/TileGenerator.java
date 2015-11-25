@@ -14,7 +14,7 @@ public class TileGenerator {
         return new Tile(Color.Black,0);
     }
 
-    public static Tile[] generate(int count) throws Exception {
+    public static Tile[] generateRndTiles(int count) throws Exception {
         Tile[] res = new Tile[count];
         for (int i = 0; i < count; i++) {
             res[i] = generate();

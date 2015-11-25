@@ -58,8 +58,4 @@ public class Tile implements Comparable<Tile> {
         return hash;
     }
     
-    @Override
-    public Tile clone() {
-        return new Tile(color, value);
-    }
 }

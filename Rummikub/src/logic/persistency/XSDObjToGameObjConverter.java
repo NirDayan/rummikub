@@ -1,11 +1,11 @@
 package logic.persistency;
 
-import logic.persistency.generated.Rummikub;
-import logic.persistency.generated.Tile;
-import logic.persistency.generated.Players;
-import logic.persistency.generated.PlayerType;
-import logic.persistency.generated.Color;
-import logic.persistency.generated.Board;
+import xml.Rummikub;
+import xml.Tile;
+import xml.Players;
+import xml.PlayerType;
+import xml.Color;
+import xml.Board;
 import java.util.ArrayList;
 import java.util.List;
 import logic.Game;
@@ -46,7 +46,7 @@ class XSDObjToGameObjConverter {
         distributeTilesToBoard();
         Player currPlayer = getCurrPlayerFromXSDObj();
         game.setCurrentPlayer(currPlayer);
-        setAllPlayerFirstStep(true);
+        setAllGamePlayerFirstStep();
     }
 
     private static void distributeTilesToPlayers() {
@@ -130,9 +130,10 @@ class XSDObjToGameObjConverter {
         }
     }
 
-    private static void setAllPlayerFirstStep(boolean firstStep) {
-        for (logic.Player player : game.getPlayers()) {
-            player.setFirstStepCompleted(firstStep);
+    private static void setAllGamePlayerFirstStep() {
+        for (Players.Player xsdPlayer : rummikubXSDObj.getPlayers().getPlayer()) {
+            Player gamePlayer = getGamePlayerByName(xsdPlayer.getName());
+            gamePlayer.setFirstStepCompleted(xsdPlayer.isPlacedFirstSequence());
         }
     }
 }

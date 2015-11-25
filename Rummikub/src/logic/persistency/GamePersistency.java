@@ -1,10 +1,10 @@
 package logic.persistency;
 
-import logic.persistency.generated.Rummikub;
-import logic.persistency.generated.Tile;
-import logic.persistency.generated.Players;
-import logic.persistency.generated.PlayerType;
-import logic.persistency.generated.Color;
+import xml.Rummikub;
+import xml.Tile;
+import xml.Players;
+import xml.PlayerType;
+import xml.Color;
 import static controllers.console.GameMainController.checkPlayersNameValidity;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -113,9 +113,9 @@ public class GamePersistency {
         marshaller.marshal(rummikubXSDObj, file);
     }
 
-    static private logic.persistency.generated.Board getBoardXSDObj(Board gameBoard) {
-        logic.persistency.generated.Board boardXSD = new logic.persistency.generated.Board();
-        List<logic.persistency.generated.Board.Sequence> xsdSequences = boardXSD.getSequence();
+    static private xml.Board getBoardXSDObj(Board gameBoard) {
+        xml.Board boardXSD = new xml.Board();
+        List<xml.Board.Sequence> xsdSequences = boardXSD.getSequence();
         List<logic.tile.Sequence> gameSequences = gameBoard.getSequences();
         for (logic.tile.Sequence gameSeq : gameSequences) {
             xsdSequences.add(convertRealSequenceToXSD(gameSeq));
@@ -132,8 +132,8 @@ public class GamePersistency {
         return xsdPlayersContiner;
     }
 
-    static private logic.persistency.generated.Board.Sequence convertRealSequenceToXSD(logic.tile.Sequence gameSeq) {
-        logic.persistency.generated.Board.Sequence xsdSeq = new logic.persistency.generated.Board.Sequence();
+    static private xml.Board.Sequence convertRealSequenceToXSD(logic.tile.Sequence gameSeq) {
+        xml.Board.Sequence xsdSeq = new xml.Board.Sequence();
         xsdSeq.getTile().addAll(convertGameTileListToXSD(gameSeq.toList()));
         return xsdSeq;
     }
@@ -174,7 +174,7 @@ public class GamePersistency {
         return xsdTile;
     }
 
-    static private logic.persistency.generated.Color convertGameColorToXSD(logic.tile.Color gameColor) {
+    static private xml.Color convertGameColorToXSD(logic.tile.Color gameColor) {
         switch (gameColor) {
             case Black:
                 return Color.BLACK;
