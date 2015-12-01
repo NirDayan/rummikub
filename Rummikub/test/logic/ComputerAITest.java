@@ -9,19 +9,24 @@ import static logic.tile.TileGenerator.generate;
 import static logic.tile.TileGenerator.generateJoker;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Before;
 
 public class ComputerAITest {
 
     private ComputerAI comp;
+    private List<Tile> tiles;
 
     public ComputerAITest() {
         comp = new ComputerAI();
     }
 
+    @Before
+    public void setUp(){
+        tiles = new ArrayList<>();
+    }
+    
     @Test
     public void getSetSeccessfully() throws Exception {
-        List<Tile> tiles = new ArrayList<>();
-
         tiles.add(generate(Yellow, 6));
         tiles.add(generate(Black, 3));
         tiles.add(generate(Red, 4)); // 1
@@ -44,8 +49,6 @@ public class ComputerAITest {
 
     @Test
     public void getSequenceSeccessfully() throws Exception {
-        List<Tile> tiles = new ArrayList<>();
-
         tiles.add(generate(Yellow, 6));
         tiles.add(generate(Black, 3));
         tiles.add(generate(Red, 4));
@@ -69,8 +72,6 @@ public class ComputerAITest {
 
     @Test
     public void getSequenceSeccessfully2() throws Exception {
-        List<Tile> tiles = new ArrayList<>();
-
         tiles.add(generate(Yellow, 6));
         tiles.add(generate(Black, 3));
         tiles.add(generate(Red, 4));
@@ -94,8 +95,6 @@ public class ComputerAITest {
 
     @Test
     public void getSequenceSeccessfullyWithJoker() throws Exception {
-        List<Tile> tiles = new ArrayList<>();
-
         tiles.add(generate(Yellow, 6));
         tiles.add(generate(Black, 3));
         tiles.add(generate(Red, 5));
@@ -119,8 +118,6 @@ public class ComputerAITest {
 
     @Test
     public void noReleventTilesFound() throws Exception {
-        List<Tile> tiles = new ArrayList<>();
-
         tiles.add(generate(Yellow, 6));
         tiles.add(generate(Black, 5));
         tiles.add(generate(Red, 4));
@@ -140,8 +137,6 @@ public class ComputerAITest {
     
         @Test
     public void getSequenceSeccessfullyWithTwoJoker() throws Exception {
-        List<Tile> tiles = new ArrayList<>();
-
         tiles.add(generate(Yellow, 6));
         tiles.add(generate(Black, 5));
         tiles.add(generate(Red, 4));

@@ -9,6 +9,7 @@ import static logic.tile.TileGenerator.generate;
 import static logic.tile.TileGenerator.generateJoker;
 import static logic.tile.TileGenerator.generateRndTiles;
 import static org.junit.Assert.*;
+import org.junit.Before;
 import org.junit.Test;
 
 public class BoardTest {
@@ -34,10 +35,14 @@ public class BoardTest {
 
         return true;
     }
+    
+    @Before
+    public void setUp(){
+        board.reset();
+    }
 
     @Test
     public void boardCreateFewSequences() throws Exception {
-        board.reset();
         board.addSequence(generateRndSequence(4));
         board.addSequence(generateRndSequence(3));
         board.addSequence(generateRndSequence(5));
@@ -47,7 +52,6 @@ public class BoardTest {
 
     @Test
     public void MoveTileToEndSeccessfuly() throws Exception {
-        board.reset();
         MoveTileData data = new MoveTileData();
         data.setSourceSequenceIndex(0);
         data.setSourceSequencePosition(2);
@@ -68,7 +72,6 @@ public class BoardTest {
 
     @Test
     public void MoveTileToFrontSeccessfuly() throws Exception {
-        board.reset();
         MoveTileData data = new MoveTileData();
         data.setSourceSequenceIndex(0);
         data.setSourceSequencePosition(2);
@@ -89,7 +92,6 @@ public class BoardTest {
 
     @Test
     public void MoveTileAndSplitSeccessfuly() throws Exception {
-        board.reset();
         MoveTileData data = new MoveTileData();
         data.setSourceSequenceIndex(0);
         data.setSourceSequencePosition(2);
@@ -112,7 +114,6 @@ public class BoardTest {
 
     @Test
     public void addTileSeccessfuly() throws Exception {
-        board.reset();
         addToBoard(generate(Blue, 1), generate(Red, 4), generate(Black, 5));
 
         board.addTile(0, 3, generate(Black, 13));
@@ -123,8 +124,6 @@ public class BoardTest {
 
     @Test
     public void validateBoardSeccessfuly() throws Exception {
-        board.reset();
-
         addToBoard(
                 generate(Blue, 1),
                 generate(Blue, 2),
@@ -160,8 +159,6 @@ public class BoardTest {
 
     @Test
     public void whenBoardIsInvalid_returnFasle() throws Exception {
-        board.reset();
-
         addToBoard(
                 generate(Blue, 1),
                 generate(Blue, 2),
@@ -196,8 +193,6 @@ public class BoardTest {
 
     @Test
     public void whenAddTilePositionIsOutOfBound_ReturnFalse() throws Exception {
-        board.reset();
-
         addToBoard(
                 generate(Blue, 1),
                 generate(Red, 4),
@@ -208,8 +203,6 @@ public class BoardTest {
 
     @Test
     public void whenAddTileIndexIsOutOfBound_ReturnFalse() throws Exception {
-        board.reset();
-
         addToBoard(
                 generate(Blue, 1),
                 generate(Red, 4),
@@ -227,7 +220,6 @@ public class BoardTest {
         sequences.add(generateRndSequence(5));
         sequences.add(generateRndSequence(3));
 
-        board.reset();
         for (Sequence sequence : sequences) {
             board.addSequence(sequence.clone());
         }

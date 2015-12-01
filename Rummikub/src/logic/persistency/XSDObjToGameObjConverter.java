@@ -1,5 +1,6 @@
 package logic.persistency;
 
+import static controllers.console.GameMainController.checkPlayersNameValidity;
 import xml.Rummikub;
 import xml.Tile;
 import xml.Players;
@@ -16,15 +17,22 @@ import logic.persistency.GamePersistency.PersistencyException;
 import logic.tile.Sequence;
 
 class XSDObjToGameObjConverter {
-    private static Game game;
-    private static Rummikub rummikubXSDObj;
+    private Game game;
+    private Rummikub rummikubXSDObj;
 
-    static {
-        game = null;
-        rummikubXSDObj = null;
+    XSDObjToGameObjConverter(Rummikub rummikubXSDObj) {
+        this.rummikubXSDObj = rummikubXSDObj;
+    }
+    
+    Game convert() {
+        GameDetails gameDetails = getGameDetailsFromXSDObj();
+        checkPlayersNameValidity(gameDetails.getPlayersNames());
+        game = new Game(gameDetails);
+        createGameFromXSDObj();
+        return game;
     }
 
-    static GameDetails getGameDetailsFromXSDObj(Rummikub rummikubXSDObj) {
+    private GameDetails getGameDetailsFromXSDObj() {
         int ID = 1;
         List<logic.PlayerDetails> gamePlayersDetails = new ArrayList<>();
         for (Players.Player player : rummikubXSDObj.getPlayers().getPlayer()) {
@@ -39,9 +47,7 @@ class XSDObjToGameObjConverter {
         return new GameDetails(rummikubXSDObj.getName(), gamePlayersDetails, new FileDetails(null, null, true));
     }
 
-    static void createGameFromXSDObj(Game game, Rummikub rummikubXSDObj) {
-        XSDObjToGameObjConverter.game = game;
-        XSDObjToGameObjConverter.rummikubXSDObj = rummikubXSDObj;
+    private void createGameFromXSDObj() {
         distributeTilesToPlayers();
         distributeTilesToBoard();
         Player currPlayer = getCurrPlayerFromXSDObj();
@@ -49,7 +55,7 @@ class XSDObjToGameObjConverter {
         setAllGamePlayerFirstStep();
     }
 
-    private static void distributeTilesToPlayers() {
+    private void distributeTilesToPlayers() {
         for (Players.Player player : rummikubXSDObj.getPlayers().getPlayer()) {
             logic.Player gamePlayer = getGamePlayerByName(player.getName());
             List<Tile> xsdTiles = player.getTiles().getTile();
@@ -58,7 +64,7 @@ class XSDObjToGameObjConverter {
         }
     }
 
-    private static void distributeTilesToBoard() {
+    private void distributeTilesToBoard() {
         for (Board.Sequence xsdSeq : rummikubXSDObj.getBoard().getSequence()) {
             List<logic.tile.Tile> gameSeqTiles = getGameSeqTilesFromXSDSeq(xsdSeq);
             logic.tile.Sequence gameSequence = new Sequence(gameSeqTiles);
@@ -66,7 +72,7 @@ class XSDObjToGameObjConverter {
         }
     }
 
-    private static Player getCurrPlayerFromXSDObj() {
+    private Player getCurrPlayerFromXSDObj() {
         for (Player player : game.getPlayers()) {
             if (player.getName().equals(rummikubXSDObj.getCurrentPlayer()))
                 return player;
@@ -74,7 +80,7 @@ class XSDObjToGameObjConverter {
         throw new PersistencyException("Current player name is not one of the players");
     }
 
-    private static Player getGamePlayerByName(String name) {
+    private Player getGamePlayerByName(String name) {
         for (Player player : game.getPlayers()) {
             if (player.getName().equals(name))
                 return player;
@@ -82,7 +88,7 @@ class XSDObjToGameObjConverter {
         throw new RuntimeException("getGamePlayerByName did not find the player");
     }
 
-    private static void addTilesToGamePlayer(Player gamePlayer, List<Tile> xsdTiles) {
+    private void addTilesToGamePlayer(Player gamePlayer, List<Tile> xsdTiles) {
         for (Tile xsdTile : xsdTiles) {
 
             logic.tile.Tile gameTile = pullTileFromDeckByXSDTile(xsdTile);
@@ -93,7 +99,7 @@ class XSDObjToGameObjConverter {
         }
     }
 
-    private static List<logic.tile.Tile> getGameSeqTilesFromXSDSeq(Board.Sequence xsdSeq) {
+    private List<logic.tile.Tile> getGameSeqTilesFromXSDSeq(Board.Sequence xsdSeq) {
         List<logic.tile.Tile> gameSeqTiles = new ArrayList<>();
         for (Tile xsdTile : xsdSeq.getTile()) {
             logic.tile.Tile gameTile = pullTileFromDeckByXSDTile(xsdTile);
@@ -105,17 +111,17 @@ class XSDObjToGameObjConverter {
         return gameSeqTiles;
     }
 
-    private static logic.tile.Tile pullTileFromDeckByXSDTile(Tile xsdTile) {
+    private logic.tile.Tile pullTileFromDeckByXSDTile(Tile xsdTile) {
         logic.tile.Color tileColor = xsdToGameColorConverter(xsdTile.getColor());
         int tileValue = xsdTile.getValue();
         return game.getTilesDeck().pullTile(tileColor, tileValue);
     }
 
-    private static String getErrorMsg_TileAppearTooMuch(Tile xsdTile) {
+    private String getErrorMsg_TileAppearTooMuch(Tile xsdTile) {
         return "The tile " + xsdTile.getValue() + " " + xsdTile.getColor().name() + " appear too much times";
     }
 
-    private static logic.tile.Color xsdToGameColorConverter(Color color) {
+    private logic.tile.Color xsdToGameColorConverter(Color color) {
         switch (color) {
             case BLACK:
                 return logic.tile.Color.Black;
@@ -130,7 +136,7 @@ class XSDObjToGameObjConverter {
         }
     }
 
-    private static void setAllGamePlayerFirstStep() {
+    private void setAllGamePlayerFirstStep() {
         for (Players.Player xsdPlayer : rummikubXSDObj.getPlayers().getPlayer()) {
             Player gamePlayer = getGamePlayerByName(xsdPlayer.getName());
             gamePlayer.setFirstStepCompleted(xsdPlayer.isPlacedFirstSequence());

@@ -10,10 +10,9 @@ import org.junit.AfterClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 
 public class PersistencyTest {
-    private static final String TEST_FILES_PATH = "Rummikub\\test\\logic\\resources\\";
+    private static final String TEST_FILES_PATH = "Rummikub\\test\\logic\\testresources\\";
     private static final File testsFolder = new File(TEST_FILES_PATH);
     private static FileDetails pathToSave;
 
@@ -25,7 +24,7 @@ public class PersistencyTest {
     @Test
     public void LoadSeccessfully() throws Exception {
         FileDetails fileDetails = new FileDetails(testsFolder.getAbsolutePath(), "test1.xml", true);
-        Game game = GamePersistency.load(fileDetails);
+        Game game = new GamePersistency().load(fileDetails);
         assertNotNull(game);
         assertEquals(game.getPlayers().size(), 4);
     }
@@ -33,13 +32,13 @@ public class PersistencyTest {
     @Test(expected = Exception.class)
     public void LoadInvalidFile() throws Exception {
         FileDetails fileDetails = new FileDetails(testsFolder.getAbsolutePath(), "test2.xml", true);
-        GamePersistency.load(fileDetails);
+        new GamePersistency().load(fileDetails);
     }
 
     @Test(expected = GamePersistency.PersistencyException.class)
     public void LoadFileWithLogicalErrors() throws Exception {
         FileDetails fileDetails = new FileDetails(testsFolder.getAbsolutePath(), "test3.xml", true);
-        GamePersistency.load(fileDetails);
+        new GamePersistency().load(fileDetails);
     }
 
     @Test
@@ -53,13 +52,13 @@ public class PersistencyTest {
         Game game = new Game(gameDetails);
         game.reset();
 
-        GamePersistency.save(pathToSave, game);
+        new GamePersistency().save(pathToSave, game);
     }
 
     @Test
     public void LoadSeccessfuly_CheckPlacedFirstSeq() throws Exception {
         FileDetails fileDetails = new FileDetails(testsFolder.getAbsolutePath(), "test1.xml", true);
-        Game game = GamePersistency.load(fileDetails);
+        Game game = new GamePersistency().load(fileDetails);
         assertNotNull(game);
         assertTrue(game.getCurrentPlayer().isFirstStep());
     }

@@ -8,6 +8,14 @@ public class TilesAndDeckTest {
 
     private Deck deck;
 
+    private boolean isTileValid(Tile t) {
+        if (t.isJoker()) {
+            return true;
+        }
+        return (t.getValue() <= Deck.HIGHEST_TILE_VALUE)
+                && (t.getValue() >= Deck.LOWEST_TILE_VALUE);
+    }
+
     @Before
     public void setUp() {
         deck = new Deck();
@@ -23,14 +31,6 @@ public class TilesAndDeckTest {
         assertEquals(106, counter);
     }
 
-    private boolean isTileValid(Tile t) {
-        if (t.isJoker()) {
-            return true;
-        }
-        return (t.getValue() <= Deck.HIGHEST_TILE_VALUE)
-                && (t.getValue() >= Deck.LOWEST_TILE_VALUE);
-    }
-
     @Test
     public void pullingFromDeckSeccessfuly() {
         Tile tile = deck.pullTile();
@@ -40,23 +40,20 @@ public class TilesAndDeckTest {
     @Test
     public void pullAllTilesFromDeckSeccessfuly() {
         int pulled = 0;
-        Deck testDeck = new Deck();
-        while (!testDeck.isEmpty()) {
-            Tile tile = testDeck.pullTile();
+        while (!deck.isEmpty()) {
+            Tile tile = deck.pullTile();
             if (tile != null)
                 pulled++;
         }
         assertEquals(pulled, 106);
-        assertFalse(!testDeck.isEmpty());
+        assertFalse(!deck.isEmpty());
     }
 
     @Test
     public void whenNoTilesInDeckAndPulling_throwUnderFlow() {
-        Deck testDeck = new Deck();
-        while (!testDeck.isEmpty())
-            testDeck.pullTile();
+        while (!deck.isEmpty())
+            deck.pullTile();
 
-        assertNull(testDeck.pullTile());
+        assertNull(deck.pullTile());
     }
-
 }

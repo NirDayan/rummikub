@@ -44,7 +44,8 @@ public class GameMainController {
     }
 
     public Game createGameFromXML(FileDetails fileDetails) throws Exception {
-        return GamePersistency.load(fileDetails);
+        GamePersistency xmlLoader = new GamePersistency();
+        return xmlLoader.load(fileDetails);
     }
 
     private void createNewGame() {
@@ -167,7 +168,7 @@ public class GameMainController {
             fileDetails = inputOutputController.askUserToSaveGame(isPersisted, player);
             if (fileDetails != null) {
                 try {
-                    GamePersistency.save(fileDetails, game);
+                    new GamePersistency().save(fileDetails, game);
                     setLastSavedFilePath(fileDetails);
                     isPersisted = true;
                     isInputValid = true;
