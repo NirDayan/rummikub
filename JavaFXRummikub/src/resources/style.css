@@ -1,0 +1,15 @@
+#newGamePane {
+    -fx-background-image: url("images/Rummikub_Background.jpg");    
+    -fx-background-size: 100% 100%;
+    -fx-background-position: center center;    
+}
+
+#newGameInnerPane {
+    -fx-background-color: rgba(255, 255, 255, 0.5);
+}
+
+.error {
+    -fx-font-size: 14px;
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-text-fill: red;
+}
