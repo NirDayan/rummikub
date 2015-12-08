@@ -15,8 +15,7 @@ import javafx.stage.Stage;
 import javafxrummikub.scenes.newGame.NewGameSceneController;
 
 public class JavaFXRummikub extends Application {
-    
-    private static final String NEW_GAME_SCENE_FILE_PATH = "scenes/newGame/NewGameScene.fxml";
+    private static final String NEW_GAME_SCENE_FILE_PATH = "/javafxrummikub/scenes/newGame/newGameScene.fxml";
     private static final String STYLE_FILE_PATH = "/resources/style.css";
     
     @Override

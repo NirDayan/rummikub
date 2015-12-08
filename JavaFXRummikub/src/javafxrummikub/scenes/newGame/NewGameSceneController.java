@@ -22,7 +22,10 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
+import logic.Game;
 import logic.PlayerDetails;
+import logic.persistency.FileDetails;
+import logic.persistency.GamePersistency;
 
 public class NewGameSceneController implements Initializable {
     private static int CURRENT_PLAYER_ID = 1;
@@ -54,6 +57,8 @@ public class NewGameSceneController implements Initializable {
     private TextField newPlayerName;
     @FXML
     private CheckBox newPlayerIsHuman;
+    private Game game;
+    private ToggleGroup newGameOptions;
     /**
      * Initializes the controller class.
      */
@@ -67,15 +72,14 @@ public class NewGameSceneController implements Initializable {
     }
 
     private void initializeNewGameOptions() {
-        ToggleGroup optionsGroup = new ToggleGroup();
-        loadGameFromFileBtn.setToggleGroup(optionsGroup);
-        createNewGameBtn.setToggleGroup(optionsGroup);      
-        optionsGroup.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> ov, Toggle old_toggle, Toggle new_toggle) -> {
-            if (optionsGroup.getSelectedToggle() == loadGameFromFileBtn) {
-                newGameFieldsPane.setVisible(false);
-                openFileChooser(optionsGroup);
+        newGameOptions = new ToggleGroup();
+        loadGameFromFileBtn.setToggleGroup(newGameOptions);
+        createNewGameBtn.setToggleGroup(newGameOptions);      
+        newGameOptions.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> ov, Toggle old_toggle, Toggle new_toggle) -> {
+            if (newGameOptions.getSelectedToggle() == loadGameFromFileBtn) {
+                handleLoadGameFromFile();
             }
-            else if (optionsGroup.getSelectedToggle() == createNewGameBtn) {
+            else if (newGameOptions.getSelectedToggle() == createNewGameBtn) {
                 showNewGameFields();
             }
         });
@@ -87,18 +91,18 @@ public class NewGameSceneController implements Initializable {
         filePathInput.setVisible(true);
     }
 
-    private void openFileChooser(ToggleGroup optionsGroup) {
+    private FileDetails openFileChooser() {
+        FileDetails fileDetails = null;
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open rummikub game file");
         File file = fileChooser.showOpenDialog(loadGameFromFileBtn.getScene().getWindow());
+        
         if (file != null) {
+            fileDetails = new FileDetails(file.getParent(), file.getName(), false);
             updateSelectedFile(file.getAbsolutePath());
         }
-        else {
-            optionsGroup.selectToggle(null);
-            filePath.setVisible(false);
-            filePathInput.setVisible(false);
-        }
+        
+        return fileDetails;
     }    
 
     private void showNewGameFields() {
@@ -118,5 +122,34 @@ public class NewGameSceneController implements Initializable {
         if (CURRENT_PLAYER_ID > MAX_PLAYERS_NUMBER) {
             addNewPlayerButton.setDisable(true);
         }
+    }
+   
+    private void handleLoadGameFromFile() {
+        newGameFieldsPane.setVisible(false);
+        FileDetails fileDetails = openFileChooser();
+        if (fileDetails != null) {
+            try {
+                game = GamePersistency.load(fileDetails);
+                clearErrorMsg();
+            }
+            catch (Exception err) {
+                openFileFailure();
+            }                    
+        }
+        else {
+            openFileFailure();            
+        }
+    }
+    
+    private void openFileFailure() {
+        newGameOptions.selectToggle(null);
+        filePath.setVisible(false);
+        filePathInput.setVisible(false);
+        
+        errorMsgLabel.setText("Failed to load file, please try again");
+    }
+    
+    private void clearErrorMsg() {
+        errorMsgLabel.setText("");
     }
 }
