@@ -25,12 +25,12 @@
               </columns>
             </TableView>
             <Label prefHeight="21.0" prefWidth="74.0" text="Player name:" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="173.0" />
-            <TextField fx:id="newPlayerName" prefWidth="200.0" AnchorPane.leftAnchor="74.0" AnchorPane.topAnchor="173.0" />
+            <TextField fx:id="newPlayerName" onAction="#addNewPlayer" prefWidth="200.0" AnchorPane.leftAnchor="74.0" AnchorPane.topAnchor="173.0" />
             <CheckBox fx:id="newPlayerIsHuman" contentDisplay="LEFT" layoutX="281.0" layoutY="173.0" mnemonicParsing="false" prefHeight="21.0" prefWidth="74.00009999999747" text="Is human" textAlignment="LEFT" />
             <Button fx:id="addNewPlayerButton" layoutX="362.0" layoutY="173.0" mnemonicParsing="false" onAction="#addNewPlayer" text="Add" />
           </children>
         </AnchorPane>
-        <Label fx:id="errorMsgLabel" prefHeight="22.0" prefWidth="457.0" styleClass="error" text="" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="301.0" AnchorPane.topAnchor="505.0" />
+        <Label fx:id="errorMsgLabel" maxWidth="-1.0" minHeight="-1.0" minWidth="-1.0" prefHeight="22.0" prefWidth="744.0" styleClass="error" text="" AnchorPane.bottomAnchor="48.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" />
       </children>
     </AnchorPane>
   </children>

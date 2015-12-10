@@ -3,6 +3,7 @@ package javafxrummikub.scenes.newGame;
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -19,7 +20,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import logic.Game;
@@ -59,9 +59,10 @@ public class NewGameSceneController implements Initializable {
     private CheckBox newPlayerIsHuman;
     private Game game;
     private ToggleGroup newGameOptions;
-    /**
-     * Initializes the controller class.
-     */
+    private SimpleBooleanProperty isStartPlayPressed;
+
+
+    //Initializes the controller class.
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         initializeNewGameOptions();
@@ -69,6 +70,11 @@ public class NewGameSceneController implements Initializable {
 
     @FXML
     private void startPlayPressed(ActionEvent event) {
+        isStartPlayPressed.set(true);
+    }
+    
+        public SimpleBooleanProperty getFinishedInit() {
+        return isStartPlayPressed;
     }
 
     private void initializeNewGameOptions() {
@@ -83,6 +89,7 @@ public class NewGameSceneController implements Initializable {
                 showNewGameFields();
             }
         });
+        isStartPlayPressed = new SimpleBooleanProperty(false);
     }
     
     private void updateSelectedFile(String fullFilePath) {
@@ -106,6 +113,7 @@ public class NewGameSceneController implements Initializable {
     }    
 
     private void showNewGameFields() {
+        clearErrorMsg();
         newGameFieldsPane.setVisible(true);
         playersInputData = FXCollections.observableArrayList();
         playerNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -122,6 +130,7 @@ public class NewGameSceneController implements Initializable {
         if (CURRENT_PLAYER_ID > MAX_PLAYERS_NUMBER) {
             addNewPlayerButton.setDisable(true);
         }
+        newPlayerName.clear();
     }
    
     private void handleLoadGameFromFile() {
