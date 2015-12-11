@@ -3,6 +3,7 @@ package javafxrummikub.scenes.newGame;
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -25,11 +26,13 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import logic.Game;
+import logic.GameDetails;
 import logic.PlayerDetails;
 import logic.persistency.FileDetails;
 import logic.persistency.GamePersistency;
 
 public class NewGameSceneController implements Initializable {
+
     @FXML
     private Label filePath;
     @FXML
@@ -45,7 +48,7 @@ public class NewGameSceneController implements Initializable {
     @FXML
     private Label errorMsgLabel;
     @FXML
-    private TableView<PlayerDetails> playersTable;    
+    private TableView<PlayerDetails> playersTable;
     @FXML
     private TableColumn<PlayerDetails, String> playerNameColumn;
     @FXML
@@ -58,8 +61,8 @@ public class NewGameSceneController implements Initializable {
     private CheckBox newPlayerIsHuman;
     @FXML
     private TextField newGameName;
-    
-    private ObservableList<PlayerDetails> playersInputData;    
+
+    private ObservableList<PlayerDetails> playersInputData;
     private static int CURRENT_PLAYER_ID = 1;
     private static final int MAX_PLAYERS_NUMBER = 4;
     private static final int MIN_PLAYERS_NUMBER = 2;
@@ -76,19 +79,19 @@ public class NewGameSceneController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         initializeNewGameOptions();
         initStartGameButton();
-    }    
+    }
 
     @FXML
     private void startPlayPressed(ActionEvent event) {
-        if (newGameOptions.getSelectedToggle() == loadGameFromFileBtn) {
-            isStartPlayPressed.set(true);
+        if (newGameOptions.getSelectedToggle() == createNewGameBtn) {
+            GameDetails gameDetails = new GameDetails(newGameName.getText(), playersInputData, null);
+            game = new Game(gameDetails);
         }
-        else {
-            //playersInputData
-        }
+
+        isStartPlayPressed.set(true);
     }
-    
-        public SimpleBooleanProperty isStartPlayPressed() {
+
+    public SimpleBooleanProperty isStartPlayPressed() {
         return isStartPlayPressed;
     }
 
@@ -106,14 +109,13 @@ public class NewGameSceneController implements Initializable {
             currNewPlayersNum.set(0);
             if (newGameOptions.getSelectedToggle() == loadGameFromFileBtn) {
                 handleLoadGameFromFile();
-            }
-            else if (newGameOptions.getSelectedToggle() == createNewGameBtn) {
+            } else if (newGameOptions.getSelectedToggle() == createNewGameBtn) {
                 showNewGameFields();
             }
         });
         isStartPlayPressed = new SimpleBooleanProperty(false);
     }
-    
+
     private void updateSelectedFile(String fullFilePath) {
         filePathInput.setText(fullFilePath);
         filePath.setVisible(true);
@@ -125,21 +127,20 @@ public class NewGameSceneController implements Initializable {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open rummikub game file");
         File file = fileChooser.showOpenDialog(loadGameFromFileBtn.getScene().getWindow());
-        
+
         if (file != null) {
             fileDetails = new FileDetails(file.getParent(), file.getName(), false);
             updateSelectedFile(file.getAbsolutePath());
         }
-        
+
         return fileDetails;
-    }    
+    }
 
     private void showNewGameFields() {
         newGameFieldsPane.setVisible(true);
         if (isPlayersFormInitialized) {
             clearNewGameForm();
-        }
-        else {
+        } else {
             initNewGameForm();
         }
     }
@@ -157,52 +158,55 @@ public class NewGameSceneController implements Initializable {
                 addNewPlayerButton.disableProperty().set(true);
             }
             newPlayerName.clear();
-        }
-        else {
+        } else {
             errorMsgLabel.setText("Player name \"" + playerName + "\" is already exist");
-        }        
+        }
     }
-    
+
     private void initNewGameForm() {
         playersInputData = FXCollections.observableArrayList();
         playerNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         isHumanColumn.setCellValueFactory(new PropertyValueFactory<>("isHuman"));
         playersTable.setItems(playersInputData);
-        isPlayersFormInitialized = true;        
+        isPlayersFormInitialized = true;
     }
-   
+
     private void handleLoadGameFromFile() {
         newGameFieldsPane.setVisible(false);
         FileDetails fileDetails = openFileChooser();
+        Thread thread = new Thread(()->loadGameFile(fileDetails));
+        thread.setDaemon(true);
+        thread.start();
+    }
+    
+    private void loadGameFile(FileDetails fileDetails) {
         if (fileDetails != null) {
             try {
                 game = GamePersistency.load(fileDetails);
-                clearErrorMsg();
+                Platform.runLater(this::clearErrorMsg);
                 gameLoadedSuccessfully.set(true);
+            } catch (Exception err) {
+                gameLoadedSuccessfully.set(true);
+                Platform.runLater(this::openFileFailure);
             }
-            catch (Exception err) {
-                gameLoadedSuccessfully.set(true);
-                openFileFailure();
-            }                    
-        }
-        else {
-            openFileFailure();            
+        } else {
+            Platform.runLater(this::openFileFailure);
         }
     }
-    
+
     private void openFileFailure() {
         newGameOptions.selectToggle(null);
         filePath.setVisible(false);
         filePathInput.setVisible(false);
-        
+
         errorMsgLabel.setText("Failed to load file, please try again");
     }
-    
+
     @FXML
     private void clearErrorMsg() {
         errorMsgLabel.setText("");
     }
-    
+
     public Game getGame() {
         return game;
     }
