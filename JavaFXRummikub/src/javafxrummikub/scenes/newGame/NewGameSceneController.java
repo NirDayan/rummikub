@@ -186,7 +186,6 @@ public class NewGameSceneController implements Initializable {
                 Platform.runLater(this::clearErrorMsg);
                 gameLoadedSuccessfully.set(true);
             } catch (Exception err) {
-                gameLoadedSuccessfully.set(true);
                 Platform.runLater(this::openFileFailure);
             }
         } else {
@@ -212,7 +211,7 @@ public class NewGameSceneController implements Initializable {
     }
 
     private boolean isPlayerNameExist(String playerName) {
-        return false;
+        return playersInputData.stream().anyMatch((player) -> (player.getName().toLowerCase().equals(playerName.toLowerCase())));
     }
 
     private void clearNewGameForm() {
