@@ -73,7 +73,7 @@ public class NewGameSceneController implements Initializable {
         isStartPlayPressed.set(true);
     }
     
-        public SimpleBooleanProperty getFinishedInit() {
+        public SimpleBooleanProperty isStartPlayPressed() {
         return isStartPlayPressed;
     }
 
@@ -160,5 +160,9 @@ public class NewGameSceneController implements Initializable {
     
     private void clearErrorMsg() {
         errorMsgLabel.setText("");
+    }
+    
+    public Game getGame() {
+        return game;
     }
 }

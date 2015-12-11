@@ -7,7 +7,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafxrummikub.scenes.gameplay.GamePlayScene;
+import javafxrummikub.scenes.gameplay.GamePlaySceneController;
 import javafxrummikub.scenes.newGame.NewGameSceneController;
 
 public class JavaFXRummikub extends Application {
@@ -26,7 +26,8 @@ public class JavaFXRummikub extends Application {
         } catch (IOException ex) {
             //TODO
         }
-        NewGameSceneController newGameController = getNewGameSceneController(fxmlLoader);
+        NewGameSceneController newGameSceneController = getNewGameSceneController(fxmlLoader);
+        registerGamePlayToStartPlayButton(newGameSceneController);
 
         if (newGameRoot != null) {
             Scene scene = new Scene(newGameRoot, 800, 600);
@@ -38,6 +39,25 @@ public class JavaFXRummikub extends Application {
         else {
             //TODO
         }
+    }
+
+    private void registerGamePlayToStartPlayButton(NewGameSceneController newGameSceneController) {
+        newGameSceneController.isStartPlayPressed().addListener((source, oldValue, isFinished) -> {
+            if (isFinished) {
+                FXMLLoader gamePlayFxmlLoader = getFXMLLoaderByRelativePath(GAME_PLAY_SCENE_FILE_PATH);
+                Parent gamePlayRoot = null;
+                try {
+                    gamePlayRoot = getParentByXmlLoader(gamePlayFxmlLoader);
+                } catch (IOException ex) {
+                    System.err.println("getParentByXmlLoader(gamePlayFxmlLoader) was failed");
+                }
+                Scene gamePlayScene = new Scene(gamePlayRoot, 800, 600);
+                GamePlaySceneController gamePlayConroller = getGamePlaySceneController(gamePlayFxmlLoader);
+                gamePlayConroller.setGame(newGameSceneController.getGame());
+                gamePlayConroller.initSceneByCurrentGame();
+                primaryStage.setScene(gamePlayScene);
+            }
+        });
     }
 
     public static void main(String[] args) {
@@ -56,23 +76,12 @@ public class JavaFXRummikub extends Application {
     }
 
     private NewGameSceneController getNewGameSceneController(FXMLLoader fxmlLoader) {
-        NewGameSceneController newGameSceneController = (NewGameSceneController) fxmlLoader.getController();
-        newGameSceneController.getFinishedInit().addListener((source, oldValue, isFinished) -> {
-            if (isFinished) {
-                primaryStage.setScene(getGamePlayScene());
-            }
-        });
-        return newGameSceneController;
+        NewGameSceneController controller = (NewGameSceneController) fxmlLoader.getController();
+        return controller;
     }
 
-    private Scene getGamePlayScene() {
-        FXMLLoader fxmlLoader = getFXMLLoaderByRelativePath(GAME_PLAY_SCENE_FILE_PATH);
-        Parent gamePlayRoot = null;
-        try {
-            gamePlayRoot = getParentByXmlLoader(fxmlLoader);
-        } catch (IOException ex) {
-            //TODO
-        }
-        return new GamePlayScene(gamePlayRoot, 800, 600);
+    private GamePlaySceneController getGamePlaySceneController(FXMLLoader fxmlLoader) {
+        GamePlaySceneController controller = (GamePlaySceneController) fxmlLoader.getController();
+        return controller;
     }
 }
