@@ -3,7 +3,9 @@ package javafxrummikub.scenes.newGame;
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -28,8 +30,6 @@ import logic.persistency.FileDetails;
 import logic.persistency.GamePersistency;
 
 public class NewGameSceneController implements Initializable {
-    private static int CURRENT_PLAYER_ID = 1;
-    private static final int MAX_PLAYERS_NUMBER = 4;
     @FXML
     private Label filePath;
     @FXML
@@ -45,8 +45,7 @@ public class NewGameSceneController implements Initializable {
     @FXML
     private Label errorMsgLabel;
     @FXML
-    private TableView<PlayerDetails> playersTable;
-    private ObservableList<PlayerDetails> playersInputData;
+    private TableView<PlayerDetails> playersTable;    
     @FXML
     private TableColumn<PlayerDetails, String> playerNameColumn;
     @FXML
@@ -57,20 +56,36 @@ public class NewGameSceneController implements Initializable {
     private TextField newPlayerName;
     @FXML
     private CheckBox newPlayerIsHuman;
+    @FXML
+    private TextField newGameName;
+    
+    private ObservableList<PlayerDetails> playersInputData;    
+    private static int CURRENT_PLAYER_ID = 1;
+    private static final int MAX_PLAYERS_NUMBER = 4;
+    private static final int MIN_PLAYERS_NUMBER = 2;
     private Game game;
     private ToggleGroup newGameOptions;
     private SimpleBooleanProperty isStartPlayPressed;
-
+    private boolean isPlayersFormInitialized;
+    private SimpleBooleanProperty gameLoadedSuccessfully;
+    private SimpleBooleanProperty newGameFormValid;
+    private SimpleIntegerProperty currNewPlayersNum;
 
     //Initializes the controller class.
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         initializeNewGameOptions();
+        initStartGameButton();
     }    
 
     @FXML
     private void startPlayPressed(ActionEvent event) {
-        isStartPlayPressed.set(true);
+        if (newGameOptions.getSelectedToggle() == loadGameFromFileBtn) {
+            isStartPlayPressed.set(true);
+        }
+        else {
+            //playersInputData
+        }
     }
     
         public SimpleBooleanProperty isStartPlayPressed() {
@@ -80,8 +95,15 @@ public class NewGameSceneController implements Initializable {
     private void initializeNewGameOptions() {
         newGameOptions = new ToggleGroup();
         loadGameFromFileBtn.setToggleGroup(newGameOptions);
-        createNewGameBtn.setToggleGroup(newGameOptions);      
+        createNewGameBtn.setToggleGroup(newGameOptions);
+        gameLoadedSuccessfully = new SimpleBooleanProperty(false);
+        newGameFormValid = new SimpleBooleanProperty(false);
+        currNewPlayersNum = new SimpleIntegerProperty(0);
+        newGameFormValid.bind(Bindings.and(currNewPlayersNum.greaterThanOrEqualTo(MIN_PLAYERS_NUMBER), newGameName.textProperty().isEqualTo("").not()));
         newGameOptions.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> ov, Toggle old_toggle, Toggle new_toggle) -> {
+            clearErrorMsg();
+            gameLoadedSuccessfully.set(false);
+            currNewPlayersNum.set(0);
             if (newGameOptions.getSelectedToggle() == loadGameFromFileBtn) {
                 handleLoadGameFromFile();
             }
@@ -113,24 +135,40 @@ public class NewGameSceneController implements Initializable {
     }    
 
     private void showNewGameFields() {
-        clearErrorMsg();
         newGameFieldsPane.setVisible(true);
-        playersInputData = FXCollections.observableArrayList();
-        playerNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        isHumanColumn.setCellValueFactory(new PropertyValueFactory<>("isHuman"));
-        playersTable.setItems(playersInputData);
+        if (isPlayersFormInitialized) {
+            clearNewGameForm();
+        }
+        else {
+            initNewGameForm();
+        }
     }
 
     @FXML
     private void addNewPlayer(ActionEvent event) {
         boolean isHuman = newPlayerIsHuman.isSelected();
         String playerName = newPlayerName.getText();
-        playersInputData.add(new PlayerDetails(CURRENT_PLAYER_ID, playerName, isHuman));
-        CURRENT_PLAYER_ID++;
-        if (CURRENT_PLAYER_ID > MAX_PLAYERS_NUMBER) {
-            addNewPlayerButton.setDisable(true);
+        if (!isPlayerNameExist(playerName)) {
+            playersInputData.add(new PlayerDetails(CURRENT_PLAYER_ID, playerName, isHuman));
+            CURRENT_PLAYER_ID++;
+            currNewPlayersNum.setValue(currNewPlayersNum.getValue() + 1);
+
+            if (CURRENT_PLAYER_ID > MAX_PLAYERS_NUMBER) {
+                addNewPlayerButton.disableProperty().set(true);
+            }
+            newPlayerName.clear();
         }
-        newPlayerName.clear();
+        else {
+            errorMsgLabel.setText("Player name \"" + playerName + "\" is already exist");
+        }        
+    }
+    
+    private void initNewGameForm() {
+        playersInputData = FXCollections.observableArrayList();
+        playerNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        isHumanColumn.setCellValueFactory(new PropertyValueFactory<>("isHuman"));
+        playersTable.setItems(playersInputData);
+        isPlayersFormInitialized = true;        
     }
    
     private void handleLoadGameFromFile() {
@@ -140,8 +178,10 @@ public class NewGameSceneController implements Initializable {
             try {
                 game = GamePersistency.load(fileDetails);
                 clearErrorMsg();
+                gameLoadedSuccessfully.set(true);
             }
             catch (Exception err) {
+                gameLoadedSuccessfully.set(true);
                 openFileFailure();
             }                    
         }
@@ -158,11 +198,31 @@ public class NewGameSceneController implements Initializable {
         errorMsgLabel.setText("Failed to load file, please try again");
     }
     
+    @FXML
     private void clearErrorMsg() {
         errorMsgLabel.setText("");
     }
     
     public Game getGame() {
         return game;
+    }
+
+    private boolean isPlayerNameExist(String playerName) {
+        return false;
+    }
+
+    private void clearNewGameForm() {
+        playersInputData.clear();
+        newPlayerName.clear();
+        newGameName.clear();
+        CURRENT_PLAYER_ID = 1;
+        addNewPlayerButton.disableProperty().set(false);
+    }
+
+    private void initStartGameButton() {
+        //start play button is enabled on the below cases:
+        // 1. Game loaded successfully from file
+        // 2. New game form is valid
+        startPlayButton.disableProperty().bind(Bindings.and(newGameFormValid.not(), gameLoadedSuccessfully.not()));
     }
 }
