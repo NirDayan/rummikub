@@ -15,7 +15,6 @@ public class JavaFXRummikub extends Application {
     Stage primaryStage;
     private static final String GAME_PLAY_SCENE_FILE_PATH = "/javafxrummikub/scenes/gameplay/GamePlayScene.fxml";
     private static final String NEW_GAME_SCENE_FILE_PATH = "/javafxrummikub/scenes/newGame/newGameScene.fxml";
-    private static final String STYLE_FILE_PATH = "/resources/style.css";
     private static final int SCENE_WIDTH = 800;
     private static final int SCENE_HEIGHT = 600;
 
