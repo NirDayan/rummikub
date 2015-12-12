@@ -78,6 +78,6 @@
     </BorderPane>
   </children>
   <stylesheets>
-    <URL value="@../../../resources/style.css" />
+    <URL value="@../../../resources/style/GamePlayScene.css" />
   </stylesheets>
 </AnchorPane>

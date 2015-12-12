@@ -15,6 +15,8 @@ public class JavaFXRummikub extends Application {
     private static final String GAME_PLAY_SCENE_FILE_PATH = "/javafxrummikub/scenes/gameplay/GamePlayScene.fxml";
     private static final String NEW_GAME_SCENE_FILE_PATH = "/javafxrummikub/scenes/newGame/newGameScene.fxml";
     private static final String STYLE_FILE_PATH = "/resources/style.css";
+    private static final int SCENE_WIDTH = 800;
+    private static final int SCENE_HEIGHT = 600;
 
     @Override
     public void start(Stage primaryStage) {
@@ -30,9 +32,8 @@ public class JavaFXRummikub extends Application {
         registerGamePlayToStartPlayButton(newGameSceneController);
 
         if (newGameRoot != null) {
-            Scene scene = new Scene(newGameRoot, 800, 600);
-            scene.getStylesheets().add(getClass().getResource(STYLE_FILE_PATH).toExternalForm());
-            primaryStage.setTitle("Wellcome to Rumikub!");
+            Scene scene = new Scene(newGameRoot, SCENE_WIDTH, SCENE_HEIGHT);
+            primaryStage.setTitle("Welcome to Rumikub!");
             primaryStage.setScene(scene);
             primaryStage.show();
         }
@@ -51,10 +52,9 @@ public class JavaFXRummikub extends Application {
                 } catch (IOException ex) {
                     System.err.println("getParentByXmlLoader(gamePlayFxmlLoader) was failed");
                 }
-                Scene gamePlayScene = new Scene(gamePlayRoot, 800, 600);
+                Scene gamePlayScene = new Scene(gamePlayRoot, SCENE_WIDTH, SCENE_HEIGHT);
                 GamePlaySceneController gamePlayConroller = getGamePlaySceneController(gamePlayFxmlLoader);
                 gamePlayConroller.setGame(newGameSceneController.getGame());
-                gamePlayConroller.initSceneByCurrentGame();
                 primaryStage.setScene(gamePlayScene);
             }
         });

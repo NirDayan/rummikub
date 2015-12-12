@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.net.*?>
 <?import java.lang.*?>
 <?import java.util.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
+<?scenebuilder-stylesheet ../../../resources/style/NewGameScene.css?>
 
 <AnchorPane id="newGamePane" minHeight="600.0" minWidth="800.0" prefHeight="600.0" prefWidth="800.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="javafxrummikub.scenes.newGame.NewGameSceneController">
   <children>
@@ -36,4 +38,7 @@
       </children>
     </AnchorPane>
   </children>
+  <stylesheets>
+    <URL value="@../../../resources/style/NewGameScene.css" />
+  </stylesheets>
 </AnchorPane>

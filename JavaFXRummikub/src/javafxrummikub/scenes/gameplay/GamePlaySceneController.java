@@ -34,21 +34,33 @@ public class GamePlaySceneController implements Initializable {
         playersNames.add(player1Name);
         playersNames.add(player2Name);
         playersNames.add(player3Name);
-        playersNames.add(player4Name);
+        playersNames.add(player4Name);        
     }
 
     public void setGame(Game game) {
         this.game = game;
+        initSceneByCurrentGame();        
     }
 
     public void initSceneByCurrentGame() {
         fillPlayersNames();
+        updateSceneWithCurrentPlayer(game.getCurrentPlayer());
     }
 
     private void fillPlayersNames() {
         List<Player> gamePlayers = game.getPlayers();
         for (int i = 0; i < gamePlayers.size(); i++) {
             playersNames.get(i).setText(gamePlayers.get(i).getName());
+        }
+    }
+
+    private void updateSceneWithCurrentPlayer(Player currentPlayer) {        
+        for (Label playerNameLabel : playersNames) {
+            if (playerNameLabel.getText().toLowerCase().equals(currentPlayer.getName().toLowerCase())) {
+                playerNameLabel.getStyleClass().add("currentPlayer");
+            } else {
+                playerNameLabel.getStyleClass().remove("currentPlayer");
+            }
         }
     }
 }
