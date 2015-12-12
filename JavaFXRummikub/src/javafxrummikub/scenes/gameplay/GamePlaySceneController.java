@@ -13,6 +13,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
+import javafxrummikub.components.TileView;
 import logic.Game;
 import logic.Player;
 import logic.tile.Tile;
@@ -46,7 +47,7 @@ public class GamePlaySceneController implements Initializable {
     private Game game;
     private List<Label> playersNames;
     private ObservableList<Tile> currentPlayerTilesData;
-    
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         initializeGamePlay();
@@ -57,18 +58,20 @@ public class GamePlaySceneController implements Initializable {
         playersNames.add(player1Name);
         playersNames.add(player2Name);
         playersNames.add(player3Name);
-        playersNames.add(player4Name);        
+        playersNames.add(player4Name);
         currentPlayerTilesData = FXCollections.observableArrayList();
     }
 
     public void setGame(Game game) {
         this.game = game;
-        initSceneByCurrentGame();        
+        initSceneByCurrentGame();
     }
 
     public void initSceneByCurrentGame() {
         fillPlayersNames();
         updateSceneWithCurrentPlayer();
+        TileView tileView = new TileView(game.getTilesDeck().pullTile());
+        tilesContainer.getChildren().add(tileView);
     }
 
     private void fillPlayersNames() {
@@ -80,11 +83,12 @@ public class GamePlaySceneController implements Initializable {
 
     private void updateSceneWithCurrentPlayer() {
         Player currentPlayer = game.getCurrentPlayer();
-        
+
         for (Label playerNameLabel : playersNames) {
             if (playerNameLabel.getText().toLowerCase().equals(currentPlayer.getName().toLowerCase())) {
                 playerNameLabel.getStyleClass().add("currentPlayer");
-            } else {
+            }
+            else {
                 playerNameLabel.getStyleClass().remove("currentPlayer");
             }
         }
@@ -92,7 +96,7 @@ public class GamePlaySceneController implements Initializable {
 
     @FXML
     private void handlePlayerTakeTileFromDeck(ActionEvent event) {
-        Player player = game.getCurrentPlayer();        
+        Player player = game.getCurrentPlayer();
         game.pullTileFromDeck(player.getID());
         //TODO: we need to think how to present it..
         //TODO: continue..

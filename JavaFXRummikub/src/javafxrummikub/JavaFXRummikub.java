@@ -7,7 +7,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javafxrummikub.scenes.gameplay.GamePlaySceneController;
 import javafxrummikub.scenes.newGame.NewGameSceneController;
 
@@ -34,6 +33,7 @@ public class JavaFXRummikub extends Application {
         if (newGameRoot != null) {
             Scene scene = new Scene(newGameRoot, SCENE_WIDTH, SCENE_HEIGHT);
             primaryStage.setTitle("Welcome to Rumikub!");
+            primaryStage.setResizable(false);
             primaryStage.setScene(scene);
             primaryStage.show();
         }
