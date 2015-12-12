@@ -228,4 +228,9 @@ public class NewGameSceneController implements Initializable {
         // 2. New game form is valid
         startPlayButton.disableProperty().bind(Bindings.and(newGameFormValid.not(), gameLoadedSuccessfully.not()));
     }
+    
+    @FXML
+    private void exitGameButtonPressed(ActionEvent event){
+        Platform.exit();
+    }
 }

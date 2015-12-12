@@ -2,6 +2,7 @@
 
 <?import java.net.*?>
 <?import java.lang.*?>
+<?import java.net.*?>
 <?import java.util.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -35,6 +36,7 @@
           </children>
         </AnchorPane>
         <Label fx:id="errorMsgLabel" maxWidth="-1.0" minHeight="-1.0" minWidth="-1.0" prefHeight="22.0" prefWidth="744.0" styleClass="error" text="" AnchorPane.bottomAnchor="48.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" />
+        <Button id="ExitButton" fx:id="exitGameButton" mnemonicParsing="false" onAction="#exitGameButtonPressed" text="Exit Game" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0" />
       </children>
     </AnchorPane>
   </children>
