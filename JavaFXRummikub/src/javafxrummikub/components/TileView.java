@@ -1,39 +1,52 @@
 package javafxrummikub.components;
 
 import javafx.geometry.Pos;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.text.TextAlignment;
 import javafxrummikub.utils.ImageUtils;
 import logic.tile.Tile;
 
-public class TileView extends HBox {
+public class TileView extends Label {
     private final Tile tile;
 
     public TileView(Tile tile) {
         this.tile = tile;
-        setSpacing(5);
         setAlignment(Pos.CENTER_LEFT);
-        getChildren().addAll(createImage(), createLabel());
-    }
-
-    private Label createLabel() {
-        Label result = new Label();
+        setGraphic(createImage());
         if (tile.isJoker()) {
-            result.setText("J");
+            setText("J");
         }
         else {
-            result.setText(String.format("%d", tile.getValue()));
+            setText(String.format("%d", tile.getValue()));
             Paint paint = getColorByTileData();
-            result.setTextFill(paint);
+            setTextFill(paint);
         }
-        return result;
     }
 
-    private ImageView createImage() {
+    public void drawTile() {
+        setTextAlignment(TextAlignment.CENTER);
+        setGraphic(createImage());
+        setContentDisplay(ContentDisplay.TOP);
+        if (tile.isJoker()) {
+            setText("J");
+        } else {
+            setText(String.format("%d", tile.getValue()));
+//            Paint paint = tilegetColorByTileData();
+//            setTextFill(paint);
+        }
+        getStyleClass().add("TileCellView");
+    }
+    
+    public boolean isJoker() {
+        return tile.isJoker();
+    }
+
+    public ImageView createImage() {
         ImageView result = new ImageView(getImage());
         final double heightWidthRatio = 0.7018;
         int tileHeight = 70;
@@ -59,5 +72,9 @@ public class TileView extends HBox {
             default:
                 return Color.BLACK;
         }
+    }
+
+    public int getValue() {
+        return tile.getValue();
     }
 }

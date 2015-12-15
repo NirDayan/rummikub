@@ -13,3 +13,7 @@
 .currentPlayer {
     -fx-background-color: lightgreen;
 }
+
+.currentPlayerTilesView, .TileCellView {
+    -fx-background-color: transparent;
+}
