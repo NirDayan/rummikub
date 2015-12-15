@@ -14,21 +14,13 @@ public class TileView extends ListCell<Tile> {
         super.updateItem(tile, empty);
         if (tile != null) {
             setTextAlignment(TextAlignment.CENTER);
-            setGraphic(createImage());
-            setContentDisplay(ContentDisplay.TOP);
-            if (tile.isJoker()) {
-                setText("J");
-            } else {
-                setText(String.format("%d", tile.getValue()));
-//            Paint paint = tilegetColorByTileData();
-//            setTextFill(paint);
-            }
+            setGraphic(createImage(tile));
             getStyleClass().add("TileCellView");
         }
     }
 
-    public ImageView createImage() {
-        ImageView result = new ImageView(getImage());
+    private ImageView createImage(Tile tile) {
+        ImageView result = new ImageView(getImage(tile));
         final double heightWidthRatio = 0.7018;
         int tileHeight = 70;
         result.setFitHeight(tileHeight);
@@ -36,7 +28,26 @@ public class TileView extends ListCell<Tile> {
         return result;
     }
 
-    private Image getImage() {
-        return ImageUtils.getImage("empty_tile.png");
+    private Image getImage(Tile tile) {
+        String color = null;
+        switch(tile.getColor()) {
+            case Blue:
+                color = "blue";
+                break;
+            case Red:
+                color = "red";
+                break;
+            case Yellow:
+                color = "yellow";
+                break;
+            case Black:
+                color = "black";
+                break;
+        }
+        if (tile.isJoker()) {
+            return ImageUtils.getImage("tiles/" + color + "/joker" + ".png");
+        }
+        
+        return ImageUtils.getImage("tiles/" + color + "/" + tile.getValue() + ".png");
     }
 }
