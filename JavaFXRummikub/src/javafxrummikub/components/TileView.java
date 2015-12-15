@@ -1,6 +1,5 @@
 package javafxrummikub.components;
 
-import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ListCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
