@@ -128,10 +128,6 @@ public class GamePlaySceneController implements Initializable {
     }
 
     @FXML
-    private void handleOpenMenu(ActionEvent event) {
-    }
-
-    @FXML
     private void handleSaveGame(ActionEvent event) {
     }
 
