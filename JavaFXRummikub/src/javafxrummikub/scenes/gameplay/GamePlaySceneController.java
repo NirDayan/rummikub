@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -15,7 +16,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
+import javafx.stage.Stage;
 import javafxrummikub.components.TileView;
+import javafxrummikub.utils.CustomizablePromptDialog;
 import logic.Game;
 import logic.Player;
 import logic.tile.Tile;
@@ -50,6 +53,7 @@ public class GamePlaySceneController implements Initializable {
     private Game game;
     private List<Label> playersNames;
     private ObservableList<Tile> currentPlayerTilesData;
+    private SimpleBooleanProperty isMainMenuButtonPressed;
     private ListView<Tile> currentPlayerTilesView;
 
     @Override
@@ -75,6 +79,7 @@ public class GamePlaySceneController implements Initializable {
         playersNames.add(player3Name);
         playersNames.add(player4Name);
         initCurrentPlayerTilesView();
+        isMainMenuButtonPressed = new SimpleBooleanProperty(false);
     }
 
     public void setGame(Game game) {
@@ -116,5 +121,19 @@ public class GamePlaySceneController implements Initializable {
         game.pullTileFromDeck(player.getID());
         //TODO: we need to think how to present it..
         //TODO: continue..
+    }
+
+    @FXML
+    private void mainMenuButtonPressed(ActionEvent event) {
+        Stage stage = (Stage) mainMenuButton.getScene().getWindow();
+        String answer = CustomizablePromptDialog.show(
+                stage, "Are you sure you want to exit? All unsaved data will be lost.", "Exit", "Stay");
+        if (answer.equals("Exit")) {
+               isMainMenuButtonPressed.set(true);
+        }
+    }
+    
+    public SimpleBooleanProperty IsMainMenuButtonPressed(){
+        return isMainMenuButtonPressed;
     }
 }
