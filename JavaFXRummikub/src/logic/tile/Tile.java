@@ -7,7 +7,7 @@ public class Tile implements Comparable<Tile> {
     protected Color color;
     protected int value;
 
-    Tile(Color color, int value) {
+    public Tile(Color color, int value) {
         this.color = color;
         this.value = value;
     }

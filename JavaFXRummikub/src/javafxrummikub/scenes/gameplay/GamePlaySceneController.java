@@ -10,16 +10,11 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Orientation;
-import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
-import javafx.scene.text.TextAlignment;
-import javafx.util.Callback;
 import javafxrummikub.components.TileView;
 import logic.Game;
 import logic.Player;
@@ -54,8 +49,8 @@ public class GamePlaySceneController implements Initializable {
 
     private Game game;
     private List<Label> playersNames;
-    private ObservableList<TileView> currentPlayerTilesData;
-    private ListView<TileView> currentPlayerTilesView;
+    private ObservableList<Tile> currentPlayerTilesData;
+    private ListView<Tile> currentPlayerTilesView;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -66,30 +61,10 @@ public class GamePlaySceneController implements Initializable {
         currentPlayerTilesView = new ListView<>();
         currentPlayerTilesView.setOrientation(Orientation.HORIZONTAL);
         currentPlayerTilesView.setPrefWidth(780);
-        currentPlayerTilesView.setCellFactory((ListView<TileView> param) -> new TileViewCell());
+        currentPlayerTilesView.setCellFactory((ListView<Tile> param) -> new TileView());
         currentPlayerTilesView.setItems(currentPlayerTilesData);
         currentPlayerTilesView.getStyleClass().add("currentPlayerTilesView");
         tilesContainer.getChildren().add(currentPlayerTilesView);
-    }
-
-    public class TileViewCell extends ListCell<TileView> {
-        @Override
-        public void updateItem(TileView tile, boolean empty) {
-            super.updateItem(tile, empty);
-            if (tile != null) {
-                setTextAlignment(TextAlignment.CENTER);
-                setGraphic(tile.createImage());
-                setContentDisplay(ContentDisplay.TOP);
-                if (tile.isJoker()) {
-                    setText("J");
-                } else {
-                    setText(String.format("%d", tile.getValue()));
-//            Paint paint = tilegetColorByTileData();
-//            setTextFill(paint);
-                }
-                getStyleClass().add("TileCellView");
-            }
-        }
     }
 
     private void initializeGamePlay() {
@@ -110,7 +85,6 @@ public class GamePlaySceneController implements Initializable {
     public void initSceneByCurrentGame() {
         fillPlayersNames();
         updateSceneWithCurrentPlayer();
-        TileView tileView = new TileView(game.getTilesDeck().pullTile());
     }
 
     private void fillPlayersNames() {
@@ -132,7 +106,7 @@ public class GamePlaySceneController implements Initializable {
         }
 
         game.getCurrentPlayer().getTiles().stream().forEach((tile) -> {
-            currentPlayerTilesData.add(new TileView(tile));
+            currentPlayerTilesData.add(tile);
         });
     }
 
