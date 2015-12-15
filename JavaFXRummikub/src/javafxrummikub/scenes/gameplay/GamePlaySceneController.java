@@ -110,17 +110,37 @@ public class GamePlaySceneController implements Initializable {
             }
         }
 
+        updateCurrentPlayerTilesView();
+    }
+    
+    private void updateCurrentPlayerTilesView() {
+        currentPlayerTilesData.clear();
         game.getCurrentPlayer().getTiles().stream().forEach((tile) -> {
             currentPlayerTilesData.add(tile);
         });
     }
 
     @FXML
-    private void handlePlayerTakeTileFromDeck(ActionEvent event) {
+    private void handleTakeTileFromDeck(ActionEvent event) {
         Player player = game.getCurrentPlayer();
         game.pullTileFromDeck(player.getID());
-        //TODO: we need to think how to present it..
-        //TODO: continue..
+        updateCurrentPlayerTilesView();
+    }
+
+    @FXML
+    private void handleOpenMenu(ActionEvent event) {
+    }
+
+    @FXML
+    private void handleSaveGame(ActionEvent event) {
+    }
+
+    @FXML
+    private void handleResign(ActionEvent event) {
+    }
+
+    @FXML
+    private void handlePlayerFinishTurn(ActionEvent event) {
     }
 
     @FXML
