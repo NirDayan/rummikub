@@ -19,7 +19,7 @@ public class JavaFXRummikub extends Application {
     private static final String WINNER_SCENE_FILE_PATH = "/javafxrummikub/scenes/winner/winnerScene.fxml";
 
     private static final int SCENE_WIDTH = 800;
-    private static final int SCENE_HEIGHT = 600;
+    private static final int SCENE_HEIGHT = 800;
     Stage primaryStage;
 
     public static void main(String[] args) {

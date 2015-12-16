@@ -100,7 +100,7 @@
             <tile color="YELLOW" value="9"/>
             <tile color="YELLOW" value="10"/>
             <tile color="BLACK" value="0"/>
-            <tile color="BLACK" value="0"/>
+            <tile color="RED" value="0"/>
             <tile color="YELLOW" value="13"/>
         </sequence>
         <sequence>

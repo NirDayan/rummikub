@@ -15,16 +15,18 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafxrummikub.components.TileView;
 import javafxrummikub.utils.CustomizablePromptDialog;
 import logic.Game;
 import logic.Player;
+import logic.tile.Sequence;
 import logic.tile.Tile;
 
 public class GamePlaySceneController implements Initializable {
-
+    private static final int TILES_LIST_VIEW_WIDTH = 780;
     @FXML
     private Label player1Name;
     @FXML
@@ -49,6 +51,8 @@ public class GamePlaySceneController implements Initializable {
     private Button finishTurnButton;
     @FXML
     private HBox tilesContainer;
+    @FXML
+    private VBox boardContainer;
 
     private Game game;
     private List<Label> playersNames;
@@ -57,6 +61,8 @@ public class GamePlaySceneController implements Initializable {
     private ListView<Tile> currentPlayerTilesView;
     private SimpleBooleanProperty isCurrPlayerFinished;
     private SimpleBooleanProperty isGameOver;
+    private List<ObservableList<Tile>> boardData;
+    private List<ListView<Tile>> boardView;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -64,24 +70,20 @@ public class GamePlaySceneController implements Initializable {
     }
 
     private void initCurrentPlayerTilesView() {
-        currentPlayerTilesView = new ListView<>();
-        currentPlayerTilesView.setOrientation(Orientation.HORIZONTAL);
-        currentPlayerTilesView.setPrefWidth(780);
-        currentPlayerTilesView.setCellFactory((ListView<Tile> param) -> new TileView());
-        currentPlayerTilesView.setItems(currentPlayerTilesData);
-        currentPlayerTilesView.getStyleClass().add("currentPlayerTilesView");
-        tilesContainer.getChildren().add(currentPlayerTilesView);
+        currentPlayerTilesData = FXCollections.observableArrayList();
+        ListView<Tile> playerTilesView = getTilesListView(currentPlayerTilesData);
+        tilesContainer.getChildren().add(playerTilesView);
     }
 
     private void initializeGamePlay() {
-        currentPlayerTilesData = FXCollections.observableArrayList();
         playersNames = new ArrayList<>(4);
         playersNames.add(player1Name);
         playersNames.add(player2Name);
         playersNames.add(player3Name);
         playersNames.add(player4Name);
-        initCurrentPlayerTilesView();
         isMainMenuButtonPressed = new SimpleBooleanProperty(false);
+        initBoard();        
+        initCurrentPlayerTilesView();
         isCurrPlayerFinished = new SimpleBooleanProperty(false);
         isGameOver = new SimpleBooleanProperty(false);
         registerFinishTurnProperty();
@@ -95,6 +97,7 @@ public class GamePlaySceneController implements Initializable {
     public void initSceneByCurrentGame() {
         fillPlayersNames();
         updateSceneWithCurrentPlayer();
+        updateBoard();
     }
 
     private void fillPlayersNames() {
@@ -158,6 +161,37 @@ public class GamePlaySceneController implements Initializable {
 
     public SimpleBooleanProperty IsMainMenuButtonPressed() {
         return isMainMenuButtonPressed;
+    }
+
+    private void updateBoard() {
+        ObservableList<Tile> seqBinding;
+        ListView<Tile> seqView;
+        boardData.clear();
+        boardView.clear();
+        
+        for (Sequence sequence : game.getBoard().getSequences()) {
+            seqBinding = FXCollections.observableArrayList(sequence.toList());
+            boardData.add(seqBinding);
+            seqView = getTilesListView(seqBinding);
+            boardView.add(seqView);
+        }
+        boardContainer.getChildren().addAll(boardView);
+    }
+
+    private void initBoard() {
+        boardData = new ArrayList<>();
+        boardView = new ArrayList<>();
+    }
+
+    private ListView<Tile> getTilesListView(ObservableList<Tile> tiles) {
+        ListView<Tile> tilesListView = new ListView<>();
+        tilesListView.setOrientation(Orientation.HORIZONTAL);
+        tilesListView.setPrefWidth(TILES_LIST_VIEW_WIDTH);
+        tilesListView.setCellFactory((ListView<Tile> param) -> new TileView());
+        tilesListView.setItems(tiles);
+        tilesListView.getStyleClass().add("TilesView");
+        
+        return tilesListView;
     }
 
     private void registerFinishTurnProperty() {
