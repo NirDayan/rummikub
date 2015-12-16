@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.net.*?>
+<?import java.util.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane id="winnerMain" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="javafxrummikub.scenes.winner.WinnerSceneController">
+  <children>
+    <BorderPane prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <bottom>
+        <Button fx:id="backToMainMenuButton" cancelButton="false" contentDisplay="CENTER" defaultButton="true" mnemonicParsing="false" onAction="#onBackToMainMenu" text="Back To Main menu" textAlignment="CENTER" BorderPane.alignment="CENTER">
+          <font>
+            <Font name="System Bold" size="14.0" />
+          </font>
+        </Button>
+      </bottom>
+      <center>
+        <Label fx:id="winnerMsg" alignment="CENTER" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="131.0" prefWidth="267.0" text="Game Over! There is no winner." textAlignment="CENTER" textFill="linear-gradient(from 0.0% 0.0% to 100.0% 100.0%, 0xff0000ff 0.0%, 0xff5f00ff 50.0%, 0xff0000ff 100.0%)" textOverrun="ELLIPSIS" underline="false" wrapText="false" BorderPane.alignment="CENTER">
+          <effect>
+            <Glow level="0.469811320754717" />
+          </effect>
+          <font>
+            <Font name="Gill Sans Ultra Bold" size="30.0" />
+          </font>
+        </Label>
+      </center>
+      <padding>
+        <Insets bottom="50.0" />
+      </padding>
+    </BorderPane>
+  </children>
+  <stylesheets>
+    <URL value="@../../../resources/style/WinnerScene.css" />
+  </stylesheets>
+</AnchorPane>

@@ -55,6 +55,8 @@ public class GamePlaySceneController implements Initializable {
     private ObservableList<Tile> currentPlayerTilesData;
     private SimpleBooleanProperty isMainMenuButtonPressed;
     private ListView<Tile> currentPlayerTilesView;
+    private SimpleBooleanProperty isCurrPlayerFinished;
+    private SimpleBooleanProperty isGameOver;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -80,6 +82,9 @@ public class GamePlaySceneController implements Initializable {
         playersNames.add(player4Name);
         initCurrentPlayerTilesView();
         isMainMenuButtonPressed = new SimpleBooleanProperty(false);
+        isCurrPlayerFinished = new SimpleBooleanProperty(false);
+        isGameOver = new SimpleBooleanProperty(false);
+        registerFinishTurnProperty();
     }
 
     public void setGame(Game game) {
@@ -112,7 +117,7 @@ public class GamePlaySceneController implements Initializable {
 
         updateCurrentPlayerTilesView();
     }
-    
+
     private void updateCurrentPlayerTilesView() {
         currentPlayerTilesData.clear();
         game.getCurrentPlayer().getTiles().stream().forEach((tile) -> {
@@ -121,35 +126,61 @@ public class GamePlaySceneController implements Initializable {
     }
 
     @FXML
-    private void handleTakeTileFromDeck(ActionEvent event) {
+    private void onPullTileButton(ActionEvent event) {
         Player player = game.getCurrentPlayer();
         game.pullTileFromDeck(player.getID());
         updateCurrentPlayerTilesView();
     }
 
     @FXML
-    private void handleSaveGame(ActionEvent event) {
+    private void onSaveGameButton(ActionEvent event) {
     }
 
     @FXML
-    private void handleResign(ActionEvent event) {
+    private void onResignButton(ActionEvent event) {
+        game.playerResign(game.getCurrentPlayer().getID());
+        isCurrPlayerFinished.set(true);
     }
 
     @FXML
-    private void handlePlayerFinishTurn(ActionEvent event) {
+    private void onFinishTurnButton(ActionEvent event) {
     }
 
     @FXML
-    private void mainMenuButtonPressed(ActionEvent event) {
+    private void onMainMenuButton(ActionEvent event) {
         Stage stage = (Stage) mainMenuButton.getScene().getWindow();
         String answer = CustomizablePromptDialog.show(
                 stage, "Are you sure you want to exit? All unsaved data will be lost.", "Exit", "Stay");
         if (answer.equals("Exit")) {
-               isMainMenuButtonPressed.set(true);
+            isMainMenuButtonPressed.set(true);
         }
     }
-    
-    public SimpleBooleanProperty IsMainMenuButtonPressed(){
+
+    public SimpleBooleanProperty IsMainMenuButtonPressed() {
         return isMainMenuButtonPressed;
+    }
+
+    private void registerFinishTurnProperty() {
+        isCurrPlayerFinished.addListener((source, oldValue, isPlayerFinished) -> {
+            if (isPlayerFinished == true) {
+                game.moveToNextPlayer();
+                updateSceneWithCurrentPlayer();
+                isCurrPlayerFinished.set(false);
+                if (game.checkIsGameOver())
+                    isGameOver.set(true);
+            }
+        });
+    }
+
+    public SimpleBooleanProperty IsGameOver() {
+        return isGameOver;
+    }
+
+    public String getWinnerName() {
+        if (game.getWinner() != null) {
+            return game.getWinner().getName();
+        } else {
+            return null;
+        }
     }
 }
