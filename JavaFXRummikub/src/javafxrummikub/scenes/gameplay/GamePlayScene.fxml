@@ -24,7 +24,14 @@
         </FlowPane>
       </bottom>
       <center>
-        <VBox id="board" fx:id="boardContainer" prefHeight="-1.0" prefWidth="-1.0" />
+        <BorderPane prefHeight="200.0" prefWidth="200.0">
+          <bottom>
+            <Label fx:id="errorMsgLabel" prefWidth="676.0" styleClass="error" text="" />
+          </bottom>
+          <center>
+            <VBox id="board" fx:id="boardContainer" prefHeight="-1.0" prefWidth="-1.0" />
+          </center>
+        </BorderPane>
       </center>
       <right>
         <VBox id="Actions List" prefHeight="-1.0" prefWidth="100.0" spacing="40.0">

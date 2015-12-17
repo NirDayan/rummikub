@@ -4,6 +4,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -63,6 +66,7 @@ public class GamePlaySceneController implements Initializable {
     private SimpleBooleanProperty isGameOver;
     private List<ObservableList<Tile>> boardData;
     private List<ListView<Tile>> boardView;
+    private boolean isBoardChanged = false;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -82,7 +86,7 @@ public class GamePlaySceneController implements Initializable {
         playersNames.add(player3Name);
         playersNames.add(player4Name);
         isMainMenuButtonPressed = new SimpleBooleanProperty(false);
-        initBoard();        
+        initBoard();
         initCurrentPlayerTilesView();
         isCurrPlayerFinished = new SimpleBooleanProperty(false);
         isGameOver = new SimpleBooleanProperty(false);
@@ -133,6 +137,11 @@ public class GamePlaySceneController implements Initializable {
         Player player = game.getCurrentPlayer();
         game.pullTileFromDeck(player.getID());
         updateCurrentPlayerTilesView();
+        if (isBoardChanged) {
+            game.getBoard().restoreFromBackup();
+            updateBoard();
+        }
+        isCurrPlayerFinished.set(true);
     }
 
     @FXML
@@ -142,11 +151,24 @@ public class GamePlaySceneController implements Initializable {
     @FXML
     private void onResignButton(ActionEvent event) {
         game.playerResign(game.getCurrentPlayer().getID());
+        
         isCurrPlayerFinished.set(true);
     }
 
     @FXML
     private void onFinishTurnButton(ActionEvent event) {
+        if (isBoardChanged == false) {
+            showErrorMsg("No Changes have been made to the board");
+            return;
+        }
+        if (game.getBoard().isValid() == false) {
+            Player currentPlayer = game.getCurrentPlayer();
+            showErrorMsg("Board is invalid. " + currentPlayer.getName() + " is punished.");
+            game.punishPlayer(currentPlayer.getID());
+            game.getBoard().restoreFromBackup();
+            updateBoard();
+        }
+        isCurrPlayerFinished.set(true);
     }
 
     @FXML
@@ -168,7 +190,7 @@ public class GamePlaySceneController implements Initializable {
         ListView<Tile> seqView;
         boardData.clear();
         boardView.clear();
-        
+
         for (Sequence sequence : game.getBoard().getSequences()) {
             seqBinding = FXCollections.observableArrayList(sequence.toList());
             boardData.add(seqBinding);
@@ -190,18 +212,21 @@ public class GamePlaySceneController implements Initializable {
         tilesListView.setCellFactory((ListView<Tile> param) -> new TileView());
         tilesListView.setItems(tiles);
         tilesListView.getStyleClass().add("TilesView");
-        
+
         return tilesListView;
     }
 
     private void registerFinishTurnProperty() {
         isCurrPlayerFinished.addListener((source, oldValue, isPlayerFinished) -> {
             if (isPlayerFinished == true) {
-                game.moveToNextPlayer();
-                updateSceneWithCurrentPlayer();
-                isCurrPlayerFinished.set(false);
                 if (game.checkIsGameOver())
                     isGameOver.set(true);
+                game.moveToNextPlayer();
+                while (game.getCurrentPlayer().isResign()){
+                    game.moveToNextPlayer();
+                }
+                updateSceneWithCurrentPlayer();
+                isCurrPlayerFinished.set(false);
             }
         });
     }
@@ -216,5 +241,24 @@ public class GamePlaySceneController implements Initializable {
         } else {
             return null;
         }
+    }
+
+    private void showErrorMsg(String msg) {
+        final int timeToShowErrorInMsec = 3000;
+        errorMsgLabel.setText(msg);
+
+        Thread clearMsgThread = new Thread(() -> {
+            try {
+                Thread.sleep(timeToShowErrorInMsec);
+            } catch (InterruptedException ex) {}
+            finally { Platform.runLater(this::clearErrorMsg); }
+        });
+        clearMsgThread.setDaemon(true);
+        clearMsgThread.start();
+    }
+    
+    private void clearErrorMsg()
+    {
+        errorMsgLabel.setText("");
     }
 }

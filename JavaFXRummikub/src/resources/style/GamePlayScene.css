@@ -22,3 +22,9 @@
     visibility:hidden;
     -fx-background-color: transparent;
 }
+
+.error {
+    -fx-font-size: 14px;
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-text-fill: red;
+}
