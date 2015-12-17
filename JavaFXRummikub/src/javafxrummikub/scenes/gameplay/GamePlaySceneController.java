@@ -150,7 +150,14 @@ public class GamePlaySceneController implements Initializable {
 
     @FXML
     private void onResignButton(ActionEvent event) {
-        game.playerResign(game.getCurrentPlayer().getID());
+        Player currentPlayer = game.getCurrentPlayer();
+        game.playerResign(currentPlayer.getID());
+
+        for (Label playerNameLabel : playersNames) {
+            if (playerNameLabel.getText().toLowerCase().equals(currentPlayer.getName().toLowerCase())) {
+                playerNameLabel.setText("");
+            }
+        }
         
         isCurrPlayerFinished.set(true);
     }
@@ -222,7 +229,7 @@ public class GamePlaySceneController implements Initializable {
                 if (game.checkIsGameOver())
                     isGameOver.set(true);
                 game.moveToNextPlayer();
-                while (game.getCurrentPlayer().isResign()){
+                while (game.getCurrentPlayer().isResign()) {
                     game.moveToNextPlayer();
                 }
                 updateSceneWithCurrentPlayer();
@@ -250,15 +257,16 @@ public class GamePlaySceneController implements Initializable {
         Thread clearMsgThread = new Thread(() -> {
             try {
                 Thread.sleep(timeToShowErrorInMsec);
-            } catch (InterruptedException ex) {}
-            finally { Platform.runLater(this::clearErrorMsg); }
+            } catch (InterruptedException ex) {
+            } finally {
+                Platform.runLater(this::clearErrorMsg);
+            }
         });
         clearMsgThread.setDaemon(true);
         clearMsgThread.start();
     }
-    
-    private void clearErrorMsg()
-    {
+
+    private void clearErrorMsg() {
         errorMsgLabel.setText("");
     }
 }
