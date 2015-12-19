@@ -5,8 +5,10 @@ import java.net.URL;
 import javafx.application.Application;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafxrummikub.scenes.gameplay.GamePlaySceneController;
 import javafxrummikub.scenes.newGame.NewGameSceneController;
@@ -18,9 +20,11 @@ public class JavaFXRummikub extends Application {
     private static final String NEW_GAME_SCENE_FILE_PATH = "/javafxrummikub/scenes/newGame/newGameScene.fxml";
     private static final String WINNER_SCENE_FILE_PATH = "/javafxrummikub/scenes/winner/winnerScene.fxml";
 
-    private static final int SCENE_WIDTH = 800;
-    private static final int SCENE_HEIGHT = 800;
-    Stage primaryStage;
+    private int sceneWidth;
+    private int sceneHeight;
+    private static final int WIDTH_PADDING = 200;
+    private static final int HEIGHT_PADDING = 50;
+    private Stage primaryStage;
 
     public static void main(String[] args) {
         launch(args);
@@ -29,6 +33,9 @@ public class JavaFXRummikub extends Application {
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
+        Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+        sceneWidth = (int) (screenBounds.getWidth() -WIDTH_PADDING);
+        sceneHeight = (int) (screenBounds.getHeight() - HEIGHT_PADDING);
         Scene newGameScene = getNewGameScene();
 
         primaryStage.setTitle("Welcome to Rumikub!");
@@ -44,7 +51,7 @@ public class JavaFXRummikub extends Application {
         NewGameSceneController newGameSceneController = getNewGameSceneController(fxmlLoader);
         registerGamePlayToStartPlayButton(newGameSceneController);
         if (newGameRoot != null) {
-            newGameScene = new Scene(newGameRoot, SCENE_WIDTH, SCENE_HEIGHT);
+            newGameScene = new Scene(newGameRoot, sceneWidth, sceneHeight);
         } else {
             //TODO
         }
@@ -73,7 +80,7 @@ public class JavaFXRummikub extends Application {
         gamePlayConroller.setGame(game);
         registerNewGameSceneToMainMenuButton(gamePlayConroller.IsMainMenuButtonPressed());
         registerWinnerSceneToIsGameOver(gamePlayConroller);
-        return new Scene(gamePlayRoot, SCENE_WIDTH, SCENE_HEIGHT);
+        return new Scene(gamePlayRoot, sceneWidth, sceneHeight);
     }
 
     private GamePlaySceneController getGamePlaySceneController(FXMLLoader fxmlLoader) {
@@ -103,7 +110,7 @@ public class JavaFXRummikub extends Application {
         WinnerSceneController winnerSceneController = getWinnerSceneController(winnerSceneFxmlLoader);
         winnerSceneController.setWinnerName(winnerName);
         registerNewGameSceneToMainMenuButton(winnerSceneController.isMainMenuButtonPressed());
-        return new Scene(winnerSceneRoot, SCENE_WIDTH, SCENE_HEIGHT);
+        return new Scene(winnerSceneRoot, sceneWidth, sceneHeight);
     }
 
     private WinnerSceneController getWinnerSceneController(FXMLLoader winnerSceneFxmlLoader) {
