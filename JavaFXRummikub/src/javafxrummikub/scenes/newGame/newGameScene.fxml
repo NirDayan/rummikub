@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.net.*?>
 <?import java.lang.*?>
 <?import java.net.*?>
 <?import java.util.*?>
@@ -28,7 +27,7 @@
               </columns>
             </TableView>
             <Label prefHeight="21.0" prefWidth="74.0" text="Player name:" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="232.0" />
-            <TextField fx:id="newPlayerName" onKeyPressed="#clearErrorMsg" prefWidth="200.0" AnchorPane.leftAnchor="74.0" AnchorPane.topAnchor="232.0" />
+            <TextField fx:id="newPlayerName" onAction="#addNewPlayer" onKeyPressed="#clearErrorMsg" prefWidth="200.0" AnchorPane.leftAnchor="74.0" AnchorPane.topAnchor="232.0" />
             <CheckBox fx:id="newPlayerIsHuman" contentDisplay="LEFT" layoutX="281.0" layoutY="232.0" mnemonicParsing="false" prefHeight="21.0" prefWidth="74.00009999999747" text="Is human" textAlignment="LEFT" />
             <Button fx:id="addNewPlayerButton" layoutX="362.0" layoutY="232.0" mnemonicParsing="false" onAction="#addNewPlayer" text="Add" />
             <Label prefHeight="21.0" prefWidth="74.0" text="Game name:" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="14.0" />

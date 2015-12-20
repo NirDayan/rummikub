@@ -143,6 +143,7 @@ public class GamePersistency {
         xsdPlayer.setName(gamePlayer.getName());
         xsdPlayer.setType(getXSDPlayerTypeFromGamePlayer(gamePlayer));
         xsdPlayer.setTiles(convertGameTilesToXSDPlayerTiles(gamePlayer.getTiles()));
+        xsdPlayer.setPlacedFirstSequence(gamePlayer.isFirstStep() == false);
         return xsdPlayer;
     }
 

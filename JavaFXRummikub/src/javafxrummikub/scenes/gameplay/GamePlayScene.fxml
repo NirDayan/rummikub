@@ -9,9 +9,9 @@
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane id="gamePlayPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="800.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="javafxrummikub.scenes.gameplay.GamePlaySceneController">
+<AnchorPane id="gamePlayPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="javafxrummikub.scenes.gameplay.GamePlaySceneController">
   <children>
-    <BorderPane layoutX="14.0" layoutY="14.0" prefHeight="750.0" prefWidth="772.0">
+    <BorderPane prefHeight="572.0" prefWidth="772.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
       <bottom>
         <FlowPane id="PlayerStand" prefHeight="155.0" prefWidth="772.0">
           <children>

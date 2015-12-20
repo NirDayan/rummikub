@@ -86,6 +86,7 @@ public class NewGameSceneController implements Initializable {
         if (newGameOptions.getSelectedToggle() == createNewGameBtn) {
             GameDetails gameDetails = new GameDetails(newGameName.getText(), playersInputData, null);
             game = new Game(gameDetails);
+            game.reset();
         }
 
         isStartPlayPressed.set(true);
