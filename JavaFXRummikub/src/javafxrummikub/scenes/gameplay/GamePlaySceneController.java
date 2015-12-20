@@ -19,7 +19,9 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
@@ -61,6 +63,8 @@ public class GamePlaySceneController implements Initializable {
     private HBox tilesContainer;
     @FXML
     private VBox boardContainer;
+    @FXML
+    private ScrollPane boardScrollPane;
 
     private Game game;
     private List<Label> playersNames;
@@ -159,6 +163,8 @@ public class GamePlaySceneController implements Initializable {
         isCurrPlayerFinished = new SimpleBooleanProperty(false);
         isGameOver = new SimpleBooleanProperty(false);
         registerFinishTurnProperty();
+
+        boardScrollPane.setContent(boardContainer);
     }
 
     private void initBoard() {
@@ -304,7 +310,7 @@ public class GamePlaySceneController implements Initializable {
             showErrorMsg("Game saving was failed.");
         }
     }
-    
+
     private FileDetails openFileChooserToSave() {
         FileDetails fileDetails = null;
         FileChooser fileChooser = new FileChooser();

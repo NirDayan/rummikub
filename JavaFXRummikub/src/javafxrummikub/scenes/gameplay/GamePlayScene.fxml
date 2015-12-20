@@ -15,9 +15,9 @@
       <bottom>
         <FlowPane id="PlayerStand" prefHeight="155.0" prefWidth="772.0">
           <children>
-            <HBox fx:id="tilesContainer" prefHeight="147.0" prefWidth="772.0">
+            <HBox fx:id="tilesContainer" maxWidth="730.0" prefHeight="147.0" prefWidth="729.0">
               <padding>
-                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                <Insets bottom="10.0" left="30.0" right="10.0" top="30.0" />
               </padding>
             </HBox>
           </children>
@@ -29,7 +29,12 @@
             <Label fx:id="errorMsgLabel" prefWidth="676.0" styleClass="error" text="" />
           </bottom>
           <center>
-            <VBox id="board" fx:id="boardContainer" prefHeight="-1.0" prefWidth="-1.0" />
+            <VBox prefHeight="200.0" prefWidth="100.0" style="-fx-background-color: transparent">
+              <children>
+                <ScrollPane fx:id="boardScrollPane" content="$null" fitToWidth="false" minHeight="-1.0" prefHeight="0.0" prefWidth="672.0" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS" />
+                <VBox id="board" fx:id="boardContainer" prefHeight="-1.0" prefWidth="386.0" />
+              </children>
+            </VBox>
           </center>
         </BorderPane>
       </center>
