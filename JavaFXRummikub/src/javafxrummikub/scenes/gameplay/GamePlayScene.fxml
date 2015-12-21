@@ -11,7 +11,7 @@
 
 <AnchorPane id="gamePlayPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="javafxrummikub.scenes.gameplay.GamePlaySceneController">
   <children>
-    <BorderPane prefHeight="572.0" prefWidth="772.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+    <BorderPane layoutX="14.0" layoutY="14.0" prefHeight="572.0" prefWidth="772.0">
       <bottom>
         <FlowPane id="PlayerStand" prefHeight="155.0" prefWidth="772.0">
           <children>
@@ -21,23 +21,21 @@
               </padding>
             </HBox>
           </children>
+          <BorderPane.margin>
+            <Insets top="30.0" />
+          </BorderPane.margin>
         </FlowPane>
       </bottom>
       <center>
-        <BorderPane prefHeight="200.0" prefWidth="200.0">
-          <bottom>
-            <Label fx:id="errorMsgLabel" prefWidth="676.0" styleClass="error" text="" />
-          </bottom>
-          <center>
-            <VBox prefHeight="200.0" prefWidth="100.0" style="-fx-background-color: transparent">
-              <children>
-                <ScrollPane fx:id="boardScrollPane" content="$null" fitToWidth="false" minHeight="-1.0" prefHeight="0.0" prefWidth="672.0" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS" />
-                <VBox id="board" fx:id="boardContainer" prefHeight="-1.0" prefWidth="386.0" />
-              </children>
-            </VBox>
-          </center>
-        </BorderPane>
+        <VBox fx:id="boardContainer" alignment="TOP_LEFT" minHeight="500.0" minWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0">
+          <BorderPane.margin>
+            <Insets right="15.0" />
+          </BorderPane.margin>
+        </VBox>
       </center>
+      <padding>
+        <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
+      </padding>
       <right>
         <VBox id="Actions List" prefHeight="-1.0" prefWidth="100.0" spacing="40.0">
           <children>
@@ -73,6 +71,9 @@
           <rowConstraints>
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
           </rowConstraints>
+          <BorderPane.margin>
+            <Insets bottom="20.0" />
+          </BorderPane.margin>
         </GridPane>
       </top>
     </BorderPane>

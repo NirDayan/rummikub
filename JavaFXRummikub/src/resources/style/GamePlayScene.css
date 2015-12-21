@@ -14,12 +14,22 @@
     -fx-background-color: lightgreen;
 }
 
-.TilesView, .TileCellView, .TilesView:empty {
+.TilesView, .TileCellView, .TilesView:empty, .boardView {
     -fx-background-color: transparent;
 }
 
 .list-cell:empty {
     visibility:hidden;
+    -fx-background-color: transparent;
+}
+
+#boardContainer .list-cell {
+  -fx-cell-size: 80 ;
+  -fx-background-color: transparent;
+}
+
+#boardContainer .sequenceView .list-cell {
+    -fx-cell-size: 10 ;
     -fx-background-color: transparent;
 }
 

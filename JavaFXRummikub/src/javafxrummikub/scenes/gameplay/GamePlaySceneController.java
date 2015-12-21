@@ -19,9 +19,7 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
@@ -63,8 +61,6 @@ public class GamePlaySceneController implements Initializable {
     private HBox tilesContainer;
     @FXML
     private VBox boardContainer;
-    @FXML
-    private ScrollPane boardScrollPane;
 
     private Game game;
     private List<Label> playersNames;
@@ -73,8 +69,8 @@ public class GamePlaySceneController implements Initializable {
     private ListView<Tile> currentPlayerTilesView;
     private SimpleBooleanProperty isCurrPlayerFinished;
     private SimpleBooleanProperty isGameOver;
-    private List<ObservableList<Tile>> boardData;
-    private List<ListView<Tile>> boardView;
+    private ObservableList<ListView<Tile>> boardData;
+    private ListView<ListView<Tile>> boardView;
     private boolean isBoardChanged = false;
 
     @FXML
@@ -163,19 +159,19 @@ public class GamePlaySceneController implements Initializable {
         isCurrPlayerFinished = new SimpleBooleanProperty(false);
         isGameOver = new SimpleBooleanProperty(false);
         registerFinishTurnProperty();
-
-        boardScrollPane.setContent(boardContainer);
     }
 
     private void initBoard() {
-        boardData = new ArrayList<>();
-        boardView = new ArrayList<>();
+        boardData = FXCollections.observableArrayList();
+        boardView = new ListView<>();
+        boardView.setItems(boardData);
     }
 
     private void initCurrentPlayerTilesView() {
         currentPlayerTilesData = FXCollections.observableArrayList();
-        ListView<Tile> playerTilesView = getTilesListView(currentPlayerTilesData);
-        tilesContainer.getChildren().add(playerTilesView);
+        currentPlayerTilesView = getTilesListView(currentPlayerTilesData);
+        currentPlayerTilesView.setPrefWidth(TILES_LIST_VIEW_WIDTH);
+        tilesContainer.getChildren().add(currentPlayerTilesView);
     }
 
     private void registerFinishTurnProperty() {
@@ -229,15 +225,15 @@ public class GamePlaySceneController implements Initializable {
         ObservableList<Tile> seqBinding;
         ListView<Tile> seqView;
         boardData.clear();
-        boardView.clear();
 
         for (Sequence sequence : game.getBoard().getSequences()) {
             seqBinding = FXCollections.observableArrayList(sequence.toList());
-            boardData.add(seqBinding);
             seqView = getTilesListView(seqBinding);
-            boardView.add(seqView);
+            seqView.getStyleClass().add("sequenceView");
+            boardData.add(seqView);
         }
-        boardContainer.getChildren().addAll(boardView);
+        boardView.getStyleClass().add("boardView");
+        boardContainer.getChildren().add(boardView);
     }
 
     private void updateCurrentPlayerTilesView() {
@@ -250,7 +246,6 @@ public class GamePlaySceneController implements Initializable {
     private ListView<Tile> getTilesListView(ObservableList<Tile> tiles) {
         ListView<Tile> tilesListView = new ListView<>();
         tilesListView.setOrientation(Orientation.HORIZONTAL);
-        tilesListView.setPrefWidth(TILES_LIST_VIEW_WIDTH);
         tilesListView.setCellFactory((ListView<Tile> param) -> new TileView());
         tilesListView.setItems(tiles);
         tilesListView.getStyleClass().add("TilesView");

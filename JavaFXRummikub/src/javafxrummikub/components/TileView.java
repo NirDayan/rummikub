@@ -21,7 +21,7 @@ public class TileView extends ListCell<Tile> {
     private ImageView createImage(Tile tile) {
         ImageView result = new ImageView(getImage(tile));
         final double heightWidthRatio = 0.7018;
-        int tileHeight = 70;
+        int tileHeight = 65;
         result.setFitHeight(tileHeight);
         result.setFitWidth(tileHeight * heightWidthRatio);
         return result;
