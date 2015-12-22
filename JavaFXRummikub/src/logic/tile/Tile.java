@@ -4,8 +4,10 @@ import java.util.Objects;
 
 public class Tile implements Comparable<Tile> {
     public static final int JOKER_VALUE = 0;
+    public static int PLUS_TILE = -1;
     protected Color color;
     protected int value;
+    private boolean isHovered;
 
     public Tile(Color color, int value) {
         this.color = color;
@@ -15,6 +17,10 @@ public class Tile implements Comparable<Tile> {
     public boolean isJoker() {
         return value == JOKER_VALUE;
     }
+    
+    public boolean isPlusTile() {
+        return value == PLUS_TILE;
+    }
 
     public Color getColor() {
         return color;
@@ -22,6 +28,14 @@ public class Tile implements Comparable<Tile> {
 
     public int getValue() {
         return value;
+    }
+    
+    public void setHovered(boolean isHovered) {
+        this.isHovered = isHovered;
+    }
+    
+    public boolean isHovered() {
+        return isHovered;
     }
 
     @Override

@@ -232,7 +232,7 @@ public class GameMainController {
             else if (option == UserOptions.TWO) {//Add tile into the board
                 backupTurn(player, isBackupNeeded);
                 isBackupNeeded = false;
-                isPlayerPerformAnyChange |= handleAddTile(player);
+                isPlayerPerformAnyChange = handleAddTile(player);
                 inputOutputController.showGameStatus(game.getBoard(), player);
             }
             else if (option == UserOptions.THREE) {//Move tile in the board

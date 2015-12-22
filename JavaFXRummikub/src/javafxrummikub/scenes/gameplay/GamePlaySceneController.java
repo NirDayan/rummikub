@@ -19,6 +19,12 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
+import javafx.scene.effect.BlendMode;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
+import javafx.scene.layout.Border;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -27,14 +33,18 @@ import javafx.stage.Stage;
 import javafxrummikub.components.TileView;
 import javafxrummikub.utils.CustomizablePromptDialog;
 import logic.Game;
+import logic.MoveTileData;
 import logic.Player;
 import logic.persistency.FileDetails;
 import logic.persistency.GamePersistency;
+import logic.tile.Color;
 import logic.tile.Sequence;
 import logic.tile.Tile;
 
 public class GamePlaySceneController implements Initializable {
+
     private static final int TILES_LIST_VIEW_WIDTH = 780;
+    private static final int INDEX_NOT_FOUND = -1;
     @FXML
     private Label player1Name;
     @FXML
@@ -72,6 +82,9 @@ public class GamePlaySceneController implements Initializable {
     private ObservableList<ListView<Tile>> boardData;
     private ListView<ListView<Tile>> boardView;
     private boolean isBoardChanged = false;
+    private boolean isPlayerPerformAnyChange = false;
+    private MoveTileData dragTileData;
+    private Tile draggedTile;
 
     @FXML
     private void onMainMenuButton(ActionEvent event) {
@@ -177,13 +190,15 @@ public class GamePlaySceneController implements Initializable {
     private void registerFinishTurnProperty() {
         isCurrPlayerFinished.addListener((source, oldValue, isPlayerFinished) -> {
             if (isPlayerFinished == true) {
-                if (game.checkIsGameOver())
+                if (game.checkIsGameOver()) {
                     isGameOver.set(true);
+                }
                 game.moveToNextPlayer();
                 while (game.getCurrentPlayer().isResign()) {
                     game.moveToNextPlayer();
                 }
                 updateSceneWithCurrentPlayer();
+                isPlayerPerformAnyChange = false;
                 isCurrPlayerFinished.set(false);
             }
         });
@@ -233,7 +248,9 @@ public class GamePlaySceneController implements Initializable {
             boardData.add(seqView);
         }
         boardView.getStyleClass().add("boardView");
-        boardContainer.getChildren().add(boardView);
+        if (!boardContainer.getChildren().contains(boardView)) {
+            boardContainer.getChildren().add(boardView);
+        }        
     }
 
     private void updateCurrentPlayerTilesView() {
@@ -249,7 +266,7 @@ public class GamePlaySceneController implements Initializable {
         tilesListView.setCellFactory((ListView<Tile> param) -> new TileView());
         tilesListView.setItems(tiles);
         tilesListView.getStyleClass().add("TilesView");
-
+        manageDragAndDrop(tilesListView);
         return tilesListView;
     }
 
@@ -317,5 +334,163 @@ public class GamePlaySceneController implements Initializable {
         }
 
         return fileDetails;
+    }
+
+    private void manageDragAndDrop(ListView<Tile> listView) {
+        listView.setOnDragDetected((MouseEvent event) -> {
+            if (listView.getSelectionModel().getSelectedItem() == null) {
+                return;
+            }
+            
+            dragTileData = getDraggedTileData(listView);
+            if (checkIsDragTileValid(listView)) {
+                Dragboard dragBoard = listView.startDragAndDrop(TransferMode.MOVE);
+                ClipboardContent content = new ClipboardContent();
+                content.putString("sdf");//TODO: change to tile data
+                dragBoard.setContent(content);
+                listView.startDragAndDrop(TransferMode.MOVE);
+                addPlusTilesToBoard();
+            }            
+        });
+
+        listView.setOnDragOver(event -> {
+            event.acceptTransferModes(TransferMode.MOVE);
+        });
+
+        listView.setOnDragDone(event -> {
+//            listView.getItems().remove(cell.getItem())
+        });
+
+        listView.setOnDragDropped(event -> {
+            if (draggedTile != null && dragTileData != null) {
+                dragTileData.setTargetSequenceIndex(getListTilesViewBoardIndex(listView));
+                dragTileData.setTargetSequencePosition(getTargetBoardSequencePosition(listView));
+                if (dragTileData.getSourceSequenceIndex() == INDEX_NOT_FOUND) {
+                    performAddTileToBoard(dragTileData);
+                } else {
+                    //TODO: performMoveTileInBoard(dragTileData);
+                }
+                event.setDropCompleted(true);
+                removePlusTilesFromBoard();
+                dragTileData = null;
+                draggedTile = null;                
+            } else {
+                event.setDropCompleted(false);
+            }
+        });
+    }
+
+    private MoveTileData getDraggedTileData(ListView<Tile> listView) {
+        Tile selectedTile = listView.getSelectionModel().getSelectedItem();
+        MoveTileData moveTileData = new MoveTileData();
+        if (isBoardSequence(listView)) {
+            //Find the sequence index
+            moveTileData.setSourceSequenceIndex(getListTilesViewBoardIndex(listView));
+        } else {
+            moveTileData.setSourceSequenceIndex(INDEX_NOT_FOUND);
+        }
+        
+        //Find the posdfsition in the sequence
+        for (int i = 0; i <listView.getItems().size(); i++) {
+            if (listView.getItems().get(i) == selectedTile) {
+                moveTileData.setSourceSequencePosition(i);
+            }
+        }
+        
+        draggedTile = listView.getSelectionModel().getSelectedItem();
+        moveTileData.setPlayerID(game.getCurrentPlayer().getID());
+        return moveTileData;
+    }
+
+    private int getListTilesViewBoardIndex(ListView<Tile> listView) {
+        for (int i = 0; i < boardData.size(); i++) {
+            if (boardData.get(i).equals(listView)) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    private void addPlusTilesToBoard() {
+        ObservableList<Tile> sequence;
+        for (ListView<Tile> boardData1 : boardData) {
+            sequence = boardData1.getItems();
+            for (int j = 0; j < sequence.size() + 1; j = j + 2) {
+                sequence.add(j, new Tile(Color.Red, Tile.PLUS_TILE));
+            }
+        }
+    }
+    
+    private void removePlusTilesFromBoard() {
+       ObservableList<Tile> sequence;
+       List<Tile> tilesForRemove = new ArrayList<>();
+        for (ListView<Tile> boardData1 : boardData) {
+            sequence = boardData1.getItems();
+            for (int j = 0; j < sequence.size() + 1; j = j + 2) {
+                if (sequence.get(j).isPlusTile()) {
+                    tilesForRemove.add(sequence.get(j));
+                }
+            }
+            sequence.removeAll(tilesForRemove);
+        } 
+    }
+
+    /**
+     * This function checks if the selected tile could be dragged out of its position
+     * [for example, tile from the middle of a board sequence could not be dragged out of the sequence]
+     * @return boolean
+     */
+    private boolean checkIsDragTileValid(ListView<Tile> listView) {
+        if (draggedTile == null || dragTileData == null) {
+            return false;
+        }
+        
+        if (isBoardSequence(listView)) {
+            int tilePoition = dragTileData.getSourceSequencePosition();
+            //Check if this is the first or the list tile in the sequence
+            if (!(tilePoition == 0 || tilePoition == listView.getItems().size() - 1)) {
+                return false;                                
+            }
+        }
+        
+        return true;
+    }
+
+    private boolean isBoardSequence(ListView<Tile> listView) {
+        for (ListView<Tile> sequenceView : boardView.getItems()) {
+            if (sequenceView.equals(listView)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    private int getTargetBoardSequencePosition(ListView<Tile> listView) {
+        Tile currentTile;
+        int plusTilesCounter = 0;
+        for (int i = 0; i < listView.getItems().size(); i++) {
+            currentTile = listView.getItems().get(i);
+            if (currentTile.isPlusTile()) {
+                if (currentTile.isHovered()) {
+                    return i - plusTilesCounter;
+                }
+                plusTilesCounter++;
+            }
+        }
+        
+        return INDEX_NOT_FOUND;
+    }
+
+    private void performAddTileToBoard(MoveTileData addTileData) {
+        boolean isValid = game.addTile(game.getCurrentPlayer().getID(), addTileData);
+        
+        if (isValid) {
+            isPlayerPerformAnyChange = true;
+            updateBoard();
+            updateCurrentPlayerTilesView();
+        } else {
+            showErrorMsg("Invalid add tile action");
+        }
     }
 }
