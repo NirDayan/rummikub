@@ -38,3 +38,9 @@
     -fx-font-family: "Segoe UI Semibold";
     -fx-text-fill: red;
 }
+
+.massage {
+    -fx-font-size: 14px;
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-text-fill: yellow;
+}
