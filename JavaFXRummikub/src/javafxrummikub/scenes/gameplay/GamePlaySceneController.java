@@ -5,6 +5,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
@@ -32,6 +35,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafxrummikub.components.TileView;
 import javafxrummikub.utils.CustomizablePromptDialog;
+import logic.ComputerAI;
 import logic.Game;
 import logic.MoveTileData;
 import logic.Player;
@@ -54,7 +58,7 @@ public class GamePlaySceneController implements Initializable {
     @FXML
     private Label player4Name;
     @FXML
-    private Label errorMsgLabel;
+    private Label msgLabel;
     @FXML
     private Font x1;
     @FXML
@@ -85,6 +89,9 @@ public class GamePlaySceneController implements Initializable {
     private boolean isPlayerPerformAnyChange = false;
     private MoveTileData dragTileData;
     private Tile draggedTile;
+    private final String ERROR_MSG_TYPE = "error";
+    private final String REGULAR_MSG_TYPE = "massage";
+    ScheduledFuture<?> clearMsgTask = null;
 
     @FXML
     private void onMainMenuButton(ActionEvent event) {
@@ -142,12 +149,12 @@ public class GamePlaySceneController implements Initializable {
     @FXML
     private void onFinishTurnButton(ActionEvent event) {
         if (isBoardChanged == false) {
-            showErrorMsg("No Changes have been made to the board");
+            showMessage("No Changes have been made to the board", ERROR_MSG_TYPE);
             return;
         }
         if (game.getBoard().isValid() == false) {
             Player currentPlayer = game.getCurrentPlayer();
-            showErrorMsg("Board is invalid. " + currentPlayer.getName() + " is punished.");
+            showMessage("Board is invalid. " + currentPlayer.getName() + " is punished.", ERROR_MSG_TYPE);
             game.punishPlayer(currentPlayer.getID());
             game.getBoard().restoreFromBackup();
             updateBoard();
@@ -161,17 +168,23 @@ public class GamePlaySceneController implements Initializable {
     }
 
     private void initializeGamePlay() {
+        isMainMenuButtonPressed = new SimpleBooleanProperty(false);
+        isCurrPlayerFinished = new SimpleBooleanProperty(false);
+        isGameOver = new SimpleBooleanProperty(false);
+
+        groupPlayerNamesToList();
+        initBoard();
+        initCurrentPlayerTilesView();
+        registerFinishTurnProperty();
+        clearMsgLabel();
+    }
+
+    private void groupPlayerNamesToList() {
         playersNames = new ArrayList<>(4);
         playersNames.add(player1Name);
         playersNames.add(player2Name);
         playersNames.add(player3Name);
         playersNames.add(player4Name);
-        isMainMenuButtonPressed = new SimpleBooleanProperty(false);
-        initBoard();
-        initCurrentPlayerTilesView();
-        isCurrPlayerFinished = new SimpleBooleanProperty(false);
-        isGameOver = new SimpleBooleanProperty(false);
-        registerFinishTurnProperty();
     }
 
     private void initBoard() {
@@ -190,18 +203,36 @@ public class GamePlaySceneController implements Initializable {
     private void registerFinishTurnProperty() {
         isCurrPlayerFinished.addListener((source, oldValue, isPlayerFinished) -> {
             if (isPlayerFinished == true) {
-                if (game.checkIsGameOver()) {
-                    isGameOver.set(true);
-                }
-                game.moveToNextPlayer();
-                while (game.getCurrentPlayer().isResign()) {
-                    game.moveToNextPlayer();
-                }
-                updateSceneWithCurrentPlayer();
-                isPlayerPerformAnyChange = false;
-                isCurrPlayerFinished.set(false);
+                playerFinishedTurn();
             }
         });
+    }
+
+    private void playerFinishedTurn() {
+        if (game.checkIsGameOver()) {
+            isGameOver.set(true);
+            return;
+        }
+        getNextPlayingPlayer();
+        while (game.getCurrentPlayer().isHuman() == false) {
+            playComputerTurn();
+            if (game.checkIsGameOver()) {
+                isGameOver.set(true);
+                return;
+            }
+            getNextPlayingPlayer();
+        }
+        updateSceneWithCurrentPlayer();
+        isCurrPlayerFinished.set(false);
+    }
+
+    private void getNextPlayingPlayer() {
+        game.moveToNextPlayer();
+        while (game.getCurrentPlayer().isResign()) {
+            game.moveToNextPlayer();
+        }
+        isBoardChanged = false;
+        updateSceneWithCurrentPlayer();
     }
 
     public void setGame(Game game) {
@@ -286,31 +317,28 @@ public class GamePlaySceneController implements Initializable {
         return isMainMenuButtonPressed;
     }
 
-    private void showErrorMsg(String msg) {
-        Thread clearMsgThread = new Thread(() -> {
-            final int timeToShowErrorInMsec = 3000;
-            try {
-                Thread.sleep(timeToShowErrorInMsec);
-            } catch (InterruptedException ex) {
-            } finally {
-                Platform.runLater(this::clearErrorMsg);
-            }
-        });
-        clearMsgThread.setDaemon(true);
-        clearMsgThread.start();
-
-        errorMsgLabel.setText(msg);
+    private void showMessage(String msg, String msgType) {
+        if (clearMsgTask != null) {
+            clearMsgTask.cancel(true);
+        }
+        ScheduledThreadPoolExecutor threadPool = new ScheduledThreadPoolExecutor(1);
+        clearMsgTask = threadPool.schedule(() -> Platform.runLater(this::clearMsgLabel),
+                3, TimeUnit.SECONDS);
+        threadPool.shutdown();
+        msgLabel.getStyleClass().clear();
+        msgLabel.getStyleClass().add(msgType);
+        msgLabel.setText(msg);
     }
 
-    private void clearErrorMsg() {
-        errorMsgLabel.setText("");
+    private void clearMsgLabel() {
+        msgLabel.setText("");
     }
 
     private void onSaveToLastFile(ActionEvent event) {
         try {
             GamePersistency.save(game.getSavedFileDetails(), game);
         } catch (Exception ex) {
-            showErrorMsg("Game saving was failed.");
+            showMessage("Game saving was failed.", ERROR_MSG_TYPE);
         }
     }
 
@@ -319,7 +347,7 @@ public class GamePlaySceneController implements Initializable {
         try {
             GamePersistency.save(fileDetails, game);
         } catch (Exception ex) {
-            showErrorMsg("Game saving was failed.");
+            showMessage("Game saving was failed.", ERROR_MSG_TYPE);
         }
     }
 
@@ -490,7 +518,37 @@ public class GamePlaySceneController implements Initializable {
             updateBoard();
             updateCurrentPlayerTilesView();
         } else {
-            showErrorMsg("Invalid add tile action");
+            showMessage("Invalid add tile action", ERROR_MSG_TYPE);
+        }
+    }
+    
+    private void playComputerTurn() {
+        ComputerAI ai = new ComputerAI();
+        Player compPlayer = game.getCurrentPlayer();
+        List<Tile> sequence = ai.getRelevantTiles(compPlayer.getTiles());
+
+        while (sequence != null) {
+            game.getBoard().addSequence(new Sequence(sequence));
+            compPlayer.removeTiles(sequence);
+            showMessage(compPlayer.getName() + " Added a Sequece to the borad.", REGULAR_MSG_TYPE);
+            updateCurrentPlayerTilesView();
+            updateBoard();
+            isBoardChanged = true;
+            sequence = ai.getRelevantTiles(game.getCurrentPlayer().getTiles());
+            try {
+                Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+            } catch (InterruptedException e) {
+            }
+        }
+
+        if (isBoardChanged == false) {
+            showMessage(compPlayer.getName() + " Pulled a tile from the deck.", REGULAR_MSG_TYPE);
+            game.pullTileFromDeck(compPlayer.getID());
+            updateCurrentPlayerTilesView();
+            try {
+                Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+            } catch (InterruptedException e) {
+            }
         }
     }
 }

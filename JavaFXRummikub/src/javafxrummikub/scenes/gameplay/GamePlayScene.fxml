@@ -11,23 +11,26 @@
 
 <AnchorPane id="gamePlayPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="javafxrummikub.scenes.gameplay.GamePlaySceneController">
   <children>
-    <BorderPane layoutX="14.0" layoutY="14.0" prefHeight="572.0" prefWidth="772.0">
+    <BorderPane prefHeight="572.0" prefWidth="772.0" AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="2.0">
       <bottom>
-        <FlowPane id="PlayerStand" prefHeight="155.0" prefWidth="772.0">
-          <children>
-            <HBox fx:id="tilesContainer" maxWidth="730.0" prefHeight="147.0" prefWidth="729.0">
+        <BorderPane id="" prefHeight="162.0" prefWidth="744.0">
+          <bottom>
+            <HBox id="PlayerStand" fx:id="tilesContainer" maxWidth="730.0" prefHeight="148.0" prefWidth="730.0">
               <padding>
-                <Insets bottom="10.0" left="30.0" right="10.0" top="30.0" />
+                <Insets bottom="10.0" left="30.0" right="30.0" top="10.0" />
               </padding>
             </HBox>
-          </children>
+          </bottom>
+          <top>
+            <Label fx:id="msgLabel" prefWidth="744.0" styleClass="massage" text="Massage" />
+          </top>
           <BorderPane.margin>
-            <Insets top="30.0" />
+            <Insets />
           </BorderPane.margin>
-        </FlowPane>
+        </BorderPane>
       </bottom>
       <center>
-        <VBox fx:id="boardContainer" alignment="TOP_LEFT" minHeight="500.0" minWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0">
+        <VBox fx:id="boardContainer" alignment="TOP_LEFT" minHeight="-1.0" minWidth="-1.0" prefHeight="500.0" prefWidth="629.0">
           <BorderPane.margin>
             <Insets right="15.0" />
           </BorderPane.margin>
@@ -37,7 +40,7 @@
         <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
       </padding>
       <right>
-        <VBox id="Actions List" prefHeight="-1.0" prefWidth="100.0" spacing="40.0">
+        <VBox id="Actions List" prefHeight="333.0" prefWidth="100.0" spacing="40.0">
           <children>
             <Button fx:id="mainMenuButton" mnemonicParsing="false" onAction="#onMainMenuButton" prefHeight="57.0" prefWidth="100.0" styleClass="gameButton" text="Main Menu" />
             <Button id="" fx:id="saveGameButton" mnemonicParsing="false" onAction="#onSaveGameButton" prefHeight="57.0" prefWidth="100.0" styleClass="gameButton" text="Save Game" />
