@@ -227,9 +227,7 @@ public class GamePlaySceneController implements Initializable {
             compPlayer.removeTiles(sequence);
 
             showMessage(compPlayer.getName() + " Added a Sequece to the borad.", REGULAR_MSG_TYPE);
-            updateCurrentPlayerTilesView();
-            updateBoard();
-            isBoardChanged = true;
+            playerActionOnBoardDone();
 
             sequence = ai.getRelevantTiles(game.getCurrentPlayer().getTiles());
             if (sequence != null) {
