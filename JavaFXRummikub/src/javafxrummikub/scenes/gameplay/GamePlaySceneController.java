@@ -22,15 +22,12 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
-import javafx.scene.effect.BlendMode;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
-import javafx.scene.layout.Border;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafxrummikub.components.TileView;
@@ -60,17 +57,9 @@ public class GamePlaySceneController implements Initializable {
     @FXML
     private Label msgLabel;
     @FXML
-    private Font x1;
-    @FXML
     private Button mainMenuButton;
     @FXML
     private Button saveGameButton;
-    @FXML
-    private Button pullTileButton;
-    @FXML
-    private Button resignButton;
-    @FXML
-    private Button finishTurnButton;
     @FXML
     private HBox tilesContainer;
     @FXML
@@ -86,12 +75,13 @@ public class GamePlaySceneController implements Initializable {
     private ObservableList<ListView<Tile>> boardData;
     private ListView<ListView<Tile>> boardView;
     private boolean isBoardChanged = false;
-    private boolean isPlayerPerformAnyChange = false;
     private MoveTileData dragTileData;
     private Tile draggedTile;
     private final String ERROR_MSG_TYPE = "error";
     private final String REGULAR_MSG_TYPE = "massage";
+    private final int COMPUTER_THINK_TIME_MSEC = 800;
     ScheduledFuture<?> clearMsgTask = null;
+    private final ComputerAI ai = new ComputerAI();
 
     @FXML
     private void onMainMenuButton(ActionEvent event) {
@@ -142,6 +132,7 @@ public class GamePlaySceneController implements Initializable {
                 playerNameLabel.setText("");
             }
         }
+        showMessage(currentPlayer.getName() + " Has Resigned", REGULAR_MSG_TYPE);
 
         isCurrPlayerFinished.set(true);
     }
@@ -214,16 +205,46 @@ public class GamePlaySceneController implements Initializable {
             return;
         }
         getNextPlayingPlayer();
-        while (game.getCurrentPlayer().isHuman() == false) {
-            playComputerTurn();
-            if (game.checkIsGameOver()) {
-                isGameOver.set(true);
-                return;
-            }
-            getNextPlayingPlayer();
+        if (game.getCurrentPlayer().isHuman() == false) {
+            Platform.runLater(this::playComputerTurn);
         }
         updateSceneWithCurrentPlayer();
         isCurrPlayerFinished.set(false);
+    }
+
+    private void playComputerTurn() {
+        Player compPlayer = game.getCurrentPlayer();
+        List<Tile> sequence = ai.getRelevantTiles(compPlayer.getTiles());
+
+        try {
+            // Simulate Computer "Thinking..."
+            Thread.sleep(COMPUTER_THINK_TIME_MSEC);
+        } catch (InterruptedException e) {
+        }
+
+        if (sequence != null) {
+            game.getBoard().addSequence(new Sequence(sequence));
+            compPlayer.removeTiles(sequence);
+
+            showMessage(compPlayer.getName() + " Added a Sequece to the borad.", REGULAR_MSG_TYPE);
+            updateCurrentPlayerTilesView();
+            updateBoard();
+            isBoardChanged = true;
+
+            sequence = ai.getRelevantTiles(game.getCurrentPlayer().getTiles());
+            if (sequence != null) {
+                Platform.runLater(this::playComputerTurn);
+                return;
+            }
+        }
+
+        if (isBoardChanged == false) {
+            showMessage(compPlayer.getName() + " Pulled a tile from the deck.", REGULAR_MSG_TYPE);
+            game.pullTileFromDeck(compPlayer.getID());
+            updateCurrentPlayerTilesView();
+        }
+
+        isCurrPlayerFinished.set(true);
     }
 
     private void getNextPlayingPlayer() {
@@ -335,20 +356,34 @@ public class GamePlaySceneController implements Initializable {
     }
 
     private void onSaveToLastFile(ActionEvent event) {
-        try {
-            GamePersistency.save(game.getSavedFileDetails(), game);
-        } catch (Exception ex) {
-            showMessage("Game saving was failed.", ERROR_MSG_TYPE);
-        }
+        FileDetails fileDetails = game.getSavedFileDetails();
+        saveToFile(fileDetails);
     }
 
     private void onSaveAs(ActionEvent event) {
         FileDetails fileDetails = openFileChooserToSave();
-        try {
-            GamePersistency.save(fileDetails, game);
-        } catch (Exception ex) {
-            showMessage("Game saving was failed.", ERROR_MSG_TYPE);
-        }
+        saveToFile(fileDetails);
+    }
+
+    private void saveToFile(FileDetails fileDetails) {
+        Thread thread = new Thread(() -> {
+            try {
+                GamePersistency.save(fileDetails, game);
+                Platform.runLater(this::saveFileSeccess);
+            } catch (Exception ex) {
+                Platform.runLater(this::saveFileFailure);
+            }
+        });
+        thread.setDaemon(false);
+        thread.start();
+    }
+
+    private void saveFileFailure() {
+        showMessage("Game saving was failed.", ERROR_MSG_TYPE);
+    }
+
+    private void saveFileSeccess() {
+        showMessage("Game Was saved.", REGULAR_MSG_TYPE);
     }
 
     private FileDetails openFileChooserToSave() {
@@ -527,36 +562,6 @@ public class GamePlaySceneController implements Initializable {
             showMessage("Invalid add tile action", ERROR_MSG_TYPE);
         }
     }
-    
-    private void playComputerTurn() {
-        ComputerAI ai = new ComputerAI();
-        Player compPlayer = game.getCurrentPlayer();
-        List<Tile> sequence = ai.getRelevantTiles(compPlayer.getTiles());
-
-        while (sequence != null) {
-            game.getBoard().addSequence(new Sequence(sequence));
-            compPlayer.removeTiles(sequence);
-            showMessage(compPlayer.getName() + " Added a Sequece to the borad.", REGULAR_MSG_TYPE);
-            updateCurrentPlayerTilesView();
-            updateBoard();
-            isBoardChanged = true;
-            sequence = ai.getRelevantTiles(game.getCurrentPlayer().getTiles());
-            try {
-                Thread.sleep(TimeUnit.SECONDS.toMillis(1));
-            } catch (InterruptedException e) {
-            }
-        }
-
-        if (isBoardChanged == false) {
-            showMessage(compPlayer.getName() + " Pulled a tile from the deck.", REGULAR_MSG_TYPE);
-            game.pullTileFromDeck(compPlayer.getID());
-            updateCurrentPlayerTilesView();
-            try {
-                Thread.sleep(TimeUnit.SECONDS.toMillis(1));
-            } catch (InterruptedException e) {
-            }
-        }
-    }
 
     private void performMoveTileInBoard(MoveTileData moveTileData) {
         if (game.moveTile(moveTileData)) {
@@ -567,7 +572,7 @@ public class GamePlaySceneController implements Initializable {
     }
     
     private void playerActionOnBoardDone() {
-        isPlayerPerformAnyChange = true;
+        isBoardChanged = true;
         updateBoard();
         updateCurrentPlayerTilesView();
     }
