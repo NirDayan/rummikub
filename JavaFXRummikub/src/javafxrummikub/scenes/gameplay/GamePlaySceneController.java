@@ -281,7 +281,7 @@ public class GamePlaySceneController implements Initializable {
         boardView.getStyleClass().add("boardView");
         if (!boardContainer.getChildren().contains(boardView)) {
             boardContainer.getChildren().add(boardView);
-        }        
+        }
     }
 
     private void updateCurrentPlayerTilesView() {
@@ -369,7 +369,7 @@ public class GamePlaySceneController implements Initializable {
             if (listView.getSelectionModel().getSelectedItem() == null) {
                 return;
             }
-            
+
             dragTileData = getDraggedTileData(listView);
             if (checkIsDragTileValid(listView)) {
                 Dragboard dragBoard = listView.startDragAndDrop(TransferMode.MOVE);
@@ -378,7 +378,7 @@ public class GamePlaySceneController implements Initializable {
                 dragBoard.setContent(content);
                 listView.startDragAndDrop(TransferMode.MOVE);
                 addPlusTilesToBoard();
-            }            
+            }
         });
 
         listView.setOnDragOver(event -> {
@@ -391,20 +391,26 @@ public class GamePlaySceneController implements Initializable {
 
         listView.setOnDragDropped(event -> {
             if (draggedTile != null && dragTileData != null) {
-                dragTileData.setTargetSequenceIndex(getListTilesViewBoardIndex(listView));
-                dragTileData.setTargetSequencePosition(getTargetBoardSequencePosition(listView));
-                if (dragTileData.getSourceSequenceIndex() == INDEX_NOT_FOUND) {
-                    performAddTileToBoard(dragTileData);
+                int targetSequenceBoardIndex = getListTilesViewBoardIndex(listView);
+                if (targetSequenceBoardIndex != INDEX_NOT_FOUND) {
+                    dragTileData.setTargetSequenceIndex(targetSequenceBoardIndex);
+                    dragTileData.setTargetSequencePosition(getTargetBoardSequencePosition(listView));
+                    if (dragTileData.getSourceSequenceIndex() == INDEX_NOT_FOUND) {
+                        performAddTileToBoard(dragTileData);
+                    } else {
+                        performMoveTileInBoard(dragTileData);
+                    }
+                    event.setDropCompleted(true);                    
                 } else {
-                    //TODO: performMoveTileInBoard(dragTileData);
+                    event.setDropCompleted(false);
                 }
-                event.setDropCompleted(true);
-                removePlusTilesFromBoard();
-                dragTileData = null;
-                draggedTile = null;                
             } else {
                 event.setDropCompleted(false);
             }
+            
+            removePlusTilesFromBoard();
+            dragTileData = null;
+            draggedTile = null;
         });
     }
 
@@ -417,14 +423,14 @@ public class GamePlaySceneController implements Initializable {
         } else {
             moveTileData.setSourceSequenceIndex(INDEX_NOT_FOUND);
         }
-        
+
         //Find the posdfsition in the sequence
-        for (int i = 0; i <listView.getItems().size(); i++) {
+        for (int i = 0; i < listView.getItems().size(); i++) {
             if (listView.getItems().get(i) == selectedTile) {
                 moveTileData.setSourceSequencePosition(i);
             }
         }
-        
+
         draggedTile = listView.getSelectionModel().getSelectedItem();
         moveTileData.setPlayerID(game.getCurrentPlayer().getID());
         return moveTileData;
@@ -436,7 +442,7 @@ public class GamePlaySceneController implements Initializable {
                 return i;
             }
         }
-        return 0;
+        return INDEX_NOT_FOUND;
     }
 
     private void addPlusTilesToBoard() {
@@ -448,10 +454,10 @@ public class GamePlaySceneController implements Initializable {
             }
         }
     }
-    
+
     private void removePlusTilesFromBoard() {
-       ObservableList<Tile> sequence;
-       List<Tile> tilesForRemove = new ArrayList<>();
+        ObservableList<Tile> sequence;
+        List<Tile> tilesForRemove = new ArrayList<>();
         for (ListView<Tile> boardData1 : boardData) {
             sequence = boardData1.getItems();
             for (int j = 0; j < sequence.size() + 1; j = j + 2) {
@@ -460,27 +466,29 @@ public class GamePlaySceneController implements Initializable {
                 }
             }
             sequence.removeAll(tilesForRemove);
-        } 
+        }
     }
 
     /**
-     * This function checks if the selected tile could be dragged out of its position
-     * [for example, tile from the middle of a board sequence could not be dragged out of the sequence]
+     * This function checks if the selected tile could be dragged out of its
+     * position [for example, tile from the middle of a board sequence could not
+     * be dragged out of the sequence]
+     *
      * @return boolean
      */
     private boolean checkIsDragTileValid(ListView<Tile> listView) {
         if (draggedTile == null || dragTileData == null) {
             return false;
         }
-        
+
         if (isBoardSequence(listView)) {
             int tilePoition = dragTileData.getSourceSequencePosition();
             //Check if this is the first or the list tile in the sequence
             if (!(tilePoition == 0 || tilePoition == listView.getItems().size() - 1)) {
-                return false;                                
+                return false;
             }
         }
-        
+
         return true;
     }
 
@@ -490,7 +498,7 @@ public class GamePlaySceneController implements Initializable {
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -506,17 +514,15 @@ public class GamePlaySceneController implements Initializable {
                 plusTilesCounter++;
             }
         }
-        
+
         return INDEX_NOT_FOUND;
     }
 
     private void performAddTileToBoard(MoveTileData addTileData) {
         boolean isValid = game.addTile(game.getCurrentPlayer().getID(), addTileData);
-        
+
         if (isValid) {
-            isPlayerPerformAnyChange = true;
-            updateBoard();
-            updateCurrentPlayerTilesView();
+            playerActionOnBoardDone();
         } else {
             showMessage("Invalid add tile action", ERROR_MSG_TYPE);
         }
@@ -550,5 +556,19 @@ public class GamePlaySceneController implements Initializable {
             } catch (InterruptedException e) {
             }
         }
+    }
+
+    private void performMoveTileInBoard(MoveTileData moveTileData) {
+        if (game.moveTile(moveTileData)) {
+            playerActionOnBoardDone();
+        } else {
+            showMessage("Invalid move tile action", ERROR_MSG_TYPE);
+        }
+    }
+    
+    private void playerActionOnBoardDone() {
+        isPlayerPerformAnyChange = true;
+        updateBoard();
+        updateCurrentPlayerTilesView();
     }
 }
