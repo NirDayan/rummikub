@@ -23,6 +23,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
@@ -114,14 +115,14 @@ public class GamePlaySceneController implements Initializable {
     @FXML
     private void onPullTileButton(ActionEvent event) {
         Player player = game.getCurrentPlayer();
-        
+
         if (!isPlayerPerformAnyChange) {
             game.pullTileFromDeck(player.getID());
             updateCurrentPlayerTilesView();
             isCurrPlayerFinished.set(true);
         } else {
             showMessage("Pull tile from deck is not possible since you performed board changes", ERROR_MSG_TYPE);
-        }        
+        }
     }
 
     @FXML
@@ -402,23 +403,7 @@ public class GamePlaySceneController implements Initializable {
 
     private void manageDragAndDrop(ListView<Tile> listView) {
         listView.setOnDragDetected((MouseEvent event) -> {
-            if (listView.getSelectionModel().getSelectedItem() == null) {
-                return;
-            }
-            
-            if (isBackupNeeded) {
-                backupTurn();
-            }
-
-            dragTileData = getDraggedTileData(listView);
-            if (checkIsDragTileValid(listView)) {
-                addPlusTilesToBoard();
-                Dragboard dragBoard = listView.startDragAndDrop(TransferMode.MOVE);
-                ClipboardContent content = new ClipboardContent();
-                content.putString("sdf");//TODO: change to tile data
-                dragBoard.setContent(content);
-                listView.startDragAndDrop(TransferMode.MOVE);
-            }
+            performDragDetected(listView);
         });
 
         listView.setOnDragOver(event -> {
@@ -426,31 +411,11 @@ public class GamePlaySceneController implements Initializable {
         });
 
         listView.setOnDragDone(event -> {
-//            listView.getItems().remove(cell.getItem())
+            removePlusTilesFromBoard();
         });
 
         listView.setOnDragDropped(event -> {
-            if (draggedTile != null && dragTileData != null) {
-                int targetSequenceBoardIndex = getListTilesViewBoardIndex(listView);
-                if (targetSequenceBoardIndex != INDEX_NOT_FOUND) {
-                    dragTileData.setTargetSequenceIndex(targetSequenceBoardIndex);
-                    dragTileData.setTargetSequencePosition(getTargetBoardSequencePosition(listView));
-                    if (dragTileData.getSourceSequenceIndex() == INDEX_NOT_FOUND) {
-                        performAddTileToBoard(dragTileData);
-                    } else {
-                        performMoveTileInBoard(dragTileData);
-                    }
-                    event.setDropCompleted(true);                    
-                } else {
-                    event.setDropCompleted(false);
-                }
-            } else {
-                event.setDropCompleted(false);
-            }
-            
-            removePlusTilesFromBoard();
-            dragTileData = null;
-            draggedTile = null;
+            performDropDetected(listView, event);
         });
     }
 
@@ -500,7 +465,7 @@ public class GamePlaySceneController implements Initializable {
         List<Tile> tilesForRemove = new ArrayList<>();
         for (ListView<Tile> boardData1 : boardData) {
             sequence = boardData1.getItems();
-            for (int j = 0; j < sequence.size() + 1; j = j + 2) {
+            for (int j = 0; j < sequence.size(); j++) {
                 if (sequence.get(j).isPlusTile()) {
                     tilesForRemove.add(sequence.get(j));
                 }
@@ -575,18 +540,62 @@ public class GamePlaySceneController implements Initializable {
             showMessage("Invalid move tile action", ERROR_MSG_TYPE);
         }
     }
-    
+
     private void playerActionOnBoardDone() {
         isPlayerPerformAnyChange = true;
         updateBoard();
         updateCurrentPlayerTilesView();
     }
-    
+
     private void backupTurn() {
         if (isBackupNeeded) {
             game.getBoard().storeBackup();
             game.getCurrentPlayer().storeBackup();
             isBackupNeeded = false;
         }
+    }
+
+    private void performDragDetected(ListView<Tile> listView) {
+        if (listView.getSelectionModel().getSelectedItem() == null) {
+            return;
+        }
+
+        if (isBackupNeeded) {
+            backupTurn();
+        }
+        
+        dragTileData = getDraggedTileData(listView);
+        if (checkIsDragTileValid(listView)) {
+            addPlusTilesToBoard();
+            Dragboard dragBoard = listView.startDragAndDrop(TransferMode.MOVE);
+            ClipboardContent content = new ClipboardContent();
+            content.putString("sdf");//TODO: change to tile data
+            dragBoard.setContent(content);
+            listView.startDragAndDrop(TransferMode.MOVE);
+        }
+    }
+
+    private void performDropDetected(ListView<Tile> listView, DragEvent event) {
+        if (draggedTile != null && dragTileData != null) {
+            int targetSequenceBoardIndex = getListTilesViewBoardIndex(listView);
+            if (targetSequenceBoardIndex != INDEX_NOT_FOUND) {
+                dragTileData.setTargetSequenceIndex(targetSequenceBoardIndex);
+                dragTileData.setTargetSequencePosition(getTargetBoardSequencePosition(listView));
+                if (dragTileData.getSourceSequenceIndex() == INDEX_NOT_FOUND) {
+                    performAddTileToBoard(dragTileData);
+                } else {
+                    performMoveTileInBoard(dragTileData);
+                }
+                event.setDropCompleted(true);
+            } else {
+                event.setDropCompleted(false);
+            }
+        } else {
+            event.setDropCompleted(false);
+        }
+
+        removePlusTilesFromBoard();
+        dragTileData = null;
+        draggedTile = null;
     }
 }
