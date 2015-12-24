@@ -84,6 +84,7 @@ public class GamePlaySceneController implements Initializable {
     private final int COMPUTER_THINK_TIME_MSEC = 800;
     ScheduledFuture<?> clearMsgTask = null;
     private final ComputerAI ai = new ComputerAI();
+    boolean isPlayerPutNewSequence = false;
 
     @FXML
     private void onMainMenuButton(ActionEvent event) {
@@ -150,10 +151,13 @@ public class GamePlaySceneController implements Initializable {
             Player currentPlayer = game.getCurrentPlayer();
             showMessage("Board is invalid. " + currentPlayer.getName() + " is punished.", ERROR_MSG_TYPE);
             game.punishPlayer(currentPlayer.getID());
-            game.getBoard().restoreFromBackup();
+            game.restoreFromBackup();
             updateBoard();
         }
         isCurrPlayerFinished.set(true);
+
+        //TODO: check if this is the first player step and if it was completed do:
+        //game.setPlayerCompletedFirstStep(game.getCurrentPlayer().getID());
     }
 
     @Override
@@ -411,7 +415,7 @@ public class GamePlaySceneController implements Initializable {
         });
 
         listView.setOnDragDone(event -> {
-            removePlusTilesFromBoard();
+            updateBoard();
         });
 
         listView.setOnDragDropped(event -> {
@@ -451,26 +455,16 @@ public class GamePlaySceneController implements Initializable {
     }
 
     private void addPlusTilesToBoard() {
-        ObservableList<Tile> sequence;
-        for (ListView<Tile> boardData1 : boardData) {
-            sequence = boardData1.getItems();
-            for (int j = 0; j < sequence.size() + 1; j = j + 2) {
-                sequence.add(j, new Tile(Color.Red, Tile.PLUS_TILE));
+        if (isPlayerFirstStepAndNoNewSequence()) {
+            addNewSequencePlaceholder();
+        } else if (isPlayerFirstStepWithNewSequence()) {
+            addPlusTilesToLastSequence();
+        } else { //Add plus tile to existing sequences if this is not the first step of the player
+            addPlusTilesToAllSequences();
+            //If the source tile is dragged from player's tiles we woule like to present a new sequence placeholder
+            if (dragTileData.getSourceSequenceIndex() == INDEX_NOT_FOUND) {
+                addNewSequencePlaceholder();
             }
-        }
-    }
-
-    private void removePlusTilesFromBoard() {
-        ObservableList<Tile> sequence;
-        List<Tile> tilesForRemove = new ArrayList<>();
-        for (ListView<Tile> boardData1 : boardData) {
-            sequence = boardData1.getItems();
-            for (int j = 0; j < sequence.size(); j++) {
-                if (sequence.get(j).isPlusTile()) {
-                    tilesForRemove.add(sequence.get(j));
-                }
-            }
-            sequence.removeAll(tilesForRemove);
         }
     }
 
@@ -488,9 +482,22 @@ public class GamePlaySceneController implements Initializable {
 
         if (isBoardSequence(listView)) {
             int tilePoition = dragTileData.getSourceSequencePosition();
-            //Check if this is the first or the list tile in the sequence
-            if (!(tilePoition == 0 || tilePoition == listView.getItems().size() - 1)) {
+            //Check if this is the first or the last tile in the sequence
+            if (!(tilePoition == 0 || (tilePoition == listView.getItems().size() - 1))) {
                 return false;
+            }
+
+            //if this is the first step and player didnt put a new sequence yet, drag from board is not valid
+            if (isPlayerFirstStepAndNoNewSequence()) {
+                return false;
+            }
+
+            //if this is the first step and the player already put a new sequence,
+            //make sure the drag is performed from the last sequence!
+            if (isPlayerFirstStepWithNewSequence()) {
+                boolean isLastSequence = (dragTileData.getSourceSequenceIndex() == (boardData.size() - 1));
+
+                return isLastSequence;
             }
         }
 
@@ -549,8 +556,7 @@ public class GamePlaySceneController implements Initializable {
 
     private void backupTurn() {
         if (isBackupNeeded) {
-            game.getBoard().storeBackup();
-            game.getCurrentPlayer().storeBackup();
+            game.storeBackup();
             isBackupNeeded = false;
         }
     }
@@ -563,7 +569,7 @@ public class GamePlaySceneController implements Initializable {
         if (isBackupNeeded) {
             backupTurn();
         }
-        
+
         dragTileData = getDraggedTileData(listView);
         if (checkIsDragTileValid(listView)) {
             addPlusTilesToBoard();
@@ -571,7 +577,6 @@ public class GamePlaySceneController implements Initializable {
             ClipboardContent content = new ClipboardContent();
             content.putString("sdf");//TODO: change to tile data
             dragBoard.setContent(content);
-            listView.startDragAndDrop(TransferMode.MOVE);
         }
     }
 
@@ -581,8 +586,8 @@ public class GamePlaySceneController implements Initializable {
             if (targetSequenceBoardIndex != INDEX_NOT_FOUND) {
                 dragTileData.setTargetSequenceIndex(targetSequenceBoardIndex);
                 dragTileData.setTargetSequencePosition(getTargetBoardSequencePosition(listView));
-                if (dragTileData.getSourceSequenceIndex() == INDEX_NOT_FOUND) {
-                    performAddTileToBoard(dragTileData);
+                if (dragTileData.getSourceSequenceIndex() == INDEX_NOT_FOUND) {//tile dragged from player's tiles
+                    handleDropTileFromPlayerTiles();
                 } else {
                     performMoveTileInBoard(dragTileData);
                 }
@@ -594,8 +599,84 @@ public class GamePlaySceneController implements Initializable {
             event.setDropCompleted(false);
         }
 
-        removePlusTilesFromBoard();
         dragTileData = null;
         draggedTile = null;
+    }
+
+    private void addNewSequencePlaceholder() {
+        int playerID = game.getCurrentPlayer().getID();
+
+        ObservableList<Tile> seqBinding = FXCollections.observableArrayList();
+        seqBinding.add(new Tile(Color.Red, Tile.PLUS_TILE));
+        ListView<Tile> seqView = getTilesListView(seqBinding);
+        seqView.getStyleClass().add("sequenceView");
+        boardData.add(seqView);
+    }
+
+    private void performCreateNewSequence(MoveTileData dragTileData) {
+        int tilePosition = dragTileData.getSourceSequencePosition();
+        game.createSequenceByPlayerTile(game.getCurrentPlayer().getID(), tilePosition);
+        playerActionOnBoardDone();
+    }
+
+    private boolean isDropIntoLastSequence() {
+        //The player drop tile into a new sequence if the position is the last sequence        
+        return dragTileData.getTargetSequenceIndex() == boardData.size() - 1;
+    }
+
+    private boolean isPlayerFirstStepAndNoNewSequence() {
+        int playerID = game.getCurrentPlayer().getID();
+        boolean isFirstStep = game.isPlayerFirstStep(playerID);
+
+        return (isFirstStep && !isPlayerPutNewSequence);
+    }
+
+    private boolean isPlayerFirstStepWithNewSequence() {
+        int playerID = game.getCurrentPlayer().getID();
+        boolean isFirstStep = game.isPlayerFirstStep(playerID);
+
+        return (isFirstStep && isPlayerPutNewSequence);
+    }
+
+    private void addPlusTilesToAllSequences() {
+        ObservableList<Tile> sequence;
+        for (ListView<Tile> boardSequences : boardData) {
+            sequence = boardSequences.getItems();
+            for (int j = 0; j < sequence.size() + 1; j = j + 2) {
+                sequence.add(j, new Tile(Color.Red, Tile.PLUS_TILE));
+            }
+        }
+    }
+
+    private void addPlusTilesToLastSequence() {
+        ListView<Tile> lastSequence = boardData.get(boardData.size() - 1);
+        if (lastSequence != null) {
+            for (int i = 0; i < lastSequence.getItems().size() + 1; i = i + 2) {
+                lastSequence.getItems().add(i, new Tile(Color.Red, Tile.PLUS_TILE));
+            }
+        }
+    }
+
+    private void handleDropTileFromPlayerTiles() {
+        if (isPlayerFirstStepAndNoNewSequence()) {
+            if (isDropIntoLastSequence()) {
+                performCreateNewSequence(dragTileData);
+                isPlayerPutNewSequence = true;
+            } else {
+                showMessage("You must drop the tile into the last new sequence", ERROR_MSG_TYPE);
+            }
+        } else if (isPlayerFirstStepWithNewSequence()) {
+            if (isDropIntoLastSequence()) {
+                performAddTileToBoard(dragTileData);
+            } else {
+                showMessage("You must drop the tile into the last new sequence", ERROR_MSG_TYPE);
+            }
+        } else {
+            if (isDropIntoLastSequence()) {
+                performCreateNewSequence(dragTileData);
+            } else {
+                performAddTileToBoard(dragTileData);
+            }
+        }
     }
 }

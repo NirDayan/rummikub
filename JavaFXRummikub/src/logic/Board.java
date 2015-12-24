@@ -34,8 +34,13 @@ public class Board {
         if (isMoveValid(data)) {
             if (isSequenceContainsOneTileOnly(sourceIndex) && sourceIndex < targetIndex) {
                 //This sequence will be removed after "removeTile" operation
-                //So the targer sequence will be (targetIndex - 1)
+                //So the target sequence will be (targetIndex - 1)
                 targetIndex = targetIndex - 1;
+            }
+            //After removing tile from the sequence, if the target position is bigger than the source position,
+            //We need to reduce targetPosition by 1
+            if (sourcePosition < targetPosition) {
+                targetPosition = targetPosition - 1;
             }
             Tile tile = removeTile(sourceIndex, sourcePosition);
             return addTile(targetIndex, targetPosition, tile);

@@ -199,16 +199,55 @@ public class Game {
 
     public boolean createSequenceByTilesList(int playerID, List<Tile> tiles) {
         Player player = getPlayerByID(playerID);
-        if (player == null || tiles == null)
+        if (player == null || tiles == null) {
             return false;
+        }
 
         return createSequenceFromTilesList(player, tiles);
+    }
+    
+    public boolean createSequenceByPlayerTile(int playerID, int tileIndex) {
+        Player player = getPlayerByID(playerID);
+        if (player == null) {
+            return false;
+        }
+        
+        List<Integer> tilesIndicesList = new ArrayList<>();
+        tilesIndicesList.add(tileIndex);
+        List<Tile> tilesToAdd = player.getTilesByIndices(tilesIndicesList);
+        if (tilesToAdd == null) {
+            return false;
+        }
+        
+        Sequence sequence = new Sequence(tilesToAdd);        
+        player.removeTilesByIndices(tilesIndicesList);
+        board.addSequence(sequence);
+
+        return true;
+    }
+    
+    public void storeBackup() {
+        board.storeBackup();
+        currentPlayer.storeBackup();
+    }
+    
+    public void restoreFromBackup() {
+        board.restoreFromBackup();
+        currentPlayer.restoreFromBackup();
+    }
+    
+    public void setPlayerCompletedFirstStep(int playerID) {
+        Player player = getPlayerByID(playerID);
+        if (player != null) {
+            player.setFirstStepCompleted(true);
+        }
     }
 
     private boolean createSequenceFromTileIndices(Player player, List<Integer> tilesIndices) {
         List<Tile> preSequence = player.getTilesByIndices(tilesIndices);
-        if (preSequence == null)
+        if (preSequence == null) {
             return false;
+        }
 
         Sequence sequence = new Sequence(preSequence);
         if (!sequence.isValid())
