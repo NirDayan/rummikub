@@ -26,9 +26,19 @@ public class Board {
     }
 
     public boolean moveTile(MoveTileData data) {
+        int sourceIndex = data.getSourceSequenceIndex();
+        int sourcePosition = data.getSourceSequencePosition();
+        int targetIndex = data.getTargetSequenceIndex();
+        int targetPosition = data.getTargetSequencePosition();
+        
         if (isMoveValid(data)) {
-            Tile tile = removeTile(data.getSourceSequenceIndex(), data.getSourceSequencePosition());
-            return addTile(data.getTargetSequenceIndex(), data.getTargetSequencePosition(), tile);
+            if (isSequenceContainsOneTileOnly(sourceIndex) && sourceIndex < targetIndex) {
+                //This sequence will be removed after "removeTile" operation
+                //So the targer sequence will be (targetIndex - 1)
+                targetIndex = targetIndex - 1;
+            }
+            Tile tile = removeTile(sourceIndex, sourcePosition);
+            return addTile(targetIndex, targetPosition, tile);
         }
 
         return false;
@@ -156,5 +166,9 @@ public class Board {
         if (sequencesArrayBackup != null) {
             sequencesArray = sequencesArrayBackup;
         }
+    }
+
+    private boolean isSequenceContainsOneTileOnly(int sourceSequenceIndex) {
+        return sequencesArray.get(sourceSequenceIndex).getSize() == 1;
     }
 }
