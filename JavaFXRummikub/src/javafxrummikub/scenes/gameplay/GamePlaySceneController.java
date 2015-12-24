@@ -74,7 +74,8 @@ public class GamePlaySceneController implements Initializable {
     private SimpleBooleanProperty isGameOver;
     private ObservableList<ListView<Tile>> boardData;
     private ListView<ListView<Tile>> boardView;
-    private boolean isBoardChanged = false;
+    private boolean isPlayerPerformAnyChange = false;
+    private boolean isBackupNeeded = true;
     private MoveTileData dragTileData;
     private Tile draggedTile;
     private final String ERROR_MSG_TYPE = "error";
@@ -113,13 +114,14 @@ public class GamePlaySceneController implements Initializable {
     @FXML
     private void onPullTileButton(ActionEvent event) {
         Player player = game.getCurrentPlayer();
-        game.pullTileFromDeck(player.getID());
-        updateCurrentPlayerTilesView();
-        if (isBoardChanged) {
-            game.getBoard().restoreFromBackup();
-            updateBoard();
-        }
-        isCurrPlayerFinished.set(true);
+        
+        if (!isPlayerPerformAnyChange) {
+            game.pullTileFromDeck(player.getID());
+            updateCurrentPlayerTilesView();
+            isCurrPlayerFinished.set(true);
+        } else {
+            showMessage("Pull tile from deck is not possible since you performed board changes", ERROR_MSG_TYPE);
+        }        
     }
 
     @FXML
@@ -139,7 +141,7 @@ public class GamePlaySceneController implements Initializable {
 
     @FXML
     private void onFinishTurnButton(ActionEvent event) {
-        if (isBoardChanged == false) {
+        if (isPlayerPerformAnyChange == false) {
             showMessage("No Changes have been made to the board", ERROR_MSG_TYPE);
             return;
         }
@@ -236,7 +238,7 @@ public class GamePlaySceneController implements Initializable {
             }
         }
 
-        if (isBoardChanged == false) {
+        if (isPlayerPerformAnyChange == false) {
             showMessage(compPlayer.getName() + " Pulled a tile from the deck.", REGULAR_MSG_TYPE);
             game.pullTileFromDeck(compPlayer.getID());
             updateCurrentPlayerTilesView();
@@ -250,7 +252,8 @@ public class GamePlaySceneController implements Initializable {
         while (game.getCurrentPlayer().isResign()) {
             game.moveToNextPlayer();
         }
-        isBoardChanged = false;
+        isPlayerPerformAnyChange = false;
+        isBackupNeeded = true;
         updateSceneWithCurrentPlayer();
     }
 
@@ -402,15 +405,19 @@ public class GamePlaySceneController implements Initializable {
             if (listView.getSelectionModel().getSelectedItem() == null) {
                 return;
             }
+            
+            if (isBackupNeeded) {
+                backupTurn();
+            }
 
             dragTileData = getDraggedTileData(listView);
             if (checkIsDragTileValid(listView)) {
+                addPlusTilesToBoard();
                 Dragboard dragBoard = listView.startDragAndDrop(TransferMode.MOVE);
                 ClipboardContent content = new ClipboardContent();
                 content.putString("sdf");//TODO: change to tile data
                 dragBoard.setContent(content);
                 listView.startDragAndDrop(TransferMode.MOVE);
-                addPlusTilesToBoard();
             }
         });
 
@@ -570,8 +577,16 @@ public class GamePlaySceneController implements Initializable {
     }
     
     private void playerActionOnBoardDone() {
-        isBoardChanged = true;
+        isPlayerPerformAnyChange = true;
         updateBoard();
         updateCurrentPlayerTilesView();
+    }
+    
+    private void backupTurn() {
+        if (isBackupNeeded) {
+            game.getBoard().storeBackup();
+            game.getCurrentPlayer().storeBackup();
+            isBackupNeeded = false;
+        }
     }
 }
