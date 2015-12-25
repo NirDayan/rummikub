@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ObservableValue;
@@ -66,13 +67,16 @@ public class NewGameSceneController implements Initializable {
     private static int CURRENT_PLAYER_ID = 1;
     private static final int MAX_PLAYERS_NUMBER = 4;
     private static final int MIN_PLAYERS_NUMBER = 2;
+    private static final int MIN_HUMAN_PLAYERS_NUMBER = 1;
     private Game game;
     private ToggleGroup newGameOptions;
     private SimpleBooleanProperty isStartPlayPressed;
     private boolean isPlayersFormInitialized;
     private SimpleBooleanProperty gameLoadedSuccessfully;
     private SimpleBooleanProperty newGameFormValid;
+    private SimpleBooleanProperty gameNameValid;
     private SimpleIntegerProperty currNewPlayersNum;
+    private SimpleIntegerProperty humanPlayersNum;
 
     //Initializes the controller class.
     @Override
@@ -102,8 +106,23 @@ public class NewGameSceneController implements Initializable {
         createNewGameBtn.setToggleGroup(newGameOptions);
         gameLoadedSuccessfully = new SimpleBooleanProperty(false);
         newGameFormValid = new SimpleBooleanProperty(false);
+        gameNameValid = new SimpleBooleanProperty(false);
         currNewPlayersNum = new SimpleIntegerProperty(0);
-        newGameFormValid.bind(Bindings.and(currNewPlayersNum.greaterThanOrEqualTo(MIN_PLAYERS_NUMBER), newGameName.textProperty().isEqualTo("").not()));
+        humanPlayersNum = new SimpleIntegerProperty(0);
+        newGameName.textProperty().addListener((ObservableValue<? extends String> observableValue, String s, String s2) -> {
+            boolean isEmpty = newGameName.textProperty().get().isEmpty();
+            boolean containsCharsExceptWhitespace = (newGameName.textProperty().get().trim().length() > 0);
+            if (!isEmpty && containsCharsExceptWhitespace) {
+                gameNameValid.set(true);
+            } else {
+                gameNameValid.set(false);
+            }
+        });
+        BooleanBinding playersBinding = Bindings.and(
+                currNewPlayersNum.greaterThanOrEqualTo(MIN_PLAYERS_NUMBER),
+                humanPlayersNum.greaterThanOrEqualTo(MIN_HUMAN_PLAYERS_NUMBER));
+        BooleanBinding newGameFormBindings = Bindings.and(playersBinding, gameNameValid);
+        newGameFormValid.bind(newGameFormBindings);
         newGameOptions.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> ov, Toggle old_toggle, Toggle new_toggle) -> {
             clearErrorMsg();
             gameLoadedSuccessfully.set(false);
@@ -154,6 +173,9 @@ public class NewGameSceneController implements Initializable {
             playersInputData.add(new PlayerDetails(CURRENT_PLAYER_ID, playerName, isHuman));
             CURRENT_PLAYER_ID++;
             currNewPlayersNum.setValue(currNewPlayersNum.getValue() + 1);
+            if (isHuman) {
+                humanPlayersNum.setValue(humanPlayersNum.getValue() + 1);
+            }
 
             if (CURRENT_PLAYER_ID > MAX_PLAYERS_NUMBER) {
                 addNewPlayerButton.disableProperty().set(true);
@@ -175,11 +197,11 @@ public class NewGameSceneController implements Initializable {
     private void handleLoadGameFromFile() {
         newGameFieldsPane.setVisible(false);
         FileDetails fileDetails = openFileChooser();
-        Thread thread = new Thread(()->loadGameFile(fileDetails));
+        Thread thread = new Thread(() -> loadGameFile(fileDetails));
         thread.setDaemon(true);
         thread.start();
     }
-    
+
     private void loadGameFile(FileDetails fileDetails) {
         if (fileDetails != null) {
             try {
@@ -229,9 +251,9 @@ public class NewGameSceneController implements Initializable {
         // 2. New game form is valid
         startPlayButton.disableProperty().bind(Bindings.and(newGameFormValid.not(), gameLoadedSuccessfully.not()));
     }
-    
+
     @FXML
-    private void exitGameButtonPressed(ActionEvent event){
+    private void exitGameButtonPressed(ActionEvent event) {
         Platform.exit();
     }
 }
