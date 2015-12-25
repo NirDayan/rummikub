@@ -20,10 +20,10 @@ public class JavaFXRummikub extends Application {
     private static final String NEW_GAME_SCENE_FILE_PATH = "/javafxrummikub/scenes/newGame/newGameScene.fxml";
     private static final String WINNER_SCENE_FILE_PATH = "/javafxrummikub/scenes/winner/winnerScene.fxml";
 
-    private final int sceneWidth = 800;
+    private int sceneWidth;
     private int sceneHeight;
-    private static final int HEIGHT_PADDING = 50;
     private Stage primaryStage;
+    private final double screenFactor = 0.8;
 
     public static void main(String[] args) {
         launch(args);
@@ -33,7 +33,8 @@ public class JavaFXRummikub extends Application {
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
         Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
-        sceneHeight = (int) (screenBounds.getHeight() - HEIGHT_PADDING);
+        sceneHeight = (int) (screenBounds.getHeight() * screenFactor);
+        sceneWidth = (int) (screenBounds.getWidth() * screenFactor);
         Scene newGameScene = getNewGameScene();
 
         primaryStage.setTitle("Welcome to Rumikub!");

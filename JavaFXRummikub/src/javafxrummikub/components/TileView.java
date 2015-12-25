@@ -9,6 +9,11 @@ import javafxrummikub.utils.ImageUtils;
 import logic.tile.Tile;
 
 public class TileView extends ListCell<Tile> {
+    
+    private static final int TILE_WIDTH = 45;
+    private static final int PLUS_TILE_WIDTH = 25;
+    private static final int TILE_HEIGHT = 65;
+    
     @Override
     public void updateItem(Tile tile, boolean empty) {
         super.updateItem(tile, empty);
@@ -34,10 +39,13 @@ public class TileView extends ListCell<Tile> {
 
     private ImageView createImage(Tile tile) {
         ImageView result = new ImageView(getImage(tile));
-        final double heightWidthRatio = 0.7018;
-        int tileHeight = 65;
-        result.setFitHeight(tileHeight);
-        result.setFitWidth(tileHeight * heightWidthRatio);
+        result.setFitHeight(TILE_HEIGHT);
+        if (tile.isPlusTile()) {
+            result.setFitWidth(PLUS_TILE_WIDTH);
+        } else {
+            result.setFitWidth(TILE_WIDTH);
+        }
+        
         return result;
     }
 
@@ -60,7 +68,7 @@ public class TileView extends ListCell<Tile> {
         if (tile.isJoker()) {
             return ImageUtils.getImage("tiles/" + color + "/joker" + ".png");
         } else if (tile.isPlusTile()) {
-            return ImageUtils.getImage("empty_tile.png");                        
+            return ImageUtils.getImage("plus_tile.png");                        
         }
         
         return ImageUtils.getImage("tiles/" + color + "/" + tile.getValue() + ".png");
