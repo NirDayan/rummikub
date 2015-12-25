@@ -383,6 +383,7 @@ public class GamePlaySceneController implements Initializable {
         Thread thread = new Thread(() -> {
             try {
                 GamePersistency.save(fileDetails, game);
+                game.setSavedFileDetails(fileDetails);
                 Platform.runLater(this::saveFileSeccess);
             } catch (Exception ex) {
                 Platform.runLater(this::saveFileFailure);
@@ -403,6 +404,7 @@ public class GamePlaySceneController implements Initializable {
     private FileDetails openFileChooserToSave() {
         FileDetails fileDetails = null;
         FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML File", "*.xml"));
         fileChooser.setTitle("Select File to save the game");
         File file = fileChooser.showSaveDialog(mainMenuButton.getScene().getWindow());
 

@@ -145,6 +145,7 @@ public class NewGameSceneController implements Initializable {
     private FileDetails openFileChooser() {
         FileDetails fileDetails = null;
         FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML File", "*.xml"));
         fileChooser.setTitle("Open rummikub game file");
         File file = fileChooser.showOpenDialog(loadGameFromFileBtn.getScene().getWindow());
 
