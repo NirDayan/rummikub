@@ -196,6 +196,23 @@ public class Game {
 
         return createSequenceFromTileIndices(player, tilesIndices);
     }
+    
+    public boolean checkSequenceValidity(int playerID, List<Tile> tiles) {
+        Player player = getPlayerByID(playerID);
+        if (tiles == null || player == null) {
+            return false;
+        }
+
+        Sequence sequence = new Sequence(tiles);
+        if (!sequence.isValid()) {
+            return false;
+        }            
+        if (player.isFirstStep() && !isFirstSequenceValid(sequence)) {
+            return false;
+        }
+        
+        return true;
+    }
 
     public boolean createSequenceByTilesList(int playerID, List<Tile> tiles) {
         Player player = getPlayerByID(playerID);

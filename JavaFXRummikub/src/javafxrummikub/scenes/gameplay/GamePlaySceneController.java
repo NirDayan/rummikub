@@ -84,7 +84,7 @@ public class GamePlaySceneController implements Initializable {
     private final int COMPUTER_THINK_TIME_MSEC = 800;
     ScheduledFuture<?> clearMsgTask = null;
     private final ComputerAI ai = new ComputerAI();
-    boolean isPlayerPutNewSequence = false;
+    boolean isPlayerPutNewSequence;
 
     @FXML
     private void onMainMenuButton(ActionEvent event) {
@@ -143,21 +143,26 @@ public class GamePlaySceneController implements Initializable {
 
     @FXML
     private void onFinishTurnButton(ActionEvent event) {
+        Player currentPlayer = game.getCurrentPlayer();
         if (isPlayerPerformAnyChange == false) {
             showMessage("No Changes have been made to the board", ERROR_MSG_TYPE);
             return;
         }
         if (game.getBoard().isValid() == false) {
-            Player currentPlayer = game.getCurrentPlayer();
-            showMessage("Board is invalid. " + currentPlayer.getName() + " is punished.", ERROR_MSG_TYPE);
-            game.punishPlayer(currentPlayer.getID());
-            game.restoreFromBackup();
-            updateBoard();
+            punishPlayer();
+            isCurrPlayerFinished.set(true);
+            return;
         }
-        isCurrPlayerFinished.set(true);
 
-        //TODO: check if this is the first player step and if it was completed do:
-        //game.setPlayerCompletedFirstStep(game.getCurrentPlayer().getID());
+        if (game.isPlayerFirstStep(currentPlayer.getID())) {
+            if (isFirstStepCompleted()) {
+                game.setPlayerCompletedFirstStep(currentPlayer.getID());
+            } else {
+                punishPlayer();
+            }
+        }
+        
+        isCurrPlayerFinished.set(true);
     }
 
     @Override
@@ -259,6 +264,7 @@ public class GamePlaySceneController implements Initializable {
         }
         isPlayerPerformAnyChange = false;
         isBackupNeeded = true;
+        isPlayerPutNewSequence = false;
         updateSceneWithCurrentPlayer();
     }
 
@@ -313,9 +319,11 @@ public class GamePlaySceneController implements Initializable {
 
     private void updateCurrentPlayerTilesView() {
         currentPlayerTilesData.clear();
-        game.getCurrentPlayer().getTiles().stream().forEach((tile) -> {
-            currentPlayerTilesData.add(tile);
-        });
+        ArrayList<Tile> playerTiles = game.getCurrentPlayer().getTiles();
+        //Don't change to forEach, it won't work since the "equals" function of tile which ignores duplicate tiles with the same coloe and value
+        for (int i = 0; i < playerTiles.size(); i++) {
+            currentPlayerTilesData.add(playerTiles.get(i));
+        }
     }
 
     private ListView<Tile> getTilesListView(ObservableList<Tile> tiles) {
@@ -678,5 +686,27 @@ public class GamePlaySceneController implements Initializable {
                 performAddTileToBoard(dragTileData);
             }
         }
+    }
+
+    private boolean isFirstStepCompleted() {
+        int playerID = game.getCurrentPlayer().getID();
+        ListView<Tile> lastSequence;
+
+        if (boardData.size() > 0) {
+            lastSequence = boardData.get(boardData.size() - 1);
+            return game.checkSequenceValidity(playerID, lastSequence.getItems());
+        }
+
+        return false;
+    }
+
+    private void punishPlayer() {
+        Player currentPlayer = game.getCurrentPlayer();
+
+        showMessage("Board is invalid. " + currentPlayer.getName() + " is punished.", ERROR_MSG_TYPE);
+        game.restoreFromBackup();
+        updateBoard();
+        //Punish player MUST be after restore from backup, otherwise the restore operation will remove additional tiles
+        game.punishPlayer(currentPlayer.getID());
     }
 }
