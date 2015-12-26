@@ -24,8 +24,8 @@
 }
 
 #boardContainer .list-cell {
-  -fx-cell-size: 80 ;
-  -fx-background-color: transparent;
+    -fx-cell-size: 80 ;
+    -fx-background-color: transparent;
 }
 
 #boardContainer .sequenceView .list-cell {
@@ -44,4 +44,17 @@
     -fx-font-size: 14px;
     -fx-font-family: "Segoe UI Semibold";
     -fx-text-fill: yellow;
+}
+
+.button {
+    -fx-text-fill: white;
+    -fx-font-family: "Arial Narrow";
+    -fx-font-weight: bold;
+    -fx-background-color: linear-gradient(#707070, #575757);
+    -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );
+    -fx-font-size: 14px;
+}
+
+.button:hover {
+    -fx-background-color: linear-gradient(#2A5058, #61a2b1);
 }
