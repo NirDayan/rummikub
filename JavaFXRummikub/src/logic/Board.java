@@ -39,7 +39,7 @@ public class Board {
             }
             //After removing tile from the sequence, if the target position is bigger than the source position,
             //We need to reduce targetPosition by 1
-            if (sourcePosition < targetPosition) {
+            if (sourceIndex == targetIndex && sourcePosition < targetPosition) {
                 targetPosition = targetPosition - 1;
             }
             Tile tile = removeTile(sourceIndex, sourcePosition);
