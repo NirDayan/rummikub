@@ -68,7 +68,7 @@ public class TileView extends ListCell<Tile> {
         if (tile.isJoker()) {
             return ImageUtils.getImage("tiles/" + color + "/joker" + ".png");
         } else if (tile.isPlusTile()) {
-            return ImageUtils.getImage("plus_tile2.png");                        
+            return ImageUtils.getImage("plus_tile.png");                        
         }
         
         return ImageUtils.getImage("tiles/" + color + "/" + tile.getValue() + ".png");
