@@ -45,7 +45,7 @@ import logic.tile.Tile;
 
 public class GamePlaySceneController implements Initializable {
 
-    private static final int TILES_LIST_VIEW_WIDTH = 780;
+    private static final int TILES_LIST_VIEW_WIDTH = 1050;
     private static final int INDEX_NOT_FOUND = -1;
     @FXML
     private Label player1Name;
