@@ -22,11 +22,6 @@ public class WinnerSceneController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         isBackToMainMenu = new SimpleBooleanProperty(false);
-        if (winnerName == null) {
-            winnerMsg.setText("Game Over! There is no winner.");
-        } else {
-            winnerMsg.setText("The Winner is " + winnerName + "!!!");
-        }
     }
 
     @FXML
@@ -40,5 +35,10 @@ public class WinnerSceneController implements Initializable {
 
     public void setWinnerName(String winnerName) {
         this.winnerName = winnerName;
+        if (winnerName == null) {
+            winnerMsg.setText("Game Over! There is no winner.");
+        } else {
+            winnerMsg.setText("The Winner is " + winnerName + "!!!");
+        }
     }
 }
