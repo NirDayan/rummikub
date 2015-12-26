@@ -30,8 +30,7 @@ class XSDObjToGameObjConverter {
         for (Players.Player player : rummikubXSDObj.getPlayers().getPlayer()) {
             if (player.getType() == PlayerType.HUMAN) {
                 gamePlayersDetails.add(new PlayerDetails(ID, player.getName(), true));
-            }
-            else {
+            } else {
                 gamePlayersDetails.add(new PlayerDetails(ID, player.getName(), false));
             }
             ID++;
@@ -47,6 +46,7 @@ class XSDObjToGameObjConverter {
         Player currPlayer = getCurrPlayerFromXSDObj();
         game.setCurrentPlayer(currPlayer);
         setAllGamePlayerFirstStep();
+        checkAtLeastOneHumanPlayer();
     }
 
     private static void distributeTilesToPlayers() {
@@ -135,5 +135,14 @@ class XSDObjToGameObjConverter {
             Player gamePlayer = getGamePlayerByName(xsdPlayer.getName());
             gamePlayer.setFirstStepCompleted(xsdPlayer.isPlacedFirstSequence());
         }
+    }
+
+    private static void checkAtLeastOneHumanPlayer() {
+        for (Players.Player xsdPlayer : rummikubXSDObj.getPlayers().getPlayer()) {
+            if(xsdPlayer.getType() == PlayerType.HUMAN)
+                return;
+        }
+        // if we got here that means that there is no human players in the game.
+        throw new PersistencyException("No Human Playrs in the game.");
     }
 }
