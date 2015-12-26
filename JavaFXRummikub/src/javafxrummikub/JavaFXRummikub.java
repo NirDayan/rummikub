@@ -51,8 +51,6 @@ public class JavaFXRummikub extends Application {
         registerGamePlayToStartPlayButton(newGameSceneController);
         if (newGameRoot != null) {
             newGameScene = new Scene(newGameRoot, sceneWidth, sceneHeight);
-        } else {
-            //TODO
         }
 
         return newGameScene;

@@ -402,7 +402,6 @@ public class GameMainController {
             return inputOutputController.askUserChooseOption(options);
         }
         else {
-            //TODO: implement ComputerPlayer actions
             return UserOptions.ONE;
         }
     }

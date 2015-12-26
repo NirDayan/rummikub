@@ -443,7 +443,7 @@ public class GamePlaySceneController implements Initializable {
             moveTileData.setSourceSequenceIndex(INDEX_NOT_FOUND);
         }
 
-        //Find the posdfsition in the sequence
+        //Find the position in the sequence
         for (int i = 0; i < listView.getItems().size(); i++) {
             if (listView.getItems().get(i) == selectedTile) {
                 moveTileData.setSourceSequencePosition(i);
@@ -585,7 +585,7 @@ public class GamePlaySceneController implements Initializable {
             addPlusTilesToBoard();
             Dragboard dragBoard = listView.startDragAndDrop(TransferMode.MOVE);
             ClipboardContent content = new ClipboardContent();
-            content.putString("sdf");//TODO: change to tile data
+            content.putString("");
             dragBoard.setContent(content);
         }
     }
