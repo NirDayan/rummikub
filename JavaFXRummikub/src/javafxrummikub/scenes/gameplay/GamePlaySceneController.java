@@ -157,6 +157,7 @@ public class GamePlaySceneController implements Initializable {
         if (game.isPlayerFirstStep(currentPlayer.getID())) {
             if (isFirstStepCompleted()) {
                 game.setPlayerCompletedFirstStep(currentPlayer.getID());
+                showMessage("Player " + currentPlayer.getName() + " put his first sequence successfully!", REGULAR_MSG_TYPE);
             } else {
                 punishPlayer();
             }
