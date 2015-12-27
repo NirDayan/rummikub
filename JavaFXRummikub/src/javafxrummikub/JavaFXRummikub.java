@@ -3,6 +3,7 @@ package javafxrummikub;
 import java.io.IOException;
 import java.net.URL;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
@@ -77,6 +78,12 @@ public class JavaFXRummikub extends Application {
         gamePlayConroller.setGame(game);
         registerNewGameSceneToMainMenuButton(gamePlayConroller.IsMainMenuButtonPressed());
         registerWinnerSceneToIsGameOver(gamePlayConroller);
+        
+        // In case that a computer player plays first
+        if (game.getCurrentPlayer().isHuman() == false) {
+            Platform.runLater(gamePlayConroller::playComputerTurn);
+        }
+        
         return new Scene(gamePlayRoot, sceneWidth, sceneHeight);
     }
 

@@ -225,7 +225,7 @@ public class GamePlaySceneController implements Initializable {
         isCurrPlayerFinished.set(false);
     }
 
-    private void playComputerTurn() {
+    public void playComputerTurn() {
         Player compPlayer = game.getCurrentPlayer();
         List<Tile> sequence = ai.getRelevantTiles(compPlayer.getTiles());
 
