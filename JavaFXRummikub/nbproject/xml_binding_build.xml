@@ -18,8 +18,8 @@
                 <pathelement path="${jaxbwiz.xjcrun.classpath}"/>
             </classpath>
             <arg value="-xmlschema"/>
-            <schema file="xml-resources/jaxb/JAXB Bindings/rummikub.xsd"/>
-            <depends file="xml-resources/jaxb/JAXB Bindings/rummikub.xsd"/>
+            <schema file="src/resources/rummikub.xsd"/>
+            <depends file="src/resources/rummikub.xsd"/>
             <produces dir="build/generated/jaxbCache/JAXB Bindings"/>
         </xjc>
         <copy todir="${build.generated.sources.dir}/jaxb">
