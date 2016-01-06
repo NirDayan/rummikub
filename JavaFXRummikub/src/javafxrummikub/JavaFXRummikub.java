@@ -1,7 +1,10 @@
 package javafxrummikub;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -15,6 +18,11 @@ import javafxrummikub.scenes.gameplay.GamePlaySceneController;
 import javafxrummikub.scenes.newGame.NewGameSceneController;
 import javafxrummikub.scenes.winner.WinnerSceneController;
 import logic.Game;
+import ws.rummikub.DuplicateGameName_Exception;
+import ws.rummikub.InvalidParameters_Exception;
+import ws.rummikub.InvalidXML_Exception;
+import ws.rummikub.RummikubWebService;
+import ws.rummikub.RummikubWebServiceService;
 
 public class JavaFXRummikub extends Application {
     private static final String GAME_PLAY_SCENE_FILE_PATH = "/javafxrummikub/scenes/gameplay/GamePlayScene.fxml";
@@ -25,6 +33,10 @@ public class JavaFXRummikub extends Application {
     private int sceneHeight;
     private Stage primaryStage;
     private final double screenFactor = 0.8;
+    private final String webserviceRoot = "rummikub";
+    private final String webserviceName = "RummikubWS";
+    private RummikubWebServiceService service;
+    private RummikubWebService rummikubGameWS;
 
     public static void main(String[] args) {
         launch(args);
@@ -42,6 +54,13 @@ public class JavaFXRummikub extends Application {
         primaryStage.setResizable(false);
         primaryStage.setScene(newGameScene);
         primaryStage.show();
+        
+        try {
+            //DOTO: chage it.. currently hard-coded
+            createWSClient("127.0.0.1", 8080);
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(JavaFXRummikub.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     private Scene getNewGameScene() {
@@ -132,5 +151,11 @@ public class JavaFXRummikub extends Application {
             System.err.println(ex.getMessage());
         }
         return fxmlLoader;
+    }
+    
+    private void createWSClient(String serverAddress, int serverPort) throws MalformedURLException {
+        URL url = new URL("http://" + serverAddress + ":" + serverPort + "/" + webserviceRoot + "/" + webserviceName);
+        service = new RummikubWebServiceService(url);
+        rummikubGameWS = service.getRummikubWebServicePort();
     }
 }

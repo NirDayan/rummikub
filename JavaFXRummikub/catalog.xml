@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="system">
     <system systemId="file:/C:/Git/rummikub/JavaFXRummikub/src/resources/rummikub.xsd" uri="xml-resources/jaxb/JAXB%20Bindings/rummikub.xsd"/>
+    <system systemId="http://localhost:8080/rummikub/RummikubWS?wsdl" uri="xml-resources/web-service-references/RummikubWS/wsdl/localhost_8080/rummikub/RummikubWS.wsdl"/>
+    <system systemId="http://localhost:8080/rummikub/RummikubWS?xsd=1" uri="xml-resources/web-service-references/RummikubWS/wsdl/localhost_8080/rummikub/RummikubWS.xsd_1.xsd"/>
 </catalog>
