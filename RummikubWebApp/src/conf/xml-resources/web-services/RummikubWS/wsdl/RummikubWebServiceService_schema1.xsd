@@ -9,57 +9,101 @@
 
   <xs:element name="InvalidXML" type="tns:InvalidXML"/>
 
-  <xs:element name="addTile" nillable="true" type="tns:addTile"/>
+  <xs:element name="addTile" type="tns:addTile"/>
 
-  <xs:element name="addTileResponse" nillable="true" type="tns:addTileResponse"/>
+  <xs:element name="addTileResponse" type="tns:addTileResponse"/>
 
-  <xs:element name="createGame" nillable="true" type="tns:createGame"/>
+  <xs:element name="createGame" type="tns:createGame"/>
 
-  <xs:element name="createGameFromXML" nillable="true" type="tns:createGameFromXML"/>
+  <xs:element name="createGameFromXML" type="tns:createGameFromXML"/>
 
-  <xs:element name="createGameFromXMLResponse" nillable="true" type="tns:createGameFromXMLResponse"/>
+  <xs:element name="createGameFromXMLResponse" type="tns:createGameFromXMLResponse"/>
 
-  <xs:element name="createGameResponse" nillable="true" type="tns:createGameResponse"/>
+  <xs:element name="createGameResponse" type="tns:createGameResponse"/>
 
-  <xs:element name="createSequence" nillable="true" type="tns:createSequence"/>
+  <xs:element name="createSequence" type="tns:createSequence"/>
 
-  <xs:element name="createSequenceResponse" nillable="true" type="tns:createSequenceResponse"/>
+  <xs:element name="createSequenceResponse" type="tns:createSequenceResponse"/>
 
-  <xs:element name="finishTurn" nillable="true" type="tns:finishTurn"/>
+  <xs:element name="finishTurn" type="tns:finishTurn"/>
 
-  <xs:element name="finishTurnResponse" nillable="true" type="tns:finishTurnResponse"/>
+  <xs:element name="finishTurnResponse" type="tns:finishTurnResponse"/>
 
-  <xs:element name="getEvents" nillable="true" type="tns:getEvents"/>
+  <xs:element name="getEvents" type="tns:getEvents"/>
 
-  <xs:element name="getEventsResponse" nillable="true" type="tns:getEventsResponse"/>
+  <xs:element name="getEventsResponse" type="tns:getEventsResponse"/>
 
-  <xs:element name="getGameDetails" nillable="true" type="tns:getGameDetails"/>
+  <xs:element name="getGameDetails" type="tns:getGameDetails"/>
 
-  <xs:element name="getGameDetailsResponse" nillable="true" type="tns:getGameDetailsResponse"/>
+  <xs:element name="getGameDetailsResponse" type="tns:getGameDetailsResponse"/>
 
-  <xs:element name="getPlayerDetails" nillable="true" type="tns:getPlayerDetails"/>
+  <xs:element name="getPlayerDetails" type="tns:getPlayerDetails"/>
 
-  <xs:element name="getPlayerDetailsResponse" nillable="true" type="tns:getPlayerDetailsResponse"/>
+  <xs:element name="getPlayerDetailsResponse" type="tns:getPlayerDetailsResponse"/>
 
-  <xs:element name="getPlayersDetails" nillable="true" type="tns:getPlayersDetails"/>
+  <xs:element name="getPlayersDetails" type="tns:getPlayersDetails"/>
 
-  <xs:element name="getPlayersDetailsResponse" nillable="true" type="tns:getPlayersDetailsResponse"/>
+  <xs:element name="getPlayersDetailsResponse" type="tns:getPlayersDetailsResponse"/>
 
-  <xs:element name="getWaitingGames" nillable="true" type="tns:getWaitingGames"/>
+  <xs:element name="getWaitingGames" type="tns:getWaitingGames"/>
 
-  <xs:element name="getWaitingGamesResponse" nillable="true" type="tns:getWaitingGamesResponse"/>
+  <xs:element name="getWaitingGamesResponse" type="tns:getWaitingGamesResponse"/>
 
-  <xs:element name="joinGame" nillable="true" type="tns:joinGame"/>
+  <xs:element name="joinGame" type="tns:joinGame"/>
 
-  <xs:element name="joinGameResponse" nillable="true" type="tns:joinGameResponse"/>
+  <xs:element name="joinGameResponse" type="tns:joinGameResponse"/>
 
-  <xs:element name="moveTile" nillable="true" type="tns:moveTile"/>
+  <xs:element name="moveTile" type="tns:moveTile"/>
 
-  <xs:element name="moveTileResponse" nillable="true" type="tns:moveTileResponse"/>
+  <xs:element name="moveTileResponse" type="tns:moveTileResponse"/>
 
-  <xs:element name="resign" nillable="true" type="tns:resign"/>
+  <xs:element name="resign" type="tns:resign"/>
 
-  <xs:element name="resignResponse" nillable="true" type="tns:resignResponse"/>
+  <xs:element name="resignResponse" type="tns:resignResponse"/>
+
+  <xs:element name="takeBackTile" type="tns:takeBackTile"/>
+
+  <xs:element name="takeBackTileResponse" type="tns:takeBackTileResponse"/>
+
+  <xs:complexType name="createGameFromXML">
+    <xs:sequence>
+      <xs:element name="xmlData" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="createGameFromXMLResponse">
+    <xs:sequence>
+      <xs:element name="return" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="DuplicateGameName">
+    <xs:sequence>
+      <xs:element name="faultInfo" type="tns:rummikubFault" minOccurs="0"/>
+      <xs:element name="message" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="rummikubFault">
+    <xs:sequence>
+      <xs:element name="faultCode" type="xs:string" minOccurs="0"/>
+      <xs:element name="faultString" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="InvalidParameters">
+    <xs:sequence>
+      <xs:element name="faultInfo" type="tns:rummikubFault" minOccurs="0"/>
+      <xs:element name="message" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="InvalidXML">
+    <xs:sequence>
+      <xs:element name="faultInfo" type="tns:rummikubFault" minOccurs="0"/>
+      <xs:element name="message" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
 
   <xs:complexType name="getGameDetails">
     <xs:sequence>
@@ -91,52 +135,24 @@
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="rummikubFault">
+  <xs:complexType name="takeBackTile">
     <xs:sequence>
-      <xs:element name="faultCode" type="xs:string" minOccurs="0"/>
-      <xs:element name="faultString" type="xs:string" minOccurs="0"/>
+      <xs:element name="playerId" type="xs:int"/>
+      <xs:element name="sequenceIndex" type="xs:int"/>
+      <xs:element name="sequencePosition" type="xs:int"/>
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="createGameFromXML">
-    <xs:sequence>
-      <xs:element name="xmlData" type="xs:string" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="createGameFromXMLResponse">
-    <xs:sequence>
-      <xs:element name="return" type="xs:string" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="DuplicateGameName">
-    <xs:sequence>
-      <xs:element name="faultInfo" type="tns:rummikubFault" minOccurs="0"/>
-      <xs:element name="message" type="xs:string" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="InvalidParameters">
-    <xs:sequence>
-      <xs:element name="faultInfo" type="tns:rummikubFault" minOccurs="0"/>
-      <xs:element name="message" type="xs:string" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="InvalidXML">
-    <xs:sequence>
-      <xs:element name="faultInfo" type="tns:rummikubFault" minOccurs="0"/>
-      <xs:element name="message" type="xs:string" minOccurs="0"/>
-    </xs:sequence>
+  <xs:complexType name="takeBackTileResponse">
+    <xs:sequence/>
   </xs:complexType>
 
   <xs:complexType name="addTile">
     <xs:sequence>
       <xs:element name="playerId" type="xs:int"/>
+      <xs:element name="tile" type="tns:tile" minOccurs="0"/>
       <xs:element name="sequenceIndex" type="xs:int"/>
       <xs:element name="sequencePosition" type="xs:int"/>
-      <xs:element name="tile" type="tns:tile" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -167,9 +183,9 @@
 
   <xs:complexType name="createGame">
     <xs:sequence>
-      <xs:element name="computerizedPlayers" type="xs:int"/>
-      <xs:element name="humanPlayers" type="xs:int"/>
       <xs:element name="name" type="xs:string" minOccurs="0"/>
+      <xs:element name="humanPlayers" type="xs:int"/>
+      <xs:element name="computerizedPlayers" type="xs:int"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -213,6 +229,7 @@
     <xs:sequence>
       <xs:element name="name" type="xs:string" minOccurs="0"/>
       <xs:element name="numberOfTiles" type="xs:int"/>
+      <xs:element name="playedFirstSequence" type="xs:boolean"/>
       <xs:element name="status" type="tns:playerStatus" minOccurs="0"/>
       <xs:element name="tiles" type="tns:tile" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element name="type" type="tns:playerType" minOccurs="0"/>
@@ -243,8 +260,8 @@
 
   <xs:complexType name="getEvents">
     <xs:sequence>
-      <xs:element name="eventId" type="xs:int"/>
       <xs:element name="playerId" type="xs:int"/>
+      <xs:element name="eventId" type="xs:int"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -268,17 +285,6 @@
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="createSequence">
-    <xs:sequence>
-      <xs:element name="playerId" type="xs:int"/>
-      <xs:element name="tiles" type="tns:tile" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="createSequenceResponse">
-    <xs:sequence/>
-  </xs:complexType>
-
   <xs:complexType name="joinGame">
     <xs:sequence>
       <xs:element name="gameName" type="xs:string" minOccurs="0"/>
@@ -290,6 +296,17 @@
     <xs:sequence>
       <xs:element name="return" type="xs:int"/>
     </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="createSequence">
+    <xs:sequence>
+      <xs:element name="playerId" type="xs:int"/>
+      <xs:element name="tiles" type="tns:tile" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="createSequenceResponse">
+    <xs:sequence/>
   </xs:complexType>
 
   <xs:simpleType name="gameStatus">
@@ -334,9 +351,9 @@
       <xs:enumeration value="PlayerResigned"/>
       <xs:enumeration value="SequenceCreated"/>
       <xs:enumeration value="TileAdded"/>
+      <xs:enumeration value="TileReturned"/>
       <xs:enumeration value="TileMoved"/>
       <xs:enumeration value="Revert"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>
-
