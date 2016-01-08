@@ -1,8 +1,12 @@
 package controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import logic.Game;
+import logic.Player;
 import logic.persistency.GamePersistency;
 import ws.rummikub.DuplicateGameName_Exception;
 import ws.rummikub.Event;
@@ -12,20 +16,27 @@ import ws.rummikub.GameStatus;
 import ws.rummikub.InvalidParameters_Exception;
 import ws.rummikub.InvalidXML_Exception;
 import ws.rummikub.PlayerDetails;
+import ws.rummikub.PlayerType;
 import ws.rummikub.Tile;
 
 public class MainController {
 
     private static final String DUP_GAME_NAME_ERR_MSG = "Could not create game due to duplicate game name";
-    private static final String GAME_NOT_EXIST_ERR_MSG = "Could not load file due to duplicate game name";
     private static final String INVALID_NEW_GAME_PARAMS_ERR_MSG = "Could not create new game due to wrong game parameters";
+    private static final String GAME_NOT_EXIST_ERR_MSG = "Could not find game name in games list";
     private static final int MAX_PLAYERS_NUMBER = 4;
     private static final int MIN_PLAYERS_NUMBER = 2;
     private static final int MIN_HUMAN_PLAYERS_NUMBER = 1;
-    List<Game> games;
+    private static final int FIRST_PLAYER_ID = 1;
+    private static final String COMPUTER_NAME_PREFIX = "Computer #";
+    private List<Game> games;
+    private Map<Integer, Player> playersIDs;
+    private AtomicInteger generatedID;
 
     public MainController() {
         games = new ArrayList<>();
+        playersIDs = new HashMap<Integer, Player>();
+        generatedID = new AtomicInteger(FIRST_PLAYER_ID);
     }
 
     public List<Event> getEvents(int playerId, int eventId) throws InvalidParameters_Exception {
@@ -37,28 +48,34 @@ public class MainController {
         if (getGameByName(game.getName()) != null) {
             throw new DuplicateGameName_Exception(DUP_GAME_NAME_ERR_MSG, null);
         }
+        setIDsToPlayers(game.getPlayers());
         games.add(game);
 
         return game.getName();
     }
 
     public List<PlayerDetails> getPlayersDetails(String gameName) throws GameDoesNotExists_Exception {
-        //TODO implement this method
-        throw new UnsupportedOperationException("Not implemented yet.");
+        Game game = getGameByName(gameName);
+        if (game == null) {
+            throw new GameDoesNotExists_Exception(GAME_NOT_EXIST_ERR_MSG, null);
+        }
+
+        return getPlayersList(game);
     }
 
     public void createGame(String name, int humanPlayers, int computerizedPlayers) throws InvalidParameters_Exception, ws.rummikub.DuplicateGameName_Exception {
-        if (isGameNameValid(name) == false ||
-                isPlayersNumberValid(humanPlayers, computerizedPlayers) == false) {
+        if (isGameNameValid(name) == false
+                || isPlayersNumberValid(humanPlayers, computerizedPlayers) == false) {
             throw new InvalidParameters_Exception(INVALID_NEW_GAME_PARAMS_ERR_MSG, null);
         }
-        
+
         if (getGameByName(name) != null) {
             throw new DuplicateGameName_Exception(DUP_GAME_NAME_ERR_MSG, null);
         }
-        
+
         GameDetails gameDetails = createNewGameDetails(name, humanPlayers, computerizedPlayers, 0, false, GameStatus.WAITING);
         Game game = new Game(gameDetails);
+        createComputerizedPlayers(game);
         games.add(game);
     }
 
@@ -74,11 +91,11 @@ public class MainController {
 
     public List<String> getWaitingGames() {
         List<String> waitingGames = new ArrayList<>();
-        
+
         games.stream().filter((game) -> (game.getStatus().equals(GameStatus.WAITING))).forEach((game) -> {
             waitingGames.add(game.getName());
         });
-        
+
         return waitingGames;
     }
 
@@ -135,22 +152,22 @@ public class MainController {
     private boolean isGameNameValid(String name) {
         return (name != null && name.trim().length() > 0);
     }
-    
+
     private boolean isPlayersNumberValid(int humanPlayers, int computerizedPlayers) {
         if (humanPlayers < MIN_HUMAN_PLAYERS_NUMBER || computerizedPlayers < 0) {
-            return false;            
+            return false;
         }
         if (humanPlayers + computerizedPlayers < MIN_PLAYERS_NUMBER) {
-            return false;            
+            return false;
         }
-        
+
         if (humanPlayers + computerizedPlayers > MAX_PLAYERS_NUMBER) {
-            return false;            
+            return false;
         }
-        
+
         return true;
     }
-    
+
     private GameDetails createNewGameDetails(String name, int humanPlayers, int computerizedPlayers, int joinedHumanPlayers, boolean isFromFile, GameStatus status) {
         GameDetails gameDetails = new GameDetails();
         gameDetails.setHumanPlayers(humanPlayers);
@@ -159,7 +176,49 @@ public class MainController {
         gameDetails.setStatus(status);
         gameDetails.setName(name);
         gameDetails.setJoinedHumanPlayers(joinedHumanPlayers);
-        
+
         return gameDetails;
+    }
+
+    private List<PlayerDetails> getPlayersList(Game game) {
+        List<PlayerDetails> playersList = new ArrayList<>();
+        PlayerDetails playerDetails;
+
+        for (Player player : game.getPlayers()) {
+            playerDetails = new PlayerDetails();
+            playerDetails.setName(player.getName());
+            playerDetails.setNumberOfTiles(player.getTiles().size());
+            playerDetails.setPlayedFirstSequence(player.isFirstStep());
+            playerDetails.setStatus(player.getStatus());
+            if (player.isHuman()) {
+                playerDetails.setType(PlayerType.HUMAN);
+            } else {
+                playerDetails.setType(PlayerType.COMPUTER);
+            }
+        }
+
+        return playersList;
+    }
+
+    private void setIDsToPlayers(List<Player> players) {
+        int currPlayerID;
+        
+        for (Player player : players) {
+            currPlayerID = generatedID.getAndIncrement();
+            player.setID(currPlayerID);
+            playersIDs.put(currPlayerID, player);
+        }
+    }
+
+    private void createComputerizedPlayers(Game game) {
+        Player player;
+        int currPlayerID;
+        
+        for (int i = 0; i < game.getComputerizedPlayersNum(); i++) {
+            currPlayerID = generatedID.getAndIncrement();
+            player = new Player(currPlayerID, COMPUTER_NAME_PREFIX + currPlayerID, false);
+            game.addPlayer(player);
+            playersIDs.put(currPlayerID, player);
+        }
     }
 }

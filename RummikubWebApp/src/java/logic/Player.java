@@ -3,6 +3,7 @@ package logic;
 import java.util.ArrayList;
 import java.util.List;
 import logic.tile.Tile;
+import ws.rummikub.PlayerStatus;
 
 public class Player {
 
@@ -13,7 +14,7 @@ public class Player {
     private boolean isFirstStep;
 
     public Player(int ID, String name, boolean isHuman) {
-        this.details = new PlayerDetails(ID, name, isHuman);
+        this.details = new PlayerDetails(ID, name, isHuman, PlayerStatus.JOINED);
         this.tiles = new ArrayList<>();
         this.isFirstStep = true;
     }
@@ -47,6 +48,10 @@ public class Player {
 
     public int getID() {
         return details.getID();
+    }
+    
+    public void setID(int ID) {
+        details.setID(ID);
     }
 
     public void reset() {
@@ -125,5 +130,13 @@ public class Player {
         if (backupTiles != null) {
             tiles = backupTiles;
         }        
+    }
+    
+    public PlayerStatus getStatus() {
+        return details.getStatus();
+    }
+    
+    public void setStatus(PlayerStatus status) {
+        details.setStatus(status);
     }
 }

@@ -17,7 +17,7 @@ import ws.rummikub.InvalidXML_Exception;
 
 class XSDObjToGameObjConverter {
 
-    private static int playerID = 0;
+    private static int INITIAL_PLAYER_ID = -1;
 
     public static Game createGameFromXSDObj(Rummikub rummikubXSDObj) throws InvalidXML_Exception {
         if (!checkGameValidity(rummikubXSDObj)) {
@@ -187,7 +187,9 @@ class XSDObjToGameObjConverter {
 
         for (Players.Player player : players) {
             isHuman = player.getType().equals(PlayerType.HUMAN);
-            logicPlayer = new Player(++playerID, player.getName(), isHuman);
+            //This is only initial player ID. To be changed by MainController
+            //Which handle the players IDs
+            logicPlayer = new Player(INITIAL_PLAYER_ID, player.getName(), isHuman);
             game.addPlayer(logicPlayer);
         }
     }
