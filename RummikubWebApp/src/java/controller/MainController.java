@@ -8,6 +8,7 @@ import ws.rummikub.DuplicateGameName_Exception;
 import ws.rummikub.Event;
 import ws.rummikub.GameDetails;
 import ws.rummikub.GameDoesNotExists_Exception;
+import ws.rummikub.GameStatus;
 import ws.rummikub.InvalidParameters_Exception;
 import ws.rummikub.InvalidXML_Exception;
 import ws.rummikub.PlayerDetails;
@@ -63,8 +64,13 @@ public class MainController {
     }
 
     public List<String> getWaitingGames() {
-        //TODO implement this method
-        throw new UnsupportedOperationException("Not implemented yet.");
+        List<String> waitingGames = new ArrayList<>();
+        
+        games.stream().filter((game) -> (game.getStatus().equals(GameStatus.WAITING))).forEach((game) -> {
+            waitingGames.add(game.getName());
+        });
+        
+        return waitingGames;
     }
 
     public int joinGame(String gameName, String playerName) throws GameDoesNotExists_Exception, InvalidParameters_Exception {
