@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import logic.tile.*;
+import ws.rummikub.GameDetails;
 import ws.rummikub.GameStatus;
 
 public class Game {
@@ -15,21 +16,25 @@ public class Game {
     private Player currentPlayer;
     private Player winner;
     private final boolean isLoadedFromFile;
+    private GameStatus status;
+    private int joinedHumanPlayersNum;
+    private final int humanPlayersNum;
+    private final int computerizedPlayersNum;
     private static final int INITIAL_TILES_COUNT = 14;
     private static final int PUNISH_TILES_NUMBER = 3;
     private static final int MINIMUM_SUM_SEQUENCE_VALUE_FOR_FIRST_STEP = 30;
-    private GameStatus status;
 
     public Game(GameDetails gameDetails) {
         players = new ArrayList<>();
-        currentPlayer = null;
         tilesDeck = new Deck();
         board = new Board();
-        name = gameDetails.getGameName();
-        isLoadedFromFile = gameDetails.isLoadedFromFile();
+        
+        name = gameDetails.getName();
+        isLoadedFromFile = gameDetails.isLoadedFromXML();
         status = gameDetails.getStatus();
-
-        createPlayers(gameDetails);
+        humanPlayersNum = gameDetails.getHumanPlayers();
+        computerizedPlayersNum = gameDetails.getComputerizedPlayers();
+        joinedHumanPlayersNum = gameDetails.getJoinedHumanPlayers();
     }
 
     public void reset() {
@@ -44,9 +49,6 @@ public class Game {
     }
 
     public void addPlayer(Player player) {
-        if (currentPlayer == null) {
-            setCurrentPlayer(player);
-        }
         players.add(player);
     }
 
@@ -136,15 +138,6 @@ public class Game {
             for (int i = 0; i < INITIAL_TILES_COUNT; i++) {
                 player.addTile(getTilesDeck().pullTile());
             }
-        }
-    }
-
-    private void createPlayers(GameDetails gameDetails) {
-        Player currPlayer;
-
-        for (PlayerDetails playerDetails : gameDetails.getPlayersDetails()) {
-            currPlayer = new Player(playerDetails);
-            addPlayer(currPlayer);
         }
     }
 
@@ -318,24 +311,12 @@ public class Game {
         return namesSet.size() >= playersNames.size();
     }
     
-    public List<Player> getHumanPlayers() {
-        List<Player> humanPlayers = new ArrayList<>();
-        
-        players.stream().filter((player) -> (player.isHuman())).forEach((player) -> {
-            humanPlayers.add(player);
-        });
-        
-        return humanPlayers;
+    public int getHumanPlayersNum() {
+        return humanPlayersNum;
     }
     
-    public List<Player> getComputerizedPlayers() {
-        List<Player> computerizedPlayers = new ArrayList<>();
-        
-        players.stream().filter((player) -> (!player.isHuman())).forEach((player) -> {
-            computerizedPlayers.add(player);
-        });
-        
-        return computerizedPlayers;
+    public int getComputerizedPlayersNum() {
+        return computerizedPlayersNum;
     }
 
     public GameStatus getStatus() {

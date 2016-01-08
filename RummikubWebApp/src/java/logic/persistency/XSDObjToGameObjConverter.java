@@ -9,105 +9,118 @@ import generated.Board;
 import java.util.ArrayList;
 import java.util.List;
 import logic.Game;
-import logic.GameDetails;
 import logic.Player;
-import logic.PlayerDetails;
-import logic.persistency.GamePersistency.PersistencyException;
 import logic.tile.Sequence;
+import ws.rummikub.GameDetails;
 import ws.rummikub.GameStatus;
+import ws.rummikub.InvalidXML_Exception;
 
 class XSDObjToGameObjConverter {
-    private static Game game;
-    private static Rummikub rummikubXSDObj;
 
-    static {
-        game = null;
-        rummikubXSDObj = null;
+    private static int playerID = 0;
+
+    public static Game createGameFromXSDObj(Rummikub rummikubXSDObj) throws InvalidXML_Exception {
+        if (!checkGameValidity(rummikubXSDObj)) {
+            throw new InvalidXML_Exception(null, null);
+        }
+        GameDetails gameDetails = getGameDetailsFromXSDObj(rummikubXSDObj);
+        Game game = new Game(gameDetails);
+        addPlayers(game, rummikubXSDObj);
+        distributeTilesToPlayers(game, rummikubXSDObj);
+        distributeTilesToBoard(game, rummikubXSDObj);
+        setCurrPlayerFromXSDObj(game, rummikubXSDObj);
+        setAllGamePlayerFirstStep(game, rummikubXSDObj);
+        
+        return game;
     }
 
-    static GameDetails getGameDetailsFromXSDObj(Rummikub rummikubXSDObj) {
-        int ID = 1;
-        List<logic.PlayerDetails> gamePlayersDetails = new ArrayList<>();
+    private static GameDetails getGameDetailsFromXSDObj(Rummikub rummikubXSDObj) {
+        GameDetails gameDetails = new GameDetails();
+        int humanPlayersNum = 0;
+        int computerizedPlayersNum = 0;
+
         for (Players.Player player : rummikubXSDObj.getPlayers().getPlayer()) {
             if (player.getType() == PlayerType.HUMAN) {
-                gamePlayersDetails.add(new PlayerDetails(ID, player.getName(), true));
+                humanPlayersNum++;
             } else {
-                gamePlayersDetails.add(new PlayerDetails(ID, player.getName(), false));
+                computerizedPlayersNum++;
             }
-            ID++;
         }
-        return new GameDetails(rummikubXSDObj.getName(), gamePlayersDetails,
-                new FileDetails(null, null, true), GameStatus.WAITING);
+        gameDetails.setComputerizedPlayers(computerizedPlayersNum);
+        gameDetails.setHumanPlayers(humanPlayersNum);
+        gameDetails.setName(rummikubXSDObj.getName());
+        gameDetails.setJoinedHumanPlayers(0);
+        gameDetails.setStatus(GameStatus.WAITING);
+        gameDetails.setLoadedFromXML(true);
+
+        return gameDetails;
     }
 
-    static void createGameFromXSDObj(Game game, Rummikub rummikubXSDObj) {
-        XSDObjToGameObjConverter.game = game;
-        XSDObjToGameObjConverter.rummikubXSDObj = rummikubXSDObj;
-        distributeTilesToPlayers();
-        distributeTilesToBoard();
-        Player currPlayer = getCurrPlayerFromXSDObj();
-        game.setCurrentPlayer(currPlayer);
-        setAllGamePlayerFirstStep();
-        checkAtLeastOneHumanPlayer();
-    }
-
-    private static void distributeTilesToPlayers() {
+    private static void distributeTilesToPlayers(Game game, Rummikub rummikubXSDObj) throws InvalidXML_Exception {
         for (Players.Player player : rummikubXSDObj.getPlayers().getPlayer()) {
-            logic.Player gamePlayer = getGamePlayerByName(player.getName());
+            logic.Player gamePlayer = getGamePlayerByName(game, player.getName());
             List<Tile> xsdTiles = player.getTiles().getTile();
 
-            addTilesToGamePlayer(gamePlayer, xsdTiles);
+            addTilesToGamePlayer(game, gamePlayer, xsdTiles);
         }
     }
 
-    private static void distributeTilesToBoard() {
+    private static void distributeTilesToBoard(Game game, Rummikub rummikubXSDObj) throws InvalidXML_Exception {
         for (Board.Sequence xsdSeq : rummikubXSDObj.getBoard().getSequence()) {
-            List<logic.tile.Tile> gameSeqTiles = getGameSeqTilesFromXSDSeq(xsdSeq);
+            List<logic.tile.Tile> gameSeqTiles = getGameSeqTilesFromXSDSeq(game, xsdSeq);
             logic.tile.Sequence gameSequence = new Sequence(gameSeqTiles);
             game.getBoard().addSequence(gameSequence);
         }
-    }
-
-    private static Player getCurrPlayerFromXSDObj() {
-        for (Player player : game.getPlayers()) {
-            if (player.getName().equals(rummikubXSDObj.getCurrentPlayer()))
-                return player;
+        
+        //perform borad validity check
+        if (!game.getBoard().isValid()) {
+            throw new InvalidXML_Exception(null, null);
         }
-        throw new PersistencyException("Current player name is not one of the players");
     }
 
-    private static Player getGamePlayerByName(String name) {
+    private static void setCurrPlayerFromXSDObj(Game game, Rummikub rummikubXSDObj) {
         for (Player player : game.getPlayers()) {
-            if (player.getName().equals(name))
-                return player;
+            if (player.getName().equals(rummikubXSDObj.getCurrentPlayer())) {
+                game.setCurrentPlayer(player);
+                return;
+            }
         }
-        throw new RuntimeException("getGamePlayerByName did not find the player");
     }
 
-    private static void addTilesToGamePlayer(Player gamePlayer, List<Tile> xsdTiles) {
+    private static Player getGamePlayerByName(Game game, String name) {
+        for (Player player : game.getPlayers()) {
+            if (player.getName().equals(name)) {
+                return player;
+            }
+        }
+        //We should not get here since we created the logic game according to saved game,
+        //so all players names exist in the logic game
+        return null;
+    }
+
+    private static void addTilesToGamePlayer(Game game, Player gamePlayer, List<Tile> xsdTiles) throws InvalidXML_Exception {
         for (Tile xsdTile : xsdTiles) {
-
-            logic.tile.Tile gameTile = pullTileFromDeckByXSDTile(xsdTile);
+            logic.tile.Tile gameTile = pullTileFromDeckByXSDTile(game, xsdTile);
             if (gameTile == null) {
-                throw new PersistencyException(getErrorMsg_TileAppearTooMuch(xsdTile));
+                throw new InvalidXML_Exception(null, null);
             }
             gamePlayer.addTile(gameTile);
         }
     }
 
-    private static List<logic.tile.Tile> getGameSeqTilesFromXSDSeq(Board.Sequence xsdSeq) {
+    private static List<logic.tile.Tile> getGameSeqTilesFromXSDSeq(Game game, Board.Sequence xsdSeq) throws InvalidXML_Exception {
         List<logic.tile.Tile> gameSeqTiles = new ArrayList<>();
         for (Tile xsdTile : xsdSeq.getTile()) {
-            logic.tile.Tile gameTile = pullTileFromDeckByXSDTile(xsdTile);
+            logic.tile.Tile gameTile = pullTileFromDeckByXSDTile(game, xsdTile);
             if (gameTile == null) {
-                throw new PersistencyException(getErrorMsg_TileAppearTooMuch(xsdTile));
+                throw new InvalidXML_Exception(null, null);
             }
             gameSeqTiles.add(gameTile);
         }
         return gameSeqTiles;
     }
 
-    private static logic.tile.Tile pullTileFromDeckByXSDTile(Tile xsdTile) {
+    private static logic.tile.Tile pullTileFromDeckByXSDTile(Game game, Tile xsdTile) {
         logic.tile.Color tileColor = xsdToGameColorConverter(xsdTile.getColor());
         int tileValue = xsdTile.getValue();
         return game.getTilesDeck().pullTile(tileColor, tileValue);
@@ -132,19 +145,50 @@ class XSDObjToGameObjConverter {
         }
     }
 
-    private static void setAllGamePlayerFirstStep() {
+    private static void setAllGamePlayerFirstStep(Game game, Rummikub rummikubXSDObj) {
         for (Players.Player xsdPlayer : rummikubXSDObj.getPlayers().getPlayer()) {
-            Player gamePlayer = getGamePlayerByName(xsdPlayer.getName());
+            Player gamePlayer = getGamePlayerByName(game, xsdPlayer.getName());
             gamePlayer.setFirstStepCompleted(xsdPlayer.isPlacedFirstSequence());
         }
     }
 
-    private static void checkAtLeastOneHumanPlayer() {
-        for (Players.Player xsdPlayer : rummikubXSDObj.getPlayers().getPlayer()) {
-            if(xsdPlayer.getType() == PlayerType.HUMAN)
-                return;
+    private static boolean validatePlayersNames(Rummikub rummikubXSDObj) {
+        List<Players.Player> players = rummikubXSDObj.getPlayers().getPlayer();
+        List<String> playersNames = new ArrayList<>();
+
+        for (Players.Player player : players) {
+            playersNames.add(player.getName());
         }
-        // if we got here that means that there is no human players in the game.
-        throw new PersistencyException("No Human Playrs in the game.");
+
+        return Game.checkPlayersNameValidity(playersNames);
+    }
+
+    private static boolean validateAtleastOneHumanPlayer(Rummikub rummikubXSDObj) {
+        for (Players.Player player : rummikubXSDObj.getPlayers().getPlayer()) {
+            if (player.getType().value().equals(PlayerType.HUMAN.value())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean checkGameValidity(Rummikub rummikubXSDObj) {
+        boolean isPlayerNamesValid = validatePlayersNames(rummikubXSDObj);
+        boolean isAtleastOneHumanPlayer = validateAtleastOneHumanPlayer(rummikubXSDObj);
+
+        return isPlayerNamesValid && isAtleastOneHumanPlayer;
+    }
+
+    private static void addPlayers(Game game, Rummikub rummikubXSDObj) {
+        List<Players.Player> players = rummikubXSDObj.getPlayers().getPlayer();
+        Player logicPlayer;
+        boolean isHuman;
+
+        for (Players.Player player : players) {
+            isHuman = player.getType().equals(PlayerType.HUMAN);
+            logicPlayer = new Player(++playerID, player.getName(), isHuman);
+            game.addPlayer(logicPlayer);
+        }
     }
 }

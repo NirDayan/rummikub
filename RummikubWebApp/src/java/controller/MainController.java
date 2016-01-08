@@ -54,8 +54,8 @@ public class MainController {
             throw new GameDoesNotExists_Exception(GAME_NOT_EXIST_ERR_MSG, null);
         }
         GameDetails gameDetails = new GameDetails();
-        gameDetails.setHumanPlayers(game.getHumanPlayers().size());
-        gameDetails.setComputerizedPlayers(game.getComputerizedPlayers().size());
+        gameDetails.setHumanPlayers(game.getHumanPlayersNum());
+        gameDetails.setComputerizedPlayers(game.getComputerizedPlayersNum());
         gameDetails.setLoadedFromXML(game.isLoadedFromFile());
         gameDetails.setStatus(game.getStatus());
         gameDetails.setName(game.getName());

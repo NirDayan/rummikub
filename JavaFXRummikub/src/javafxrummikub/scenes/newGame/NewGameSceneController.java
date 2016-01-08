@@ -1,12 +1,7 @@
 package javafxrummikub.scenes.newGame;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -214,9 +209,9 @@ public class NewGameSceneController implements Initializable {
         if (fileDetails != null) {
             try {
                 GamePersistency.loadGameInServer(fileDetails, server);
-                game = GamePersistency.load(fileDetails);
-                Platform.runLater(this::clearErrorMsg);
-                gameLoadedSuccessfully.set(true);
+//                game = GamePersistency.load(fileDetails);
+//                Platform.runLater(this::clearErrorMsg);
+//                gameLoadedSuccessfully.set(true);
             } catch (Exception err) {
                 Platform.runLater(this::openFileFailure);
             }

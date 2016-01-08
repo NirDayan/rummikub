@@ -12,8 +12,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import logic.Game;
-import static logic.Game.checkPlayersNameValidity;
-import logic.GameDetails;
 import org.xml.sax.SAXException;
 import ws.rummikub.InvalidParameters_Exception;
 import ws.rummikub.InvalidXML_Exception;
@@ -21,13 +19,14 @@ import ws.rummikub.InvalidXML_Exception;
 public class GamePersistency {
     private static final String RESOURCES = "resources";
     private static final String EMPTY_XML_ERR_MSG = "Could not load file due to empty XML file";
-    private static final String INVALIG_GAME_ERR_MSG = "Could not load file due to empty XML file";
+    private static final String INVALID_GAME_ERR_MSG = "Could not load file due to empty XML file";
     private static final String BROKEN_FILE_ERR_MSG = "Could not load file due to broken XML file";
-    private static final String DUP_GAME_NAME_ERR_MSG = "Could not load file due to duplicate game name";
 
     public static Game load(String xmlData) throws InvalidParameters_Exception, InvalidXML_Exception {
         Schema schema;
         Rummikub rummikubXSDObj;
+        Game game;
+        
         if (xmlData == null) {
             throw new InvalidParameters_Exception(EMPTY_XML_ERR_MSG, null);
         }
@@ -36,18 +35,14 @@ public class GamePersistency {
             schema = GamePersistency.getSchemaFromXSD();
             InputStream xmlInputStream = new ByteArrayInputStream(xmlData.getBytes(StandardCharsets.UTF_8));
             rummikubXSDObj = GamePersistency.readXMLAndCreateRummikubXSDOBj(schema, xmlInputStream);
-        } catch (SAXException | JAXBException ex) {
+        } catch (Exception err) {
             throw new InvalidXML_Exception(BROKEN_FILE_ERR_MSG, null);
         }
         
-        GameDetails gameDetails = XSDObjToGameObjConverter.getGameDetailsFromXSDObj(rummikubXSDObj);
-        if (!checkPlayersNameValidity(gameDetails.getPlayersNames())) {
-            throw new InvalidXML_Exception(INVALIG_GAME_ERR_MSG, null);
-        }
-        Game game = new Game(gameDetails);
-        XSDObjToGameObjConverter.createGameFromXSDObj(game, rummikubXSDObj);
-        if (game.getBoard().isValid() == false) {
-            throw new InvalidXML_Exception(INVALIG_GAME_ERR_MSG, null);
+        try {
+            game = XSDObjToGameObjConverter.createGameFromXSDObj(rummikubXSDObj);
+        } catch(Exception err) {
+            throw new InvalidXML_Exception(INVALID_GAME_ERR_MSG, null);
         }
         return game;
     }
@@ -67,11 +62,5 @@ public class GamePersistency {
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         Schema schema = schemaFactory.newSchema(csdURL);
         return schema;
-    }
-
-    public static class PersistencyException extends RuntimeException {
-        public PersistencyException(String msg) {
-            super(msg);
-        }
     }
 }

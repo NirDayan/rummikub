@@ -3,8 +3,6 @@ package javafxrummikub;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -18,9 +16,6 @@ import javafxrummikub.scenes.gameplay.GamePlaySceneController;
 import javafxrummikub.scenes.newGame.NewGameSceneController;
 import javafxrummikub.scenes.winner.WinnerSceneController;
 import logic.Game;
-import ws.rummikub.DuplicateGameName_Exception;
-import ws.rummikub.InvalidParameters_Exception;
-import ws.rummikub.InvalidXML_Exception;
 import ws.rummikub.RummikubWebService;
 import ws.rummikub.RummikubWebServiceService;
 

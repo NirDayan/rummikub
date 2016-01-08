@@ -6,3 +6,5 @@
 4. Notification to the user when new action is requiret from the user
 5. Implement user response timer
 6. Load file scenario - show informative error in the UI (for example, duplicate game name)
+7. Replay game scenario...?
+8. Remove console application from JAVAFX project

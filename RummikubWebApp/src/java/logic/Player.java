@@ -12,13 +12,13 @@ public class Player {
     private boolean isResign;
     private boolean isFirstStep;
 
-    Player(int ID, String name, boolean isHuman) {
+    public Player(int ID, String name, boolean isHuman) {
         this.details = new PlayerDetails(ID, name, isHuman);
         this.tiles = new ArrayList<>();
         this.isFirstStep = true;
     }
     
-    Player(PlayerDetails playerDetails) {
+    public Player(PlayerDetails playerDetails) {
         this.details = playerDetails;
         this.tiles = new ArrayList<>();
         this.isFirstStep = true;
