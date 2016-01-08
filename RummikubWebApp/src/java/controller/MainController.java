@@ -16,8 +16,12 @@ import ws.rummikub.Tile;
 
 public class MainController {
 
-    private static final String DUP_GAME_NAME_ERR_MSG = "Could not load file due to duplicate game name";
+    private static final String DUP_GAME_NAME_ERR_MSG = "Could not create game due to duplicate game name";
     private static final String GAME_NOT_EXIST_ERR_MSG = "Could not load file due to duplicate game name";
+    private static final String INVALID_NEW_GAME_PARAMS_ERR_MSG = "Could not create new game due to wrong game parameters";
+    private static final int MAX_PLAYERS_NUMBER = 4;
+    private static final int MIN_PLAYERS_NUMBER = 2;
+    private static final int MIN_HUMAN_PLAYERS_NUMBER = 1;
     List<Game> games;
 
     public MainController() {
@@ -44,8 +48,18 @@ public class MainController {
     }
 
     public void createGame(String name, int humanPlayers, int computerizedPlayers) throws InvalidParameters_Exception, ws.rummikub.DuplicateGameName_Exception {
-        //TODO implement this method
-        throw new UnsupportedOperationException("Not implemented yet.");
+        if (isGameNameValid(name) == false ||
+                isPlayersNumberValid(humanPlayers, computerizedPlayers) == false) {
+            throw new InvalidParameters_Exception(INVALID_NEW_GAME_PARAMS_ERR_MSG, null);
+        }
+        
+        if (getGameByName(name) != null) {
+            throw new DuplicateGameName_Exception(DUP_GAME_NAME_ERR_MSG, null);
+        }
+        
+        GameDetails gameDetails = createNewGameDetails(name, humanPlayers, computerizedPlayers, 0, false, GameStatus.WAITING);
+        Game game = new Game(gameDetails);
+        games.add(game);
     }
 
     public GameDetails getGameDetails(String gameName) throws GameDoesNotExists_Exception {
@@ -53,12 +67,7 @@ public class MainController {
         if (game == null) {
             throw new GameDoesNotExists_Exception(GAME_NOT_EXIST_ERR_MSG, null);
         }
-        GameDetails gameDetails = new GameDetails();
-        gameDetails.setHumanPlayers(game.getHumanPlayersNum());
-        gameDetails.setComputerizedPlayers(game.getComputerizedPlayersNum());
-        gameDetails.setLoadedFromXML(game.isLoadedFromFile());
-        gameDetails.setStatus(game.getStatus());
-        gameDetails.setName(game.getName());
+        GameDetails gameDetails = createNewGameDetails(game.getName(), game.getHumanPlayersNum(), game.getComputerizedPlayersNum(), game.getJoinedHumanPlayersNum(), game.isLoadedFromFile(), game.getStatus());
 
         return gameDetails;
     }
@@ -121,5 +130,36 @@ public class MainController {
         }
 
         return null;
+    }
+
+    private boolean isGameNameValid(String name) {
+        return (name != null && name.trim().length() > 0);
+    }
+    
+    private boolean isPlayersNumberValid(int humanPlayers, int computerizedPlayers) {
+        if (humanPlayers < MIN_HUMAN_PLAYERS_NUMBER || computerizedPlayers < 0) {
+            return false;            
+        }
+        if (humanPlayers + computerizedPlayers < MIN_PLAYERS_NUMBER) {
+            return false;            
+        }
+        
+        if (humanPlayers + computerizedPlayers > MAX_PLAYERS_NUMBER) {
+            return false;            
+        }
+        
+        return true;
+    }
+    
+    private GameDetails createNewGameDetails(String name, int humanPlayers, int computerizedPlayers, int joinedHumanPlayers, boolean isFromFile, GameStatus status) {
+        GameDetails gameDetails = new GameDetails();
+        gameDetails.setHumanPlayers(humanPlayers);
+        gameDetails.setComputerizedPlayers(computerizedPlayers);
+        gameDetails.setLoadedFromXML(isFromFile);
+        gameDetails.setStatus(status);
+        gameDetails.setName(name);
+        gameDetails.setJoinedHumanPlayers(joinedHumanPlayers);
+        
+        return gameDetails;
     }
 }

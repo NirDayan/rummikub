@@ -318,6 +318,10 @@ public class Game {
     public int getComputerizedPlayersNum() {
         return computerizedPlayersNum;
     }
+    
+    public int getJoinedHumanPlayersNum() {
+        return joinedHumanPlayersNum;
+    }
 
     public GameStatus getStatus() {
         return status;
