@@ -14,6 +14,7 @@ import logic.Player;
 import logic.PlayerDetails;
 import logic.persistency.GamePersistency.PersistencyException;
 import logic.tile.Sequence;
+import ws.rummikub.GameStatus;
 
 class XSDObjToGameObjConverter {
     private static Game game;
@@ -35,7 +36,8 @@ class XSDObjToGameObjConverter {
             }
             ID++;
         }
-        return new GameDetails(rummikubXSDObj.getName(), gamePlayersDetails, new FileDetails(null, null, true));
+        return new GameDetails(rummikubXSDObj.getName(), gamePlayersDetails,
+                new FileDetails(null, null, true), GameStatus.WAITING);
     }
 
     static void createGameFromXSDObj(Game game, Rummikub rummikubXSDObj) {

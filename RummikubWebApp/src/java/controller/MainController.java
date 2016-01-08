@@ -14,10 +14,11 @@ import ws.rummikub.PlayerDetails;
 import ws.rummikub.Tile;
 
 public class MainController {
+
     private static final String DUP_GAME_NAME_ERR_MSG = "Could not load file due to duplicate game name";
     private static final String GAME_NOT_EXIST_ERR_MSG = "Could not load file due to duplicate game name";
     List<Game> games;
-    
+
     public MainController() {
         games = new ArrayList<>();
     }
@@ -32,7 +33,7 @@ public class MainController {
             throw new DuplicateGameName_Exception(DUP_GAME_NAME_ERR_MSG, null);
         }
         games.add(game);
-        
+
         return game.getName();
     }
 
@@ -51,8 +52,14 @@ public class MainController {
         if (game == null) {
             throw new GameDoesNotExists_Exception(GAME_NOT_EXIST_ERR_MSG, null);
         }
-        
-        return createGameDetails(game);
+        GameDetails gameDetails = new GameDetails();
+        gameDetails.setHumanPlayers(game.getHumanPlayers().size());
+        gameDetails.setComputerizedPlayers(game.getComputerizedPlayers().size());
+        gameDetails.setLoadedFromXML(game.isLoadedFromFile());
+        gameDetails.setStatus(game.getStatus());
+        gameDetails.setName(game.getName());
+
+        return gameDetails;
     }
 
     public List<String> getWaitingGames() {
@@ -99,20 +106,14 @@ public class MainController {
         //TODO implement this method
         throw new UnsupportedOperationException("Not implemented yet.");
     }
-    
+
     private Game getGameByName(String gameName) {
         for (Game game : games) {
             if (game.getName().toLowerCase().equals(gameName.toLowerCase())) {
                 return game;
-            }        
+            }
         }
-        
-        return null;
-    }
 
-    private GameDetails createGameDetails(Game game) {
-        GameDetails gameDetails = new GameDetails();
-//        gameDetails.setComputerizedPlayers();
-        return gameDetails;
+        return null;
     }
 }

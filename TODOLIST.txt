@@ -4,3 +4,5 @@
 2. Implement in JAVAFX waiting screen
 3. User can take back a tile he put on the board
 4. Notification to the user when new action is requiret from the user
+5. Implement user response timer
+6. Load file scenario - show informative error in the UI (for example, duplicate game name)

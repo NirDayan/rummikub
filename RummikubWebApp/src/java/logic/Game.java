@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import logic.persistency.FileDetails;
 import logic.tile.*;
+import ws.rummikub.GameStatus;
 
 public class Game {
     private final String name;
@@ -14,10 +14,11 @@ public class Game {
     private final Board board;
     private Player currentPlayer;
     private Player winner;
-    private FileDetails savedFileDetails;
+    private final boolean isLoadedFromFile;
     private static final int INITIAL_TILES_COUNT = 14;
     private static final int PUNISH_TILES_NUMBER = 3;
     private static final int MINIMUM_SUM_SEQUENCE_VALUE_FOR_FIRST_STEP = 30;
+    private GameStatus status;
 
     public Game(GameDetails gameDetails) {
         players = new ArrayList<>();
@@ -25,7 +26,8 @@ public class Game {
         tilesDeck = new Deck();
         board = new Board();
         name = gameDetails.getGameName();
-        savedFileDetails = gameDetails.getSavedFileDetails();
+        isLoadedFromFile = gameDetails.isLoadedFromFile();
+        status = gameDetails.getStatus();
 
         createPlayers(gameDetails);
     }
@@ -127,14 +129,6 @@ public class Game {
 
     public Deck getTilesDeck() {
         return tilesDeck;
-    }
-
-    public FileDetails getSavedFileDetails() {
-        return savedFileDetails;
-    }
-
-    public void setSavedFileDetails(FileDetails savedFileDetails) {
-        this.savedFileDetails = savedFileDetails;
     }
 
     private void distributeTiles() {
@@ -277,6 +271,10 @@ public class Game {
 
         return true;
     }
+    
+    public boolean isLoadedFromFile() {
+        return isLoadedFromFile;
+    }
 
     private boolean createSequenceFromTilesList(Player player, List<Tile> tiles) {
         if (tiles == null)
@@ -312,16 +310,39 @@ public class Game {
     }
     
     public static boolean checkPlayersNameValidity(List<String> playersNames) {
-        for (String name : playersNames) {
-            if (name.isEmpty()) {
-                return false;
-            }
+        if (!playersNames.stream().noneMatch((name) -> (name.isEmpty()))) {
+            return false;
         }
         //check names are unique
         Set<String> namesSet = new HashSet<>(playersNames);
-        if (namesSet.size() < playersNames.size()) {
-            return false;
-        }
-        return true;
+        return namesSet.size() >= playersNames.size();
+    }
+    
+    public List<Player> getHumanPlayers() {
+        List<Player> humanPlayers = new ArrayList<>();
+        
+        players.stream().filter((player) -> (player.isHuman())).forEach((player) -> {
+            humanPlayers.add(player);
+        });
+        
+        return humanPlayers;
+    }
+    
+    public List<Player> getComputerizedPlayers() {
+        List<Player> computerizedPlayers = new ArrayList<>();
+        
+        players.stream().filter((player) -> (!player.isHuman())).forEach((player) -> {
+            computerizedPlayers.add(player);
+        });
+        
+        return computerizedPlayers;
+    }
+
+    public GameStatus getStatus() {
+        return status;
+    }
+    
+    public void setStatus(GameStatus newStatus) {
+        status = newStatus;
     }
 }

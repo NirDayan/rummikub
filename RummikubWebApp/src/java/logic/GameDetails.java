@@ -3,6 +3,7 @@ package logic;
 import java.util.ArrayList;
 import java.util.List;
 import logic.persistency.FileDetails;
+import ws.rummikub.GameStatus;
 
 public class GameDetails {
     private String gameName;
@@ -10,11 +11,10 @@ public class GameDetails {
     private int humenPlayersNum;
     private List<PlayerDetails> playersDetails;
     private FileDetails savedFileDetails;
-    
-    public GameDetails() {}
-    
+    private GameStatus status;
+        
     public GameDetails(String gameName, List<PlayerDetails> playerDetails, 
-            FileDetails savedFileDetails) {
+            FileDetails savedFileDetails, GameStatus status) {
         this.gameName = gameName;
         this.playersDetails = playerDetails;
         humenPlayersNum=0; computerPlayersNum=0;
@@ -25,6 +25,7 @@ public class GameDetails {
                 computerPlayersNum++;
         }
         this.savedFileDetails = savedFileDetails;
+        this.status = status;
     }
 
     public String getGameName() {
@@ -69,5 +70,13 @@ public class GameDetails {
 
     public List<PlayerDetails> getPlayersDetails() {
         return playersDetails;
+    }
+
+    public boolean isLoadedFromFile() {
+        return savedFileDetails != null;
+    }
+
+    GameStatus getStatus() {
+        return status;
     }
 }
