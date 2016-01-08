@@ -105,8 +105,13 @@ public class MainController {
     }
 
     public PlayerDetails getPlayerDetails(int playerId) throws InvalidParameters_Exception, GameDoesNotExists_Exception {
-        //TODO implement this method
-        throw new UnsupportedOperationException("Not implemented yet.");
+        Player player = playersIDs.get(playerId);
+        if (player == null) {
+            //TODO: throw PlayerNotFound Exception...
+            // I think there is a mistake here with the Exceptions definitions.
+            //Mail will be send to Liron about it.
+        }
+        return createPlayerDetailsFromPlayer(player);
     }
 
     public void createSequence(int playerId, List<Tile> tiles) throws InvalidParameters_Exception {
@@ -180,21 +185,26 @@ public class MainController {
         return gameDetails;
     }
 
+    private PlayerDetails createPlayerDetailsFromPlayer(Player player) {
+        PlayerDetails playerDetails = new PlayerDetails();
+        playerDetails.setName(player.getName());
+        playerDetails.setNumberOfTiles(player.getTiles().size());
+        playerDetails.setPlayedFirstSequence(player.isFirstStep());
+        playerDetails.setStatus(player.getStatus());
+        if (player.isHuman()) {
+            playerDetails.setType(PlayerType.HUMAN);
+        } else {
+            playerDetails.setType(PlayerType.COMPUTER);
+        }
+        
+        return playerDetails;
+    }
+
     private List<PlayerDetails> getPlayersList(Game game) {
         List<PlayerDetails> playersList = new ArrayList<>();
-        PlayerDetails playerDetails;
 
         for (Player player : game.getPlayers()) {
-            playerDetails = new PlayerDetails();
-            playerDetails.setName(player.getName());
-            playerDetails.setNumberOfTiles(player.getTiles().size());
-            playerDetails.setPlayedFirstSequence(player.isFirstStep());
-            playerDetails.setStatus(player.getStatus());
-            if (player.isHuman()) {
-                playerDetails.setType(PlayerType.HUMAN);
-            } else {
-                playerDetails.setType(PlayerType.COMPUTER);
-            }
+            playersList.add(createPlayerDetailsFromPlayer(player));
         }
 
         return playersList;
@@ -202,7 +212,7 @@ public class MainController {
 
     private void setIDsToPlayers(List<Player> players) {
         int currPlayerID;
-        
+
         for (Player player : players) {
             currPlayerID = generatedID.getAndIncrement();
             player.setID(currPlayerID);
@@ -213,7 +223,7 @@ public class MainController {
     private void createComputerizedPlayers(Game game) {
         Player player;
         int currPlayerID;
-        
+
         for (int i = 0; i < game.getComputerizedPlayersNum(); i++) {
             currPlayerID = generatedID.getAndIncrement();
             player = new Player(currPlayerID, COMPUTER_NAME_PREFIX + currPlayerID, false);
