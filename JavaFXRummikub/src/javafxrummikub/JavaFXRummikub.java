@@ -48,19 +48,18 @@ public class JavaFXRummikub extends Application {
         Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
         sceneHeight = (int) (screenBounds.getHeight() * screenFactor);
         sceneWidth = (int) (screenBounds.getWidth() * screenFactor);
+        
+        try {
+            //DOTO: chage it.. currently hard-coded
+            createWSClient("127.0.0.1", 8080);
+        } catch (MalformedURLException ex) {}
+        
         Scene newGameScene = getNewGameScene();
 
         primaryStage.setTitle("Welcome to Rumikub!");
         primaryStage.setResizable(false);
         primaryStage.setScene(newGameScene);
         primaryStage.show();
-        
-        try {
-            //DOTO: chage it.. currently hard-coded
-            createWSClient("127.0.0.1", 8080);
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(JavaFXRummikub.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 
     private Scene getNewGameScene() {
@@ -69,6 +68,7 @@ public class JavaFXRummikub extends Application {
         Parent newGameRoot = (Parent) fxmlLoader.getRoot();
         NewGameSceneController newGameSceneController = getNewGameSceneController(fxmlLoader);
         registerGamePlayToStartPlayButton(newGameSceneController);
+        newGameSceneController.setServer(rummikubGameWS);
         if (newGameRoot != null) {
             newGameScene = new Scene(newGameRoot, sceneWidth, sceneHeight);
         }

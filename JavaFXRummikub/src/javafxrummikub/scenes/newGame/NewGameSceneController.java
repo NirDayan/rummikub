@@ -1,7 +1,12 @@
 package javafxrummikub.scenes.newGame;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -31,6 +36,7 @@ import logic.GameDetails;
 import logic.PlayerDetails;
 import logic.persistency.FileDetails;
 import logic.persistency.GamePersistency;
+import ws.rummikub.RummikubWebService;
 
 public class NewGameSceneController implements Initializable {
 
@@ -77,6 +83,7 @@ public class NewGameSceneController implements Initializable {
     private SimpleBooleanProperty gameNameValid;
     private SimpleIntegerProperty currNewPlayersNum;
     private SimpleIntegerProperty humanPlayersNum;
+    private RummikubWebService server;
 
     //Initializes the controller class.
     @Override
@@ -206,6 +213,7 @@ public class NewGameSceneController implements Initializable {
     private void loadGameFile(FileDetails fileDetails) {
         if (fileDetails != null) {
             try {
+                GamePersistency.loadGameInServer(fileDetails, server);
                 game = GamePersistency.load(fileDetails);
                 Platform.runLater(this::clearErrorMsg);
                 gameLoadedSuccessfully.set(true);
@@ -256,5 +264,9 @@ public class NewGameSceneController implements Initializable {
     @FXML
     private void exitGameButtonPressed(ActionEvent event) {
         Platform.exit();
+    }
+
+    public void setServer(RummikubWebService rummikubGameWS) {
+        server = rummikubGameWS;
     }
 }

@@ -11,6 +11,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.XMLConstants;
@@ -26,6 +30,10 @@ import static logic.Game.checkPlayersNameValidity;
 import logic.GameDetails;
 import logic.Player;
 import org.xml.sax.SAXException;
+import ws.rummikub.DuplicateGameName_Exception;
+import ws.rummikub.InvalidParameters_Exception;
+import ws.rummikub.InvalidXML_Exception;
+import ws.rummikub.RummikubWebService;
 
 public class GamePersistency {
     private static final String RESOURCES = "resources";
@@ -190,9 +198,19 @@ public class GamePersistency {
         }
     }
 
+    public static void loadGameInServer(FileDetails fileDetails, RummikubWebService server) throws DuplicateGameName_Exception, InvalidParameters_Exception, InvalidXML_Exception, IOException {
+        String fileContent = readFile(fileDetails.getFullPath(), StandardCharsets.UTF_8);
+        server.createGameFromXML(fileContent);
+    }
+
     public static class PersistencyException extends RuntimeException {
         public PersistencyException(String msg) {
             super(msg);
         }
+    }
+
+    private static String readFile(String path, Charset encoding) throws IOException {
+        byte[] encoded = Files.readAllBytes(Paths.get(path));
+        return new String(encoded, encoding);
     }
 }
