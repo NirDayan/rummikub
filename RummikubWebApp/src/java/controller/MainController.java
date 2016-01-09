@@ -28,6 +28,7 @@ public class MainController {
     private static final String GAME_NOT_EXIST_ERR_MSG = "Could not find game name in games list";
     private static final String PLAYER_NOT_FOUND_ERR_MSG = "Could not find player name";
     private static final String CANT_JOIN_ACTIVE_GAME_ERR_MSG = "Could not join into active game";
+    private static final String EVENT_ID_NOT_FOUND_ERR_MSG = "Could not find event_id for the game of the specific player";
     private static final int MAX_PLAYERS_NUMBER = 4;
     private static final int MIN_PLAYERS_NUMBER = 2;
     private static final int MIN_HUMAN_PLAYERS_NUMBER = 1;
@@ -47,7 +48,18 @@ public class MainController {
     }
 
     public List<Event> getEvents(int playerId, int eventId) throws InvalidParameters_Exception {
-        return null;
+        List<Event> eventsResult = new ArrayList<>();
+        
+        Game game = checkGetEventsInputParams(playerId, eventId);
+        if (game != null) {
+            for (Event event : gamesEventsMap.get(game)) {
+                if (event.getId() > eventId) {
+                    eventsResult.add(event);
+                }
+            }
+        }
+        
+        return eventsResult;
     }
 
     public String createGameFromXML(String xmlData) throws InvalidParameters_Exception, InvalidXML_Exception, DuplicateGameName_Exception {
@@ -287,5 +299,30 @@ public class MainController {
         game.addPlayer(player);
         playersIDs.put(playerID, player);
         return playerID;
+    }
+
+    private Game checkGetEventsInputParams(int playerID, int eventId) throws InvalidParameters_Exception{
+        Player player = playersIDs.get(playerID);
+        if (player == null) {
+            throw new InvalidParameters_Exception(PLAYER_NOT_FOUND_ERR_MSG, null);
+        }
+        Game game = getGameByPlayerID(playerID);
+        //game should not be null here since we already has the player with the ID
+        if (eventId < 0 ||
+                !gamesEventsMap.get(game).stream().anyMatch((event)-> (event.getId() == eventId))) {
+            throw new InvalidParameters_Exception(EVENT_ID_NOT_FOUND_ERR_MSG, null);
+        }
+        
+        return game;
+    }
+    
+    private Game getGameByPlayerID(int playerID) {
+        for (Game game : gamesEventsMap.keySet()) {
+            if (game.getPlayers().stream().anyMatch((player) -> (player.getID() == playerID))) {
+                return game;                
+            }
+        }
+        
+        return null;
     }
 }
