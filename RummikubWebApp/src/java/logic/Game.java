@@ -7,6 +7,7 @@ import java.util.Set;
 import logic.tile.*;
 import ws.rummikub.GameDetails;
 import ws.rummikub.GameStatus;
+import ws.rummikub.PlayerStatus;
 
 public class Game {
     private final String name;
@@ -50,6 +51,10 @@ public class Game {
 
     public void addPlayer(Player player) {
         players.add(player);
+        player.setStatus(PlayerStatus.JOINED);
+        if (player.isHuman()) {
+            incJoinedHumanPlayersNum();
+        }        
     }
 
     public boolean checkIsGameOver() {
@@ -322,6 +327,17 @@ public class Game {
     public int getJoinedHumanPlayersNum() {
         return joinedHumanPlayersNum;
     }
+    
+    public void incJoinedHumanPlayersNum() {
+        joinedHumanPlayersNum++;
+        if (joinedHumanPlayersNum == humanPlayersNum) {
+            setGameActive();            
+        }
+    }
+    
+    public void decJoinedHumanPlayersNum() {
+        joinedHumanPlayersNum--;
+    }
 
     public GameStatus getStatus() {
         return status;
@@ -329,5 +345,12 @@ public class Game {
     
     public void setStatus(GameStatus newStatus) {
         status = newStatus;
+    }
+
+    private void setGameActive() {
+        status = GameStatus.ACTIVE;
+        for (Player player : players) {
+            player.setStatus(PlayerStatus.ACTIVE);
+        }
     }
 }

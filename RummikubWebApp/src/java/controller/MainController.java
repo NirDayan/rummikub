@@ -16,6 +16,7 @@ import ws.rummikub.GameStatus;
 import ws.rummikub.InvalidParameters_Exception;
 import ws.rummikub.InvalidXML_Exception;
 import ws.rummikub.PlayerDetails;
+import ws.rummikub.PlayerStatus;
 import ws.rummikub.PlayerType;
 import ws.rummikub.Tile;
 
@@ -24,6 +25,7 @@ public class MainController {
     private static final String DUP_GAME_NAME_ERR_MSG = "Could not create game due to duplicate game name";
     private static final String INVALID_NEW_GAME_PARAMS_ERR_MSG = "Could not create new game due to wrong game parameters";
     private static final String GAME_NOT_EXIST_ERR_MSG = "Could not find game name in games list";
+    private static final String PLAYER_NOT_FOUND_ERR_MSG = "Could not find player name";
     private static final int MAX_PLAYERS_NUMBER = 4;
     private static final int MIN_PLAYERS_NUMBER = 2;
     private static final int MIN_HUMAN_PLAYERS_NUMBER = 1;
@@ -100,8 +102,11 @@ public class MainController {
     }
 
     public int joinGame(String gameName, String playerName) throws GameDoesNotExists_Exception, InvalidParameters_Exception {
-        //TODO implement this method
-        throw new UnsupportedOperationException("Not implemented yet.");
+        Game game = getGameByName(gameName);
+        if (game == null) {
+            throw new GameDoesNotExists_Exception(GAME_NOT_EXIST_ERR_MSG, null);
+        }
+        return playerJoinIntoGame(playerName, game);
     }
 
     public PlayerDetails getPlayerDetails(int playerId) throws InvalidParameters_Exception, GameDoesNotExists_Exception {
@@ -196,7 +201,7 @@ public class MainController {
         } else {
             playerDetails.setType(PlayerType.COMPUTER);
         }
-        
+
         return playerDetails;
     }
 
@@ -229,6 +234,32 @@ public class MainController {
             player = new Player(currPlayerID, COMPUTER_NAME_PREFIX + currPlayerID, false);
             game.addPlayer(player);
             playersIDs.put(currPlayerID, player);
+        }
+    }
+
+    private int playerJoinIntoGame(String playerName, Game game) throws InvalidParameters_Exception {
+        Player player = null;
+        //Different handling for saved game regarding the player which already exist for saved games
+        if (game.isLoadedFromFile()) {
+            for (Player currPlayer : game.getPlayers()) {
+                if (currPlayer.getName().toLowerCase().equals(playerName.toLowerCase())) {
+                    player = currPlayer;
+                    break;
+                }
+            }
+            //If player not found or this is not a human player, throw exception
+            if (player == null || (player != null && !player.isHuman())) {
+                throw new InvalidParameters_Exception(PLAYER_NOT_FOUND_ERR_MSG, null);
+            }
+            player.setStatus(PlayerStatus.JOINED);
+            game.incJoinedHumanPlayersNum();
+            return player.getID();
+        } else {
+            int playerID = generatedID.getAndIncrement();
+            player = new Player(playerID, playerName, true);
+            game.addPlayer(player);
+            playersIDs.put(playerID, player);
+            return playerID;
         }
     }
 }
