@@ -17,7 +17,7 @@ import ws.rummikub.InvalidXML_Exception;
 
 class XSDObjToGameObjConverter {
 
-    private static int INITIAL_PLAYER_ID = -1;
+    private static final int INITIAL_PLAYER_ID = -1;
 
     public static Game createGameFromXSDObj(Rummikub rummikubXSDObj) throws InvalidXML_Exception {
         if (!checkGameValidity(rummikubXSDObj)) {

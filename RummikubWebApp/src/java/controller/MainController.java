@@ -10,6 +10,7 @@ import logic.Player;
 import logic.persistency.GamePersistency;
 import ws.rummikub.DuplicateGameName_Exception;
 import ws.rummikub.Event;
+import ws.rummikub.EventType;
 import ws.rummikub.GameDetails;
 import ws.rummikub.GameDoesNotExists_Exception;
 import ws.rummikub.GameStatus;
@@ -26,19 +27,23 @@ public class MainController {
     private static final String INVALID_NEW_GAME_PARAMS_ERR_MSG = "Could not create new game due to wrong game parameters";
     private static final String GAME_NOT_EXIST_ERR_MSG = "Could not find game name in games list";
     private static final String PLAYER_NOT_FOUND_ERR_MSG = "Could not find player name";
+    private static final String CANT_JOIN_ACTIVE_GAME_ERR_MSG = "Could not join into active game";
     private static final int MAX_PLAYERS_NUMBER = 4;
     private static final int MIN_PLAYERS_NUMBER = 2;
     private static final int MIN_HUMAN_PLAYERS_NUMBER = 1;
     private static final int FIRST_PLAYER_ID = 1;
+    private static final int FIRST_EVENT_ID = 1;
     private static final String COMPUTER_NAME_PREFIX = "Computer #";
-    private List<Game> games;
     private Map<Integer, Player> playersIDs;
     private AtomicInteger generatedID;
+    private Map<Game, List<Event>> gamesEventsMap;
+    private AtomicInteger eventID;
 
     public MainController() {
-        games = new ArrayList<>();
         playersIDs = new HashMap<Integer, Player>();
         generatedID = new AtomicInteger(FIRST_PLAYER_ID);
+        eventID = new AtomicInteger(FIRST_EVENT_ID);
+        gamesEventsMap = new HashMap<Game, List<Event>>();
     }
 
     public List<Event> getEvents(int playerId, int eventId) throws InvalidParameters_Exception {
@@ -51,7 +56,7 @@ public class MainController {
             throw new DuplicateGameName_Exception(DUP_GAME_NAME_ERR_MSG, null);
         }
         setIDsToPlayers(game.getPlayers());
-        games.add(game);
+        gamesEventsMap.put(game, new ArrayList<Event>());
 
         return game.getName();
     }
@@ -78,7 +83,7 @@ public class MainController {
         GameDetails gameDetails = createNewGameDetails(name, humanPlayers, computerizedPlayers, 0, false, GameStatus.WAITING);
         Game game = new Game(gameDetails);
         createComputerizedPlayers(game);
-        games.add(game);
+        gamesEventsMap.put(game, new ArrayList<Event>());
     }
 
     public GameDetails getGameDetails(String gameName) throws GameDoesNotExists_Exception {
@@ -94,7 +99,7 @@ public class MainController {
     public List<String> getWaitingGames() {
         List<String> waitingGames = new ArrayList<>();
 
-        games.stream().filter((game) -> (game.getStatus().equals(GameStatus.WAITING))).forEach((game) -> {
+        gamesEventsMap.keySet().stream().filter((game) -> (game.getStatus().equals(GameStatus.WAITING))).forEach((game) -> {
             waitingGames.add(game.getName());
         });
 
@@ -105,6 +110,9 @@ public class MainController {
         Game game = getGameByName(gameName);
         if (game == null) {
             throw new GameDoesNotExists_Exception(GAME_NOT_EXIST_ERR_MSG, null);
+        }
+        if (game.getStatus().equals(GameStatus.ACTIVE)) {
+            throw new InvalidParameters_Exception(CANT_JOIN_ACTIVE_GAME_ERR_MSG, null);
         }
         return playerJoinIntoGame(playerName, game);
     }
@@ -150,7 +158,7 @@ public class MainController {
     }
 
     private Game getGameByName(String gameName) {
-        for (Game game : games) {
+        for (Game game : gamesEventsMap.keySet()) {
             if (game.getName().toLowerCase().equals(gameName.toLowerCase())) {
                 return game;
             }
@@ -238,28 +246,46 @@ public class MainController {
     }
 
     private int playerJoinIntoGame(String playerName, Game game) throws InvalidParameters_Exception {
-        Player player = null;
+        int playerID;
         //Different handling for saved game regarding the player which already exist for saved games
         if (game.isLoadedFromFile()) {
-            for (Player currPlayer : game.getPlayers()) {
-                if (currPlayer.getName().toLowerCase().equals(playerName.toLowerCase())) {
-                    player = currPlayer;
-                    break;
-                }
-            }
-            //If player not found or this is not a human player, throw exception
-            if (player == null || (player != null && !player.isHuman())) {
-                throw new InvalidParameters_Exception(PLAYER_NOT_FOUND_ERR_MSG, null);
-            }
-            player.setStatus(PlayerStatus.JOINED);
-            game.incJoinedHumanPlayersNum();
-            return player.getID();
+            playerID = playerJoinIntoSavedGame(game, playerName);
         } else {
-            int playerID = generatedID.getAndIncrement();
-            player = new Player(playerID, playerName, true);
-            game.addPlayer(player);
-            playersIDs.put(playerID, player);
-            return playerID;
+            playerID = playerJoinIntoNewGame(game, playerName);
         }
+        //If the game status has been changed to ACTIVE, add GAME_START event
+        if (game.getStatus().equals(GameStatus.ACTIVE)) {
+            Event event = new Event();
+            event.setId(eventID.getAndIncrement());
+            event.setType(EventType.GAME_START);
+            gamesEventsMap.get(game).add(event);
+        }
+        
+        return playerID;
+    }
+
+    private int playerJoinIntoSavedGame(Game game, String playerName) throws InvalidParameters_Exception {
+        Player player = null;
+        for (Player currPlayer : game.getPlayers()) {
+            if (currPlayer.getName().toLowerCase().equals(playerName.toLowerCase())) {
+                player = currPlayer;
+                break;
+            }
+        }
+        //If player not found or this is not a human player, throw exception
+        if (player == null || (player != null && !player.isHuman())) {
+            throw new InvalidParameters_Exception(PLAYER_NOT_FOUND_ERR_MSG, null);
+        }
+        player.setStatus(PlayerStatus.JOINED);
+        game.incJoinedHumanPlayersNum();
+        return player.getID();
+    }
+
+    private int playerJoinIntoNewGame(Game game, String playerName) {
+        int playerID = generatedID.getAndIncrement();
+        Player player = new Player(playerID, playerName, true);
+        game.addPlayer(player);
+        playersIDs.put(playerID, player);
+        return playerID;
     }
 }
