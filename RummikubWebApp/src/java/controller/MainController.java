@@ -70,6 +70,7 @@ public class MainController {
         }
         setIDsToPlayers(game.getPlayers());
         gamesEventsMap.put(game, new ArrayList<Event>());
+        game.setStatus(GameStatus.WAITING);
 
         return game.getName();
     }
