@@ -40,7 +40,7 @@ public class NewGameSceneController implements Initializable {
     @FXML
     private TextField filePathInput;
     @FXML
-    private Button startPlayButton;
+    private Button okButton;
     @FXML
     private RadioButton loadGameFromFileBtn;
     @FXML
@@ -71,7 +71,7 @@ public class NewGameSceneController implements Initializable {
     private static final int MIN_HUMAN_PLAYERS_NUMBER = 1;
     private Game game;
     private ToggleGroup newGameOptions;
-    private SimpleBooleanProperty isStartPlayPressed;
+    private SimpleBooleanProperty backToGamesListScene;
     private boolean isPlayersFormInitialized;
     private SimpleBooleanProperty gameLoadedSuccessfully;
     private SimpleBooleanProperty newGameFormValid;
@@ -84,22 +84,27 @@ public class NewGameSceneController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         initializeNewGameOptions();
-        initStartGameButton();
+        initCreateGameButton();
     }
 
     @FXML
-    private void startPlayPressed(ActionEvent event) {
+    private void onOkButtonPressed(ActionEvent event) {
         if (newGameOptions.getSelectedToggle() == createNewGameBtn) {
             GameDetails gameDetails = new GameDetails(newGameName.getText(), playersInputData, null);
             game = new Game(gameDetails);
             game.reset();
         }
 
-        isStartPlayPressed.set(true);
+        backToGamesListScene.set(true);
+    }
+    
+    @FXML
+    private void onBackButtonPressed(ActionEvent event) {
+        backToGamesListScene.set(true);
     }
 
-    public SimpleBooleanProperty isStartPlayPressed() {
-        return isStartPlayPressed;
+    public SimpleBooleanProperty isBackToGamesListScene() {
+        return backToGamesListScene;
     }
 
     private void initializeNewGameOptions() {
@@ -135,7 +140,7 @@ public class NewGameSceneController implements Initializable {
                 showNewGameFields();
             }
         });
-        isStartPlayPressed = new SimpleBooleanProperty(false);
+        backToGamesListScene = new SimpleBooleanProperty(false);
     }
 
     private void updateSelectedFile(String fullFilePath) {
@@ -209,9 +214,8 @@ public class NewGameSceneController implements Initializable {
         if (fileDetails != null) {
             try {
                 GamePersistency.loadGameInServer(fileDetails, server);
-//                game = GamePersistency.load(fileDetails);
-//                Platform.runLater(this::clearErrorMsg);
-//                gameLoadedSuccessfully.set(true);
+                Platform.runLater(this::clearErrorMsg);
+                gameLoadedSuccessfully.set(true);
             } catch (Exception err) {
                 Platform.runLater(this::openFileFailure);
             }
@@ -249,16 +253,11 @@ public class NewGameSceneController implements Initializable {
         addNewPlayerButton.disableProperty().set(false);
     }
 
-    private void initStartGameButton() {
+    private void initCreateGameButton() {
         //start play button is enabled on the below cases:
         // 1. Game loaded successfully from file
         // 2. New game form is valid
-        startPlayButton.disableProperty().bind(Bindings.and(newGameFormValid.not(), gameLoadedSuccessfully.not()));
-    }
-
-    @FXML
-    private void exitGameButtonPressed(ActionEvent event) {
-        Platform.exit();
+        okButton.disableProperty().bind(Bindings.and(newGameFormValid.not(), gameLoadedSuccessfully.not()));
     }
 
     public void setServer(RummikubWebService rummikubGameWS) {

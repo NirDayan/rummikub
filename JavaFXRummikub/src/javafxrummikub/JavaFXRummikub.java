@@ -12,6 +12,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafxrummikub.scenes.gamelist.GamesListSceneController;
 import javafxrummikub.scenes.gameplay.GamePlaySceneController;
 import javafxrummikub.scenes.newGame.NewGameSceneController;
 import javafxrummikub.scenes.winner.WinnerSceneController;
@@ -23,6 +24,7 @@ public class JavaFXRummikub extends Application {
     private static final String GAME_PLAY_SCENE_FILE_PATH = "/javafxrummikub/scenes/gameplay/GamePlayScene.fxml";
     private static final String NEW_GAME_SCENE_FILE_PATH = "/javafxrummikub/scenes/newGame/newGameScene.fxml";
     private static final String WINNER_SCENE_FILE_PATH = "/javafxrummikub/scenes/winner/winnerScene.fxml";
+    private static final String GAMES_LIST_SCENE_FILE_PATH = "/javafxrummikub/scenes/gamelist/GamesListScene.fxml";
 
     private int sceneWidth;
     private int sceneHeight;
@@ -49,14 +51,28 @@ public class JavaFXRummikub extends Application {
             createWSClient("127.0.0.1", 8080);
         } catch (MalformedURLException ex) {}
         
-        Scene newGameScene = getNewGameScene();
+        Scene gamesListScene = getGamesListScene();
 
         primaryStage.setTitle("Welcome to Rumikub!");
         primaryStage.setResizable(false);
-        primaryStage.setScene(newGameScene);
+        primaryStage.setScene(gamesListScene);
         primaryStage.show();
     }
 
+    private Scene getGamesListScene() {
+        Scene gamesListScene = null;
+        FXMLLoader fxmlLoader = getFXMLLoaderByRelativePath(GAMES_LIST_SCENE_FILE_PATH);
+        Parent gamesListRoot = (Parent) fxmlLoader.getRoot();
+        GamesListSceneController gamesListSceneController = getGamesListSceneController(fxmlLoader);
+        registerNewGameSceneToCreateGameButton(gamesListSceneController);
+        gamesListSceneController.setServer(rummikubGameWS);
+        if (gamesListRoot != null) {
+            gamesListScene = new Scene(gamesListRoot, sceneWidth, sceneHeight);
+        }
+
+        return gamesListScene;
+    }
+    
     private Scene getNewGameScene() {
         Scene newGameScene = null;
         FXMLLoader fxmlLoader = getFXMLLoaderByRelativePath(NEW_GAME_SCENE_FILE_PATH);
@@ -77,10 +93,9 @@ public class JavaFXRummikub extends Application {
     }
 
     private void registerGamePlayToStartPlayButton(NewGameSceneController newGameSceneController) {
-        newGameSceneController.isStartPlayPressed().addListener((source, oldValue, isFinished) -> {
-            if (isFinished) {
-                Scene gamePlayScene = getGamePlayScene(newGameSceneController.getGame());
-                primaryStage.setScene(gamePlayScene);
+        newGameSceneController.isBackToGamesListScene().addListener((source, oldValue, goToGamesList) -> {
+            if (goToGamesList) {
+                primaryStage.setScene(getGamesListScene());
             }
         });
     }
@@ -152,5 +167,17 @@ public class JavaFXRummikub extends Application {
         URL url = new URL("http://" + serverAddress + ":" + serverPort + "/" + webserviceRoot + "/" + webserviceName);
         service = new RummikubWebServiceService(url);
         rummikubGameWS = service.getRummikubWebServicePort();
+    }
+
+    private GamesListSceneController getGamesListSceneController(FXMLLoader fxmlLoader) {
+        return (GamesListSceneController) fxmlLoader.getController();
+    }
+
+    private void registerNewGameSceneToCreateGameButton(GamesListSceneController gamesListSceneController) {
+                gamesListSceneController.getIsCreateGamePressed().addListener((source, oldValue, isCreateGamePressed) -> {
+            if (isCreateGamePressed) {
+                primaryStage.setScene(getNewGameScene());
+            }
+        });
     }
 }
