@@ -15,7 +15,7 @@ import ws.rummikub.GameDetails;
 import ws.rummikub.GameStatus;
 import ws.rummikub.InvalidXML_Exception;
 
-class XSDObjToGameObjConverter {
+public class XSDObjToGameObjConverter {
 
     private static final int INITIAL_PLAYER_ID = -1;
 
@@ -30,7 +30,7 @@ class XSDObjToGameObjConverter {
         distributeTilesToBoard(game, rummikubXSDObj);
         setCurrPlayerFromXSDObj(game, rummikubXSDObj);
         setAllGamePlayerFirstStep(game, rummikubXSDObj);
-        
+
         return game;
     }
 
@@ -71,7 +71,7 @@ class XSDObjToGameObjConverter {
             logic.tile.Sequence gameSequence = new Sequence(gameSeqTiles);
             game.getBoard().addSequence(gameSequence);
         }
-        
+
         //perform borad validity check
         if (!game.getBoard().isValid()) {
             throw new InvalidXML_Exception(null, null);

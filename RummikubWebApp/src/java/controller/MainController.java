@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import logic.Game;
 import logic.Player;
 import logic.persistency.GamePersistency;
+import logic.tile.Color;
 import ws.rummikub.DuplicateGameName_Exception;
 import ws.rummikub.Event;
 import ws.rummikub.EventType;
@@ -132,9 +133,7 @@ public class MainController {
     public PlayerDetails getPlayerDetails(int playerId) throws InvalidParameters_Exception, GameDoesNotExists_Exception {
         Player player = playersIDs.get(playerId);
         if (player == null) {
-            //TODO: throw PlayerNotFound Exception...
-            // I think there is a mistake here with the Exceptions definitions.
-            //Mail will be send to Liron about it.
+            throw new InvalidParameters_Exception(PLAYER_NOT_FOUND_ERR_MSG, null);
         }
         return createPlayerDetailsFromPlayer(player);
     }
@@ -216,6 +215,7 @@ public class MainController {
         playerDetails.setNumberOfTiles(player.getTiles().size());
         playerDetails.setPlayedFirstSequence(player.isFirstStep());
         playerDetails.setStatus(player.getStatus());
+        addPlayerTilesIntoPlayerDetails(player, playerDetails);
         if (player.isHuman()) {
             playerDetails.setType(PlayerType.HUMAN);
         } else {
@@ -324,5 +324,30 @@ public class MainController {
         }
         
         return null;
+    }
+    
+    public static ws.rummikub.Color convertGameColorToGeneratedColor(Color color) {
+        switch (color) {
+            case Black:
+                return ws.rummikub.Color.BLACK;
+            case Red:
+                return ws.rummikub.Color.RED;
+            case Blue:
+                return ws.rummikub.Color.BLUE;
+            case Yellow:
+                return ws.rummikub.Color.YELLOW;
+            default:
+                return ws.rummikub.Color.BLACK;
+        }
+    }
+
+    private void addPlayerTilesIntoPlayerDetails(Player player, PlayerDetails playerDetails) {
+        List<Tile> tilesList = playerDetails.getTiles();
+        for (logic.tile.Tile tile : player.getTiles()) {
+            Tile newTile = new Tile();
+            newTile.setColor(convertGameColorToGeneratedColor(tile.getColor()));
+            newTile.setValue(tile.getValue());
+            tilesList.add(newTile);
+        }
     }
 }
