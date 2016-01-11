@@ -64,12 +64,8 @@ public class Player {
         return tiles;
     }
 
-    public Tile removeTile(int index) {
-        if (index < tiles.size() && index >= 0) {
-            return tiles.remove(index);
-        }
-
-        return null;
+    public boolean removeTile(Tile tile) {
+        return tiles.remove(tile);
     }
 
     public boolean isFirstStep() {

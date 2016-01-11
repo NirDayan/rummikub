@@ -10,6 +10,7 @@ import ws.rummikub.GameStatus;
 import ws.rummikub.PlayerStatus;
 
 public class Game {
+
     private final String name;
     private final ArrayList<Player> players;
     private final Deck tilesDeck;
@@ -29,7 +30,7 @@ public class Game {
         players = new ArrayList<>();
         tilesDeck = new Deck();
         board = new Board();
-        
+
         name = gameDetails.getName();
         isLoadedFromFile = gameDetails.isLoadedFromXML();
         status = gameDetails.getStatus();
@@ -70,8 +71,9 @@ public class Game {
                 resignedPlayersCount++;
             }
         }
-        if (resignedPlayersCount == players.size() - 1)
+        if (resignedPlayersCount == players.size() - 1) {
             return true;
+        }
 
         return false;
     }
@@ -96,16 +98,16 @@ public class Game {
         int currPlayerIndex = players.indexOf(currentPlayer);
         if (currPlayerIndex == players.size() - 1) {
             setCurrentPlayer(players.get(0));
-        }
-        else {
+        } else {
             setCurrentPlayer(players.get(currPlayerIndex + 1));
         }
     }
 
     public void pullTileFromDeck(int playerID) {
         Player player = getPlayerByID(playerID);
-        if (player != null && !getTilesDeck().isEmpty())
+        if (player != null && !getTilesDeck().isEmpty()) {
             player.addTile(getTilesDeck().pullTile());
+        }
     }
 
     public boolean isPlayerFirstStep(int playerID) {
@@ -146,17 +148,12 @@ public class Game {
         return board.moveTile(data);
     }
 
-    public boolean addTile(int playerID, MoveTileData addTileData) {
+    public boolean addTile(int playerID, Tile tile, int sequenceIndex, int sequencePosition) {
         Player player = getPlayerByID(playerID);
-        Tile tile;
-        int seqIndex = addTileData.getTargetSequenceIndex();
-        int seqPosition = addTileData.getTargetSequencePosition();
 
-        if (player != null && board.isTargetValid(seqIndex, seqPosition)) {
-            tile = player.removeTile(addTileData.getSourceSequencePosition());
-            if (tile != null) {
-                return board.addTile(addTileData.getTargetSequenceIndex(),
-                        addTileData.getTargetSequencePosition(), tile);
+        if (player != null && board.isTargetValid(sequenceIndex, sequencePosition)) {
+            if (player.removeTile(tile)) {
+                return board.addTile(sequenceIndex, sequencePosition, tile);
             }
         }
 
@@ -179,12 +176,13 @@ public class Game {
      */
     public boolean createSequence(int playerID, List<Integer> tilesIndices) {
         Player player = getPlayerByID(playerID);
-        if (player == null || tilesIndices == null)
+        if (player == null || tilesIndices == null) {
             return false;
+        }
 
         return createSequenceFromTileIndices(player, tilesIndices);
     }
-    
+
     public boolean checkSequenceValidity(int playerID, List<Tile> tiles) {
         Player player = getPlayerByID(playerID);
         if (tiles == null || player == null) {
@@ -194,11 +192,11 @@ public class Game {
         Sequence sequence = new Sequence(tiles);
         if (!sequence.isValid()) {
             return false;
-        }            
+        }
         if (player.isFirstStep() && !isFirstSequenceValid(sequence)) {
             return false;
         }
-        
+
         return true;
     }
 
@@ -210,37 +208,37 @@ public class Game {
 
         return createSequenceFromTilesList(player, tiles);
     }
-    
+
     public boolean createSequenceByPlayerTile(int playerID, int tileIndex) {
         Player player = getPlayerByID(playerID);
         if (player == null) {
             return false;
         }
-        
+
         List<Integer> tilesIndicesList = new ArrayList<>();
         tilesIndicesList.add(tileIndex);
         List<Tile> tilesToAdd = player.getTilesByIndices(tilesIndicesList);
         if (tilesToAdd == null) {
             return false;
         }
-        
-        Sequence sequence = new Sequence(tilesToAdd);        
+
+        Sequence sequence = new Sequence(tilesToAdd);
         player.removeTilesByIndices(tilesIndicesList);
         board.addSequence(sequence);
 
         return true;
     }
-    
+
     public void storeBackup() {
         board.storeBackup();
         currentPlayer.storeBackup();
     }
-    
+
     public void restoreFromBackup() {
         board.restoreFromBackup();
         currentPlayer.restoreFromBackup();
     }
-    
+
     public void setPlayerCompletedFirstStep(int playerID) {
         Player player = getPlayerByID(playerID);
         if (player != null) {
@@ -255,30 +253,35 @@ public class Game {
         }
 
         Sequence sequence = new Sequence(preSequence);
-        if (!sequence.isValid())
+        if (!sequence.isValid()) {
             return false;
-        if (player.isFirstStep() && !isFirstSequenceValid(sequence))
+        }
+        if (player.isFirstStep() && !isFirstSequenceValid(sequence)) {
             return false;
+        }
 
         player.removeTilesByIndices(tilesIndices);
         board.addSequence(sequence);
 
         return true;
     }
-    
+
     public boolean isLoadedFromFile() {
         return isLoadedFromFile;
     }
 
     private boolean createSequenceFromTilesList(Player player, List<Tile> tiles) {
-        if (tiles == null)
+        if (tiles == null) {
             return false;
+        }
 
         Sequence sequence = new Sequence(tiles);
-        if (!sequence.isValid())
+        if (!sequence.isValid()) {
             return false;
-        if (player.isFirstStep() && !isFirstSequenceValid(sequence))
+        }
+        if (player.isFirstStep() && !isFirstSequenceValid(sequence)) {
             return false;
+        }
 
         player.removeTiles(tiles);
         board.addSequence(sequence);
@@ -292,8 +295,9 @@ public class Game {
 
     private Player getPlayerByID(int playerID) {
         for (Player pl : players) {
-            if (pl.getID() == playerID)
+            if (pl.getID() == playerID) {
                 return pl;
+            }
         }
 
         return null;
@@ -302,7 +306,7 @@ public class Game {
     public String getName() {
         return name;
     }
-    
+
     public static boolean checkPlayersNameValidity(List<String> playersNames) {
         if (!playersNames.stream().noneMatch((name) -> (name.isEmpty()))) {
             return false;
@@ -311,26 +315,26 @@ public class Game {
         Set<String> namesSet = new HashSet<>(playersNames);
         return namesSet.size() >= playersNames.size();
     }
-    
+
     public int getHumanPlayersNum() {
         return humanPlayersNum;
     }
-    
+
     public int getComputerizedPlayersNum() {
         return computerizedPlayersNum;
     }
-    
+
     public int getJoinedHumanPlayersNum() {
         return joinedHumanPlayersNum;
     }
-    
+
     public void incJoinedHumanPlayersNum() {
         joinedHumanPlayersNum++;
         if (joinedHumanPlayersNum == humanPlayersNum) {
-            setGameActive();            
+            setGameActive();
         }
     }
-    
+
     public void decJoinedHumanPlayersNum() {
         joinedHumanPlayersNum--;
     }
@@ -338,7 +342,7 @@ public class Game {
     public GameStatus getStatus() {
         return status;
     }
-    
+
     public void setStatus(GameStatus newStatus) {
         status = newStatus;
     }

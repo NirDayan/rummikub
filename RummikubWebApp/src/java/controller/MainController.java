@@ -31,6 +31,11 @@ public class MainController {
     private static final String CANT_JOIN_ACTIVE_GAME_ERR_MSG = "Could not join into active game";
     private static final String EVENT_ID_NOT_FOUND_ERR_MSG = "Could not find event_id for the game of the specific player";
     private static final String EMPTY_TILES_LIST_ERR_MSG = "Empty tiles list parameter is invalid";
+    private static final String NULL_TILE_ERR_MSG = "Null tile parameter is invalid";
+    private static final String INVALID_SOURCE_SEQUENCE_INDEX_ERR_MSG = "Invalid source sequence index parameter";
+    private static final String INVALID_SOURCE_SEQUENCE_POSITION_ERR_MSG = "Invalid source sequence position parameter";
+    private static final String INVALID_TARGET_SEQUENCE_INDEX_ERR_MSG = "Invalid target sequence index parameter";
+    private static final String INVALID_TARGET_SEQUENCE_POSITION_ERR_MSG = "Invalid target sequence position parameter";
     private static final int MAX_PLAYERS_NUMBER = 4;
     private static final int MIN_PLAYERS_NUMBER = 2;
     private static final int MIN_HUMAN_PLAYERS_NUMBER = 1;
@@ -147,14 +152,21 @@ public class MainController {
         if (game != null) {
             List<logic.tile.Tile> tilesList = WSObjToGameObjConverter.convertGeneratedTilesListIntoGameTiles(tiles);
             if (game.createSequenceByTilesList(playerId, tilesList)) {
-                addSequenceCreatedEvent(game, player);
+                createSequenceCreatedEvent(game, player);
             }
         }
     }
 
     public void addTile(int playerId, Tile tile, int sequenceIndex, int sequencePosition) throws InvalidParameters_Exception {
-        //TODO implement this method
-        throw new UnsupportedOperationException("Not implemented yet.");
+        Player player = getPlayerById(playerId);
+        validateAddTileParameters(tile, sequenceIndex, sequencePosition);
+        logic.tile.Tile logicTile = WSObjToGameObjConverter.convertWSTileIntoGameTile(tile);
+        Game game = getGameByPlayerID(player.getID());
+        //Check just on the safe side
+        if (game != null) {
+            game.addTile(player.getID(), logicTile, sequenceIndex, sequencePosition);
+            createAddTileEvent(game, player, sequenceIndex, sequencePosition);
+        }
     }
 
     public void takeBackTile(int playerId, int sequenceIndex, int sequencePosition) throws InvalidParameters_Exception {
@@ -276,7 +288,7 @@ public class MainController {
         }
         //If the game status has been changed to ACTIVE, add GAME_START event
         if (game.getStatus().equals(GameStatus.ACTIVE)) {
-            addGameStartEvent(game);
+            createGameStartEvent(game);
         }
 
         return playerId;
@@ -346,7 +358,7 @@ public class MainController {
         return player;
     }
 
-    private void addSequenceCreatedEvent(Game game, Player player) {
+    private void createSequenceCreatedEvent(Game game, Player player) {
         Event event = new Event();
         event.setId(eventID.getAndIncrement());
         event.setType(EventType.SEQUENCE_CREATED);
@@ -354,10 +366,32 @@ public class MainController {
         gamesEventsMap.get(game).add(event);
     }
 
-    private void addGameStartEvent(Game game) {
+    private void createGameStartEvent(Game game) {
         Event event = new Event();
         event.setId(eventID.getAndIncrement());
         event.setType(EventType.GAME_START);
+        gamesEventsMap.get(game).add(event);
+    }
+
+    private void validateAddTileParameters(Tile tile, int sequenceIndex, int sequencePosition) throws InvalidParameters_Exception {
+        if (tile == null) {
+            throw new InvalidParameters_Exception(NULL_TILE_ERR_MSG, null);
+        }
+        if (sequenceIndex < 0) {
+            throw new InvalidParameters_Exception(INVALID_TARGET_SEQUENCE_INDEX_ERR_MSG, null);
+        }
+        if (sequencePosition < 0) {
+            throw new InvalidParameters_Exception(INVALID_TARGET_SEQUENCE_POSITION_ERR_MSG, null);
+        }
+    }
+
+    private void createAddTileEvent(Game game, Player player, int sequenceIndex, int sequencePosition) {
+        Event event = new Event();
+        event.setId(eventID.getAndIncrement());
+        event.setType(EventType.TILE_ADDED);
+        event.setPlayerName(player.getName());
+        event.setTargetSequenceIndex(sequenceIndex);
+        event.setTargetSequencePosition(sequencePosition);
         gamesEventsMap.get(game).add(event);
     }
 }

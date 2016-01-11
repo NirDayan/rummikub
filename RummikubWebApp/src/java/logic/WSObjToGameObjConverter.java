@@ -38,10 +38,9 @@ public class WSObjToGameObjConverter {
     
     public static List<logic.tile.Tile> convertGeneratedTilesListIntoGameTiles(List<ws.rummikub.Tile> tiles) {
         List<logic.tile.Tile> tilesList = new ArrayList<>();
-        logic.tile.Color color; 
+        logic.tile.Tile newTile; 
         for (ws.rummikub.Tile tile : tiles) {
-            color = convertGeneratedColorIntoGameColor(tile.getColor());
-            logic.tile.Tile newTile = new logic.tile.Tile(color, tile.getValue());
+            newTile = convertWSTileIntoGameTile(tile);
             tilesList.add(newTile);
         }
         
@@ -58,5 +57,12 @@ public class WSObjToGameObjConverter {
         }
         
         return tilesList;
+    }
+    
+    public static logic.tile.Tile convertWSTileIntoGameTile(ws.rummikub.Tile tile) {
+        logic.tile.Color color = WSObjToGameObjConverter.convertGeneratedColorIntoGameColor(tile.getColor());
+        logic.tile.Tile logicTile = new logic.tile.Tile(color, tile.getValue());
+        
+        return logicTile;
     }
 }
