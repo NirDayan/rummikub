@@ -21,7 +21,7 @@
         <Label fx:id="errorMsgLabel" maxWidth="-1.0" minHeight="-1.0" minWidth="-1.0" prefHeight="22.0" prefWidth="744.0" styleClass="error" text="" AnchorPane.bottomAnchor="48.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" />
         <Button id="ExitButton" fx:id="exitGameButton" minWidth="100.0" mnemonicParsing="false" onAction="#onExitGameButtonPressed" prefWidth="57.0" text="Exit Game" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0" />
         <Button id="createNewGameButton" fx:id="createGameButton" mnemonicParsing="false" onAction="#onCreateGameButtonPressed" prefWidth="100.0" text="Create Game" textAlignment="CENTER" textOverrun="ELLIPSIS" AnchorPane.rightAnchor="160.0" AnchorPane.topAnchor="388.0" />
-        <Button fx:id="joinGameButton" mnemonicParsing="false" onAction="#onJoinGameButtonPressed" prefWidth="100.0" text="Join Game" AnchorPane.leftAnchor="161.0" AnchorPane.topAnchor="388.0" />
+        <Button fx:id="joinGameButton" mnemonicParsing="false" onAction="#onJoinGameButtonPressed" prefWidth="100.0" text="Join Game" AnchorPane.leftAnchor="378.0" AnchorPane.topAnchor="388.0" />
         <Label alignment="CENTER" prefHeight="40.0" prefWidth="420.0" text="Welcome To Rmmikub Game!" textAlignment="CENTER" textFill="linear-gradient(from 0.0% 0.0% to 100.0% 100.0%, 0xff0000ff 0.0%, 0x0000ffff 30.0%, 0x000000ff 100.0%)" AnchorPane.leftAnchor="161.0" AnchorPane.rightAnchor="191.0" AnchorPane.topAnchor="40.0">
           <font>
             <Font name="Calibri Bold" size="32.0" />
@@ -35,6 +35,12 @@
             <TableColumn editable="false" maxWidth="300.0" minWidth="100.0" prefWidth="100.0" resizable="true" text="Joined Humans" fx:id="joinedHumanNumColumn" />
           </columns>
         </TableView>
+        <TextField fx:id="playerNameTextBox" layoutX="239.0" layoutY="386.0" onAction="#onJoinGameButtonPressed" prefHeight="25.0" prefWidth="132.0" />
+        <Label alignment="CENTER_RIGHT" disable="false" focusTraversable="false" layoutX="130.0" layoutY="387.0" minHeight="25.0" minWidth="80.0" prefHeight="25.0" prefWidth="100.0" text="Player Name:" underline="true">
+          <font>
+            <Font size="14.0" />
+          </font>
+        </Label>
       </children>
     </AnchorPane>
   </children>

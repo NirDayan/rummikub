@@ -16,6 +16,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import ws.rummikub.GameDetails;
 import ws.rummikub.GameDoesNotExists_Exception;
@@ -42,6 +43,8 @@ public class GamesListSceneController implements Initializable {
     private TableColumn<GameDetails, Integer> compPlayersNumColumn;
     @FXML
     private TableColumn<GameDetails, Integer> joinedHumanNumColumn;
+    @FXML
+    private TextField playerNameTextBox;
 
     private SimpleBooleanProperty isGameSelectedFromList = new SimpleBooleanProperty(false);
     private SimpleBooleanProperty isCreateGameButtonPressed = new SimpleBooleanProperty(false);
@@ -54,6 +57,7 @@ public class GamesListSceneController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         joinGameButton.disableProperty().bind(Bindings.not(isGameSelectedFromList));
+        playerNameTextBox.disableProperty().bind(Bindings.not(isGameSelectedFromList));
         initGamesTable();
     }
 
@@ -90,7 +94,7 @@ public class GamesListSceneController implements Initializable {
     @FXML
     private void onJoinGameButtonPressed(ActionEvent event) {
         String gameName = gamesTable.getSelectionModel().getSelectedItem().getName();
-        String playerName = ""; //TODO
+        String playerName = playerNameTextBox.getText();
         try {
             joinedPlayerID = server.joinGame(gameName, playerName);
             joinedGameName = gameName;
