@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import logic.Game;
 import logic.Player;
+import logic.WSObjToGameObjConverter;
 import logic.persistency.GamePersistency;
-import logic.tile.Color;
 import ws.rummikub.DuplicateGameName_Exception;
 import ws.rummikub.Event;
 import ws.rummikub.EventType;
@@ -30,6 +30,7 @@ public class MainController {
     private static final String PLAYER_NOT_FOUND_ERR_MSG = "Could not find player name";
     private static final String CANT_JOIN_ACTIVE_GAME_ERR_MSG = "Could not join into active game";
     private static final String EVENT_ID_NOT_FOUND_ERR_MSG = "Could not find event_id for the game of the specific player";
+    private static final String EMPTY_TILES_LIST_ERR_MSG = "Empty tiles list parameter is invalid";
     private static final int MAX_PLAYERS_NUMBER = 4;
     private static final int MIN_PLAYERS_NUMBER = 2;
     private static final int MIN_HUMAN_PLAYERS_NUMBER = 1;
@@ -50,7 +51,7 @@ public class MainController {
 
     public List<Event> getEvents(int playerId, int eventId) throws InvalidParameters_Exception {
         List<Event> eventsResult = new ArrayList<>();
-        
+
         Game game = checkGetEventsInputParams(playerId, eventId);
         if (game != null) {
             for (Event event : gamesEventsMap.get(game)) {
@@ -59,7 +60,7 @@ public class MainController {
                 }
             }
         }
-        
+
         return eventsResult;
     }
 
@@ -131,16 +132,24 @@ public class MainController {
     }
 
     public PlayerDetails getPlayerDetails(int playerId) throws InvalidParameters_Exception, GameDoesNotExists_Exception {
-        Player player = playersIDs.get(playerId);
-        if (player == null) {
-            throw new InvalidParameters_Exception(PLAYER_NOT_FOUND_ERR_MSG, null);
-        }
+        Player player = getPlayerById(playerId);
+
         return createPlayerDetailsFromPlayer(player);
     }
 
     public void createSequence(int playerId, List<Tile> tiles) throws InvalidParameters_Exception {
-        //TODO implement this method
-        throw new UnsupportedOperationException("Not implemented yet.");
+        Player player = getPlayerById(playerId);
+        if (tiles.isEmpty()) {
+            throw new InvalidParameters_Exception(EMPTY_TILES_LIST_ERR_MSG, null);
+        }
+        Game game = getGameByPlayerID(playerId);
+        //Check just on the safe side
+        if (game != null) {
+            List<logic.tile.Tile> tilesList = WSObjToGameObjConverter.convertGeneratedTilesListIntoGameTiles(tiles);
+            if (game.createSequenceByTilesList(playerId, tilesList)) {
+                addSequenceCreatedEvent(game, player);
+            }
+        }
     }
 
     public void addTile(int playerId, Tile tile, int sequenceIndex, int sequencePosition) throws InvalidParameters_Exception {
@@ -258,22 +267,19 @@ public class MainController {
     }
 
     private int playerJoinIntoGame(String playerName, Game game) throws InvalidParameters_Exception {
-        int playerID;
+        int playerId;
         //Different handling for saved game regarding the player which already exist for saved games
         if (game.isLoadedFromFile()) {
-            playerID = playerJoinIntoSavedGame(game, playerName);
+            playerId = playerJoinIntoSavedGame(game, playerName);
         } else {
-            playerID = playerJoinIntoNewGame(game, playerName);
+            playerId = playerJoinIntoNewGame(game, playerName);
         }
         //If the game status has been changed to ACTIVE, add GAME_START event
         if (game.getStatus().equals(GameStatus.ACTIVE)) {
-            Event event = new Event();
-            event.setId(eventID.getAndIncrement());
-            event.setType(EventType.GAME_START);
-            gamesEventsMap.get(game).add(event);
+            addGameStartEvent(game);
         }
-        
-        return playerID;
+
+        return playerId;
     }
 
     private int playerJoinIntoSavedGame(Game game, String playerName) throws InvalidParameters_Exception {
@@ -294,60 +300,64 @@ public class MainController {
     }
 
     private int playerJoinIntoNewGame(Game game, String playerName) {
-        int playerID = generatedID.getAndIncrement();
-        Player player = new Player(playerID, playerName, true);
+        int playerId = generatedID.getAndIncrement();
+        Player player = new Player(playerId, playerName, true);
         game.addPlayer(player);
-        playersIDs.put(playerID, player);
-        return playerID;
+        playersIDs.put(playerId, player);
+        return playerId;
     }
 
-    private Game checkGetEventsInputParams(int playerID, int eventId) throws InvalidParameters_Exception{
-        Player player = playersIDs.get(playerID);
+    private Game checkGetEventsInputParams(int playerId, int eventId) throws InvalidParameters_Exception {
+        Player player = playersIDs.get(playerId);
         if (player == null) {
             throw new InvalidParameters_Exception(PLAYER_NOT_FOUND_ERR_MSG, null);
         }
-        Game game = getGameByPlayerID(playerID);
+        Game game = getGameByPlayerID(playerId);
         //game should not be null here since we already has the player with the ID
-        if (eventId < 0 ||
-                !gamesEventsMap.get(game).stream().anyMatch((event)-> (event.getId() == eventId))) {
+        if (eventId < 0
+                || !gamesEventsMap.get(game).stream().anyMatch((event) -> (event.getId() == eventId))) {
             throw new InvalidParameters_Exception(EVENT_ID_NOT_FOUND_ERR_MSG, null);
         }
-        
+
         return game;
     }
-    
-    private Game getGameByPlayerID(int playerID) {
+
+    private Game getGameByPlayerID(int playerId) {
         for (Game game : gamesEventsMap.keySet()) {
-            if (game.getPlayers().stream().anyMatch((player) -> (player.getID() == playerID))) {
-                return game;                
+            if (game.getPlayers().stream().anyMatch((player) -> (player.getID() == playerId))) {
+                return game;
             }
         }
-        
+
         return null;
-    }
-    
-    public static ws.rummikub.Color convertGameColorToGeneratedColor(Color color) {
-        switch (color) {
-            case Black:
-                return ws.rummikub.Color.BLACK;
-            case Red:
-                return ws.rummikub.Color.RED;
-            case Blue:
-                return ws.rummikub.Color.BLUE;
-            case Yellow:
-                return ws.rummikub.Color.YELLOW;
-            default:
-                return ws.rummikub.Color.BLACK;
-        }
     }
 
     private void addPlayerTilesIntoPlayerDetails(Player player, PlayerDetails playerDetails) {
         List<Tile> tilesList = playerDetails.getTiles();
-        for (logic.tile.Tile tile : player.getTiles()) {
-            Tile newTile = new Tile();
-            newTile.setColor(convertGameColorToGeneratedColor(tile.getColor()));
-            newTile.setValue(tile.getValue());
-            tilesList.add(newTile);
+        tilesList.addAll(WSObjToGameObjConverter.convertGameTilesListIntoGeneratedTilesList(player.getTiles()));
+    }
+
+    private Player getPlayerById(int playerId) throws InvalidParameters_Exception {
+        Player player = playersIDs.get(playerId);
+        if (player == null) {
+            throw new InvalidParameters_Exception(PLAYER_NOT_FOUND_ERR_MSG, null);
         }
+
+        return player;
+    }
+
+    private void addSequenceCreatedEvent(Game game, Player player) {
+        Event event = new Event();
+        event.setId(eventID.getAndIncrement());
+        event.setType(EventType.SEQUENCE_CREATED);
+        event.setPlayerName(player.getName());
+        gamesEventsMap.get(game).add(event);
+    }
+
+    private void addGameStartEvent(Game game) {
+        Event event = new Event();
+        event.setId(eventID.getAndIncrement());
+        event.setType(EventType.GAME_START);
+        gamesEventsMap.get(game).add(event);
     }
 }
