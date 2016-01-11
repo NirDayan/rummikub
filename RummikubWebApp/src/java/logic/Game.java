@@ -51,10 +51,6 @@ public class Game {
 
     public void addPlayer(Player player) {
         players.add(player);
-        player.setStatus(PlayerStatus.JOINED);
-        if (player.isHuman()) {
-            incJoinedHumanPlayersNum();
-        }        
     }
 
     public boolean checkIsGameOver() {

@@ -30,6 +30,7 @@ public class XSDObjToGameObjConverter {
         distributeTilesToBoard(game, rummikubXSDObj);
         setCurrPlayerFromXSDObj(game, rummikubXSDObj);
         setAllGamePlayerFirstStep(game, rummikubXSDObj);
+        game.setStatus(GameStatus.WAITING);
 
         return game;
     }

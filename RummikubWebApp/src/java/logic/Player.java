@@ -14,7 +14,7 @@ public class Player {
     private boolean isFirstStep;
 
     public Player(int ID, String name, boolean isHuman) {
-        this.details = new PlayerDetails(ID, name, isHuman, PlayerStatus.JOINED);
+        this.details = new PlayerDetails(ID, name, isHuman, PlayerStatus.RETIRED);
         this.tiles = new ArrayList<>();
         this.isFirstStep = true;
     }

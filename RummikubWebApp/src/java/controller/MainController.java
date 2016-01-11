@@ -70,7 +70,6 @@ public class MainController {
         }
         setIDsToPlayers(game.getPlayers());
         gamesEventsMap.put(game, new ArrayList<Event>());
-        game.setStatus(GameStatus.WAITING);
 
         return game.getName();
     }
@@ -285,8 +284,8 @@ public class MainController {
                 break;
             }
         }
-        //If player not found or this is not a human player, throw exception
-        if (player == null || (player != null && !player.isHuman())) {
+        //If player not found or this is not a human player, throw exception or the player has already joined
+        if (player == null || (player != null && !player.isHuman()) || player.getStatus() != PlayerStatus.RETIRED) {
             throw new InvalidParameters_Exception(PLAYER_NOT_FOUND_ERR_MSG, null);
         }
         player.setStatus(PlayerStatus.JOINED);

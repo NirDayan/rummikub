@@ -45,12 +45,13 @@ public class JavaFXRummikub extends Application {
         Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
         sceneHeight = (int) (screenBounds.getHeight() * screenFactor);
         sceneWidth = (int) (screenBounds.getWidth() * screenFactor);
-        
+
         try {
             //DOTO: chage it.. currently hard-coded
             createWSClient("127.0.0.1", 8080);
-        } catch (MalformedURLException ex) {}
-        
+        } catch (MalformedURLException ex) {
+        }
+
         Scene gamesListScene = getGamesListScene();
 
         primaryStage.setTitle("Welcome to Rumikub!");
@@ -64,7 +65,7 @@ public class JavaFXRummikub extends Application {
         FXMLLoader fxmlLoader = getFXMLLoaderByRelativePath(GAMES_LIST_SCENE_FILE_PATH);
         Parent gamesListRoot = (Parent) fxmlLoader.getRoot();
         GamesListSceneController gamesListSceneController = getGamesListSceneController(fxmlLoader);
-        registerNewGameSceneToCreateGameButton(gamesListSceneController);
+        registerToGameListSceneProperties(gamesListSceneController);
         gamesListSceneController.setServer(rummikubGameWS);
         if (gamesListRoot != null) {
             gamesListScene = new Scene(gamesListRoot, sceneWidth, sceneHeight);
@@ -72,7 +73,7 @@ public class JavaFXRummikub extends Application {
 
         return gamesListScene;
     }
-    
+
     private Scene getNewGameScene() {
         Scene newGameScene = null;
         FXMLLoader fxmlLoader = getFXMLLoaderByRelativePath(NEW_GAME_SCENE_FILE_PATH);
@@ -100,19 +101,19 @@ public class JavaFXRummikub extends Application {
         });
     }
 
-    private Scene getGamePlayScene(Game game) {
+    private Scene getGamePlayScene(String gameName, String playerName) {
         FXMLLoader gamePlayFxmlLoader = getFXMLLoaderByRelativePath(GAME_PLAY_SCENE_FILE_PATH);
         Parent gamePlayRoot = (Parent) gamePlayFxmlLoader.getRoot();
         GamePlaySceneController gamePlayConroller = getGamePlaySceneController(gamePlayFxmlLoader);
-        gamePlayConroller.setGame(game);
+//        gamePlayConroller.setGame();
         registerNewGameSceneToMainMenuButton(gamePlayConroller.IsMainMenuButtonPressed());
         registerWinnerSceneToIsGameOver(gamePlayConroller);
-        
-        // In case that a computer player plays first
-        if (game.getCurrentPlayer().isHuman() == false) {
-            Platform.runLater(gamePlayConroller::playComputerTurn);
-        }
-        
+
+//        // In case that a computer player plays first
+//        if (game.getCurrentPlayer().isHuman() == false) {
+//            Platform.runLater(gamePlayConroller::playComputerTurn);
+//        }
+
         return new Scene(gamePlayRoot, sceneWidth, sceneHeight);
     }
 
@@ -150,7 +151,7 @@ public class JavaFXRummikub extends Application {
         WinnerSceneController controller = (WinnerSceneController) winnerSceneFxmlLoader.getController();
         return controller;
     }
-    
+
     private FXMLLoader getFXMLLoaderByRelativePath(String path) {
         FXMLLoader fxmlLoader = new FXMLLoader();
         URL url = getClass().getResource(path);
@@ -162,7 +163,7 @@ public class JavaFXRummikub extends Application {
         }
         return fxmlLoader;
     }
-    
+
     private void createWSClient(String serverAddress, int serverPort) throws MalformedURLException {
         URL url = new URL("http://" + serverAddress + ":" + serverPort + "/" + webserviceRoot + "/" + webserviceName);
         service = new RummikubWebServiceService(url);
@@ -173,10 +174,18 @@ public class JavaFXRummikub extends Application {
         return (GamesListSceneController) fxmlLoader.getController();
     }
 
-    private void registerNewGameSceneToCreateGameButton(GamesListSceneController gamesListSceneController) {
-                gamesListSceneController.getIsCreateGamePressed().addListener((source, oldValue, isCreateGamePressed) -> {
+    private void registerToGameListSceneProperties(GamesListSceneController controller) {
+        //Register new game scene to create game button
+        controller.getIsCreateGamePressed().addListener((source, oldValue, isCreateGamePressed) -> {
             if (isCreateGamePressed) {
                 primaryStage.setScene(getNewGameScene());
+            }
+        });
+
+        //Register game play scene to player joined game property
+        controller.getIsPlayerJoinedGame().addListener((source, oldValue, isJoined) -> {
+            if (isJoined) {
+                primaryStage.setScene(getGamePlayScene(controller.getJoinedGameName(), controller.getJoinedPlayerName()));
             }
         });
     }
