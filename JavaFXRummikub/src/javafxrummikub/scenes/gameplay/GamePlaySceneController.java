@@ -42,8 +42,12 @@ import logic.persistency.GamePersistency;
 import logic.tile.Color;
 import logic.tile.Sequence;
 import logic.tile.Tile;
+import ws.rummikub.RummikubWebService;
 
 public class GamePlaySceneController implements Initializable {
+    private RummikubWebService server;
+    private int playerID;
+    private String gameName;
 
     private static final int TILES_LIST_VIEW_WIDTH = 1050;
     private static final int INDEX_NOT_FOUND = -1;
@@ -162,7 +166,7 @@ public class GamePlaySceneController implements Initializable {
                 punishPlayer();
             }
         }
-        
+
         isCurrPlayerFinished.set(true);
     }
 
@@ -210,6 +214,12 @@ public class GamePlaySceneController implements Initializable {
                 playerFinishedTurn();
             }
         });
+    }
+
+    public void initGameParmeters(RummikubWebService rummikubGameWS, String gameName, int playerID) {
+        this.server = rummikubGameWS;
+        this.playerID = playerID;
+        this.gameName = gameName;
     }
 
     private void playerFinishedTurn() {

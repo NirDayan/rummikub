@@ -3,8 +3,6 @@ package javafxrummikub.scenes.gamelist;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -51,7 +49,7 @@ public class GamesListSceneController implements Initializable {
     private ObservableList<GameDetails> gamesList;
     private RummikubWebService server;
     private String joinedGameName;
-    private String joinedPlayerName;
+    private int joinedPlayerID;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -94,12 +92,11 @@ public class GamesListSceneController implements Initializable {
         String gameName = gamesTable.getSelectionModel().getSelectedItem().getName();
         String playerName = ""; //TODO
         try {
-            server.joinGame(gameName, playerName);
+            joinedPlayerID = server.joinGame(gameName, playerName);
             joinedGameName = gameName;
-            joinedPlayerName = playerName;
             isPlayerJoinedGame.set(true);
         } catch (GameDoesNotExists_Exception | InvalidParameters_Exception ex) {
-            //Show Error to user
+            showErrorMessage(ex.getMessage());
         }
     }
 
@@ -129,7 +126,12 @@ public class GamesListSceneController implements Initializable {
         return joinedGameName;
     }
 
-    public String getJoinedPlayerName() {
-        return joinedPlayerName;
+    public int getJoinedPlayerID() {
+        return joinedPlayerID;
     }
+    
+     private void showErrorMessage(String msg)
+     {
+         errorMsgLabel.setText(msg);
+     }
 }

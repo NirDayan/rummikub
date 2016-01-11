@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
@@ -16,7 +15,6 @@ import javafxrummikub.scenes.gamelist.GamesListSceneController;
 import javafxrummikub.scenes.gameplay.GamePlaySceneController;
 import javafxrummikub.scenes.newGame.NewGameSceneController;
 import javafxrummikub.scenes.winner.WinnerSceneController;
-import logic.Game;
 import ws.rummikub.RummikubWebService;
 import ws.rummikub.RummikubWebServiceService;
 
@@ -101,18 +99,13 @@ public class JavaFXRummikub extends Application {
         });
     }
 
-    private Scene getGamePlayScene(String gameName, String playerName) {
+    private Scene getGamePlayScene(String gameName, int playerID) {
         FXMLLoader gamePlayFxmlLoader = getFXMLLoaderByRelativePath(GAME_PLAY_SCENE_FILE_PATH);
         Parent gamePlayRoot = (Parent) gamePlayFxmlLoader.getRoot();
         GamePlaySceneController gamePlayConroller = getGamePlaySceneController(gamePlayFxmlLoader);
-//        gamePlayConroller.setGame();
+        gamePlayConroller.initGameParmeters(rummikubGameWS, gameName, playerID);
         registerNewGameSceneToMainMenuButton(gamePlayConroller.IsMainMenuButtonPressed());
         registerWinnerSceneToIsGameOver(gamePlayConroller);
-
-//        // In case that a computer player plays first
-//        if (game.getCurrentPlayer().isHuman() == false) {
-//            Platform.runLater(gamePlayConroller::playComputerTurn);
-//        }
 
         return new Scene(gamePlayRoot, sceneWidth, sceneHeight);
     }
@@ -185,7 +178,7 @@ public class JavaFXRummikub extends Application {
         //Register game play scene to player joined game property
         controller.getIsPlayerJoinedGame().addListener((source, oldValue, isJoined) -> {
             if (isJoined) {
-                primaryStage.setScene(getGamePlayScene(controller.getJoinedGameName(), controller.getJoinedPlayerName()));
+                primaryStage.setScene(getGamePlayScene(controller.getJoinedGameName(), controller.getJoinedPlayerID()));
             }
         });
     }
