@@ -59,6 +59,13 @@ public class JavaFXRummikub extends Application {
         primaryStage.show();
     }
 
+    @Override
+    public void stop() {
+        if (eventsMgr != null) {
+            eventsMgr.stop();
+        }
+    }
+
     private Scene getGamesListScene() {
         Scene gamesListScene = null;
         FXMLLoader fxmlLoader = getFXMLLoaderByRelativePath(GAMES_LIST_SCENE_FILE_PATH);
