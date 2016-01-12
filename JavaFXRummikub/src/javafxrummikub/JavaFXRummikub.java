@@ -12,6 +12,7 @@ import javafx.scene.Scene;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafxrummikub.scenes.gamelist.GamesListSceneController;
+import javafxrummikub.scenes.gameplay.GamePlayEventsMgr;
 import javafxrummikub.scenes.gameplay.GamePlaySceneController;
 import javafxrummikub.scenes.newGame.NewGameSceneController;
 import javafxrummikub.scenes.winner.WinnerSceneController;
@@ -104,21 +105,25 @@ public class JavaFXRummikub extends Application {
         Parent gamePlayRoot = (Parent) gamePlayFxmlLoader.getRoot();
         GamePlaySceneController gamePlayConroller = getGamePlaySceneController(gamePlayFxmlLoader);
         gamePlayConroller.initGameParmeters(rummikubGameWS, gameName, playerID);
-        registerNewGameSceneToMainMenuButton(gamePlayConroller.IsMainMenuButtonPressed());
+        eventsMgr = new GamePlayEventsMgr(gamePlayConroller, rummikubGameWS, playerID, gameName);
+        eventsMgr.start();
+        registerGameListSceneToMainMenuButton(gamePlayConroller.IsMainMenuButtonPressed());
         registerWinnerSceneToIsGameOver(gamePlayConroller);
 
         return new Scene(gamePlayRoot, sceneWidth, sceneHeight);
     }
+    private GamePlayEventsMgr eventsMgr;
 
     private GamePlaySceneController getGamePlaySceneController(FXMLLoader fxmlLoader) {
         GamePlaySceneController controller = (GamePlaySceneController) fxmlLoader.getController();
         return controller;
     }
 
-    private void registerNewGameSceneToMainMenuButton(SimpleBooleanProperty isMainMenu) {
+    private void registerGameListSceneToMainMenuButton(SimpleBooleanProperty isMainMenu) {
         isMainMenu.addListener((source, oldValue, isExitToMainMenu) -> {
             if (isExitToMainMenu) {
-                primaryStage.setScene(getNewGameScene());
+                eventsMgr.stop();
+                primaryStage.setScene(getGamesListScene());
             }
         });
     }
@@ -126,6 +131,7 @@ public class JavaFXRummikub extends Application {
     private void registerWinnerSceneToIsGameOver(GamePlaySceneController gamePlayConroller) {
         gamePlayConroller.IsGameOver().addListener((source, oldValue, isGameOver) -> {
             if (isGameOver) {
+                eventsMgr.stop();
                 primaryStage.setScene(getWinnerScene(gamePlayConroller.getWinnerName()));
             }
         });
@@ -136,7 +142,7 @@ public class JavaFXRummikub extends Application {
         Parent winnerSceneRoot = (Parent) winnerSceneFxmlLoader.getRoot();
         WinnerSceneController winnerSceneController = getWinnerSceneController(winnerSceneFxmlLoader);
         winnerSceneController.setWinnerName(winnerName);
-        registerNewGameSceneToMainMenuButton(winnerSceneController.isMainMenuButtonPressed());
+        registerGameListSceneToMainMenuButton(winnerSceneController.isMainMenuButtonPressed());
         return new Scene(winnerSceneRoot, sceneWidth, sceneHeight);
     }
 

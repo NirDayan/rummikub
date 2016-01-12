@@ -1,6 +1,5 @@
 package javafxrummikub.scenes.gameplay;
 
-import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +7,8 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
@@ -16,12 +17,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Orientation;
-import javafx.geometry.Side;
 import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.control.MenuItem;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -29,7 +27,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafxrummikub.components.TileView;
 import javafxrummikub.utils.CustomizablePromptDialog;
@@ -37,18 +34,14 @@ import logic.ComputerAI;
 import logic.Game;
 import logic.MoveTileData;
 import logic.Player;
-import logic.persistency.FileDetails;
-import logic.persistency.GamePersistency;
 import logic.tile.Color;
 import logic.tile.Sequence;
 import logic.tile.Tile;
+import ws.rummikub.GameDoesNotExists_Exception;
+import ws.rummikub.InvalidParameters_Exception;
 import ws.rummikub.RummikubWebService;
 
-public class GamePlaySceneController implements Initializable {
-    private RummikubWebService server;
-    private int playerID;
-    private String gameName;
-
+public class GamePlaySceneController implements Initializable, IGamePlayEventHandler {
     private static final int TILES_LIST_VIEW_WIDTH = 1050;
     private static final int INDEX_NOT_FOUND = -1;
     @FXML
@@ -64,7 +57,11 @@ public class GamePlaySceneController implements Initializable {
     @FXML
     private Button mainMenuButton;
     @FXML
-    private Button saveGameButton;
+    private Button pullTileButton;
+    @FXML
+    private Button resignButton;
+    @FXML
+    private Button finishTurnButton;
     @FXML
     private HBox tilesContainer;
     @FXML
@@ -86,9 +83,12 @@ public class GamePlaySceneController implements Initializable {
     private final String ERROR_MSG_TYPE = "error";
     private final String REGULAR_MSG_TYPE = "massage";
     private final int COMPUTER_THINK_TIME_MSEC = 800;
-    ScheduledFuture<?> clearMsgTask = null;
+    private ScheduledFuture<?> clearMsgTask = null;
     private final ComputerAI ai = new ComputerAI();
-    boolean isPlayerPutNewSequence;
+    private boolean isPlayerPutNewSequence;
+    private RummikubWebService server;
+    private int playerID;
+    private String gameName;
 
     @FXML
     private void onMainMenuButton(ActionEvent event) {
@@ -96,25 +96,13 @@ public class GamePlaySceneController implements Initializable {
         String answer = CustomizablePromptDialog.show(
                 stage, "Are you sure you want to exit? All unsaved data will be lost.", "Exit", "Stay");
         if (answer.equals("Exit")) {
+//            try {
+//                server.resign(playerID);
+//            } catch (InvalidParameters_Exception ex) {
+//                System.err.println(ex.getMessage());
+//            }
             isMainMenuButtonPressed.set(true);
         }
-    }
-
-    @FXML
-    private void onSaveGameButton(ActionEvent event) {
-        ContextMenu saveMenu = new ContextMenu();
-        MenuItem saveOption = new MenuItem("Save");
-        MenuItem saveAsOption = new MenuItem("Save As...");
-        saveOption.setOnAction(this::onSaveToLastFile);
-        saveAsOption.setOnAction(this::onSaveAs);
-        if (game.getSavedFileDetails() == null) {
-            saveOption.setDisable(true);
-        } else {
-            saveOption.setDisable(false);
-        }
-
-        saveMenu.getItems().addAll(saveOption, saveAsOption);
-        saveMenu.show(saveGameButton, Side.LEFT, 10, 10);
     }
 
     @FXML
@@ -132,21 +120,25 @@ public class GamePlaySceneController implements Initializable {
 
     @FXML
     private void onResignButton(ActionEvent event) {
-        Player currentPlayer = game.getCurrentPlayer();
-        game.playerResign(currentPlayer.getID());
+        try {
+            String currentPlayerName = server.getPlayerDetails(playerID).getName();
+            server.resign(playerID);
 
-        for (Label playerNameLabel : playersNames) {
-            if (playerNameLabel.getText().toLowerCase().equals(currentPlayer.getName().toLowerCase())) {
-                playerNameLabel.setText("");
+            for (Label playerNameLabel : playersNames) {
+                if (playerNameLabel.getText().toLowerCase().equals(currentPlayerName.toLowerCase())) {
+                    playerNameLabel.setText("");
+                }
             }
+            showMessage(currentPlayerName + " Has Resigned", REGULAR_MSG_TYPE);
+        } catch (InvalidParameters_Exception | GameDoesNotExists_Exception ex) {
+            System.err.println(ex.getMessage());
         }
-        showMessage(currentPlayer.getName() + " Has Resigned", REGULAR_MSG_TYPE);
-
         isCurrPlayerFinished.set(true);
     }
 
     @FXML
-    private void onFinishTurnButton(ActionEvent event) {
+    private void onFinishTurnButton(ActionEvent event
+    ) {
         Player currentPlayer = game.getCurrentPlayer();
         if (isPlayerPerformAnyChange == false) {
             showMessage("No Changes have been made to the board", ERROR_MSG_TYPE);
@@ -173,6 +165,8 @@ public class GamePlaySceneController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         initializeGamePlay();
+        disableAllControls(true);
+
     }
 
     private void initializeGamePlay() {
@@ -378,52 +372,6 @@ public class GamePlaySceneController implements Initializable {
 
     private void clearMsgLabel() {
         msgLabel.setText("");
-    }
-
-    private void onSaveToLastFile(ActionEvent event) {
-        FileDetails fileDetails = game.getSavedFileDetails();
-        saveToFile(fileDetails);
-    }
-
-    private void onSaveAs(ActionEvent event) {
-        FileDetails fileDetails = openFileChooserToSave();
-        saveToFile(fileDetails);
-    }
-
-    private void saveToFile(FileDetails fileDetails) {
-        Thread thread = new Thread(() -> {
-            try {
-                GamePersistency.save(fileDetails, game);
-                game.setSavedFileDetails(fileDetails);
-                Platform.runLater(this::saveFileSeccess);
-            } catch (Exception ex) {
-                Platform.runLater(this::saveFileFailure);
-            }
-        });
-        thread.setDaemon(false);
-        thread.start();
-    }
-
-    private void saveFileFailure() {
-        showMessage("Game saving was failed.", ERROR_MSG_TYPE);
-    }
-
-    private void saveFileSeccess() {
-        showMessage("Game Was saved.", REGULAR_MSG_TYPE);
-    }
-
-    private FileDetails openFileChooserToSave() {
-        FileDetails fileDetails = null;
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML File", "*.xml"));
-        fileChooser.setTitle("Select File to save the game");
-        File file = fileChooser.showSaveDialog(mainMenuButton.getScene().getWindow());
-
-        if (file != null) {
-            fileDetails = new FileDetails(file.getParent(), file.getName(), true);
-        }
-
-        return fileDetails;
     }
 
     private void manageDragAndDrop(ListView<Tile> listView) {
@@ -721,5 +669,12 @@ public class GamePlaySceneController implements Initializable {
         updateBoard();
         //Punish player MUST be after restore from backup, otherwise the restore operation will remove additional tiles
         game.punishPlayer(currentPlayer.getID());
+    }
+
+    private void disableAllControls(boolean disabled) {
+        pullTileButton.setDisable(disabled);
+        resignButton.setDisable(disabled);
+        finishTurnButton.setDisable(disabled);
+        currentPlayerTilesView.setDisable(disabled);
     }
 }

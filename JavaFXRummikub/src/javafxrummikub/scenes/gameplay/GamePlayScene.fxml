@@ -43,7 +43,6 @@
         <VBox id="Actions List" prefHeight="333.0" prefWidth="100.0" spacing="40.0">
           <children>
             <Button fx:id="mainMenuButton" mnemonicParsing="false" onAction="#onMainMenuButton" prefHeight="57.0" prefWidth="100.0" styleClass="gameButton" text="Main Menu" />
-            <Button id="" fx:id="saveGameButton" mnemonicParsing="false" onAction="#onSaveGameButton" prefHeight="57.0" prefWidth="100.0" styleClass="gameButton" text="Save Game" />
             <Button fx:id="pullTileButton" mnemonicParsing="false" onAction="#onPullTileButton" prefHeight="57.0" prefWidth="100.0" styleClass="gameButton" text="Pull Tile" />
             <Button id="resign" fx:id="resignButton" mnemonicParsing="false" onAction="#onResignButton" prefHeight="57.0" prefWidth="100.0" styleClass="gameButton" text="Resign" />
             <Button fx:id="finishTurnButton" mnemonicParsing="false" onAction="#onFinishTurnButton" prefHeight="57.0" prefWidth="100.0" styleClass="gameButton" text="Finish Turn" />
