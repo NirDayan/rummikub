@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import logic.Game;
+import logic.MoveTileData;
 import logic.Player;
 import logic.WSObjToGameObjConverter;
 import logic.persistency.GamePersistency;
@@ -36,6 +37,8 @@ public class MainController {
     private static final String INVALID_SOURCE_SEQUENCE_POSITION_ERR_MSG = "Invalid source sequence position parameter";
     private static final String INVALID_TARGET_SEQUENCE_INDEX_ERR_MSG = "Invalid target sequence index parameter";
     private static final String INVALID_TARGET_SEQUENCE_POSITION_ERR_MSG = "Invalid target sequence position parameter";
+    private static final String INVALID_ADD_TILE_PARAMETERS_ERR_MSG = "Invalid add tile parameters";
+    private static final String INVALID_MOVE_TILE_PARAMETERS_ERR_MSG = "Invalid move tile parameters";
     private static final int MAX_PLAYERS_NUMBER = 4;
     private static final int MIN_PLAYERS_NUMBER = 2;
     private static final int MIN_HUMAN_PLAYERS_NUMBER = 1;
@@ -164,8 +167,11 @@ public class MainController {
         Game game = getGameByPlayerID(player.getID());
         //Check just on the safe side
         if (game != null) {
-            game.addTile(player.getID(), logicTile, sequenceIndex, sequencePosition);
-            createAddTileEvent(game, player, sequenceIndex, sequencePosition);
+            if (game.addTile(player.getID(), logicTile, sequenceIndex, sequencePosition)) {
+                createAddTileEvent(game, player, sequenceIndex, sequencePosition);
+            } else {
+                throw new InvalidParameters_Exception(INVALID_ADD_TILE_PARAMETERS_ERR_MSG, null);
+            }            
         }
     }
 
@@ -175,8 +181,18 @@ public class MainController {
     }
 
     public void moveTile(int playerId, int sourceSequenceIndex, int sourceSequencePosition, int targetSequenceIndex, int targetSequencePosition) throws InvalidParameters_Exception {
-        //TODO implement this method
-        throw new UnsupportedOperationException("Not implemented yet.");
+        Player player = getPlayerById(playerId);
+        MoveTileData moveTileData = new MoveTileData(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
+        validateMoveTileParameters(moveTileData);
+        Game game = getGameByPlayerID(player.getID());
+        //Check just on the safe side
+        if (game != null) {
+            if (game.moveTile(moveTileData)) {
+                createMoveTileEvent(game, player, moveTileData);
+            } else {
+                throw new InvalidParameters_Exception(INVALID_MOVE_TILE_PARAMETERS_ERR_MSG, null);
+            }            
+        }
     }
 
     public void finishTurn(int playerId) throws InvalidParameters_Exception {
@@ -393,6 +409,33 @@ public class MainController {
         event.setPlayerName(player.getName());
         event.setTargetSequenceIndex(sequenceIndex);
         event.setTargetSequencePosition(sequencePosition);
+        gamesEventsMap.get(game).add(event);
+    }
+
+    private void validateMoveTileParameters(MoveTileData moveTileData) throws InvalidParameters_Exception {
+        if (moveTileData.getSourceSequenceIndex() < 0) {
+            throw new InvalidParameters_Exception(INVALID_SOURCE_SEQUENCE_INDEX_ERR_MSG, null);
+        }
+        if (moveTileData.getSourceSequencePosition() < 0) {
+            throw new InvalidParameters_Exception(INVALID_SOURCE_SEQUENCE_POSITION_ERR_MSG, null);
+        }
+        if (moveTileData.getTargetSequenceIndex() < 0) {
+            throw new InvalidParameters_Exception(INVALID_TARGET_SEQUENCE_INDEX_ERR_MSG, null);
+        }
+        if (moveTileData.getTargetSequencePosition() < 0) {
+            throw new InvalidParameters_Exception(INVALID_TARGET_SEQUENCE_POSITION_ERR_MSG, null);
+        }
+    }
+
+    private void createMoveTileEvent(Game game, Player player, MoveTileData moveTileData) {
+        Event event = new Event();
+        event.setId(eventID.getAndIncrement());
+        event.setType(EventType.TILE_MOVED);
+        event.setPlayerName(player.getName());
+        event.setSourceSequenceIndex(moveTileData.getSourceSequenceIndex());
+        event.setSourceSequencePosition(moveTileData.getSourceSequencePosition());
+        event.setTargetSequenceIndex(moveTileData.getTargetSequenceIndex());
+        event.setTargetSequencePosition(moveTileData.getTargetSequencePosition());
         gamesEventsMap.get(game).add(event);
     }
 }
