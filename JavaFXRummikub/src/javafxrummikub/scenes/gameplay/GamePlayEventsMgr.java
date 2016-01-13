@@ -1,15 +1,23 @@
 package javafxrummikub.scenes.gameplay;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import ws.rummikub.Event;
+import ws.rummikub.GameDoesNotExists_Exception;
 import ws.rummikub.InvalidParameters_Exception;
+import ws.rummikub.PlayerDetails;
 import ws.rummikub.RummikubWebService;
+import ws.rummikub.Tile;
 
 public class GamePlayEventsMgr {
+    private String playerName;
     private static final int INTERVAL = 5;
     private IGamePlayEventHandler eventsHandler;
     private final RummikubWebService server;
@@ -55,6 +63,7 @@ public class GamePlayEventsMgr {
                     case GAME_OVER:
                         break;
                     case GAME_START:
+                        handleGameStart();
                         break;
                     case GAME_WINNER:
                         break;
@@ -81,6 +90,21 @@ public class GamePlayEventsMgr {
         } catch (Exception ex) {
             System.err.println(ex.getMessage());
         }
+    }
+
+    private void handleGameStart() throws InvalidParameters_Exception, GameDoesNotExists_Exception {
+        PlayerDetails currPlayerDetails = server.getPlayerDetails(playerID);
+        playerName = currPlayerDetails.getName();
+        List<Tile> currPlayerTiles = currPlayerDetails.getTiles();
+        
+        List<PlayerDetails> playersDetails = server.getPlayersDetails(gameName);
+        List<String> allPlayerNames = new ArrayList<>();
+        
+        for (PlayerDetails details : playersDetails) {
+            allPlayerNames.add(details.getName());
+        }
+        
+        eventsHandler.gameStart(playerName, allPlayerNames,currPlayerTiles);
     }
 
 }

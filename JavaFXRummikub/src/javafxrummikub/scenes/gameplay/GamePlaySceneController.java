@@ -7,8 +7,6 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
@@ -42,6 +40,8 @@ import ws.rummikub.InvalidParameters_Exception;
 import ws.rummikub.RummikubWebService;
 
 public class GamePlaySceneController implements Initializable, IGamePlayEventHandler {
+    private String playerName;
+    private List<Tile> playerTiles;
     private static final int TILES_LIST_VIEW_WIDTH = 1050;
     private static final int INDEX_NOT_FOUND = -1;
     @FXML
@@ -69,7 +69,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
 
     private Game game;
     private List<Label> playersNames;
-    private ObservableList<Tile> currentPlayerTilesData;
+    private ObservableList<Tile> clientPlayerTilesData;
     private SimpleBooleanProperty isMainMenuButtonPressed;
     private ListView<Tile> currentPlayerTilesView;
     private SimpleBooleanProperty isCurrPlayerFinished;
@@ -196,8 +196,8 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     }
 
     private void initCurrentPlayerTilesView() {
-        currentPlayerTilesData = FXCollections.observableArrayList();
-        currentPlayerTilesView = getTilesListView(currentPlayerTilesData);
+        clientPlayerTilesData = FXCollections.observableArrayList();
+        currentPlayerTilesView = getTilesListView(clientPlayerTilesData);
         currentPlayerTilesView.setPrefWidth(TILES_LIST_VIEW_WIDTH);
         tilesContainer.getChildren().add(currentPlayerTilesView);
     }
@@ -279,15 +279,13 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     }
 
     private void initSceneByCurrentGame() {
-        fillPlayersNames();
         updateSceneWithCurrentPlayer();
         updateBoard();
     }
 
-    private void fillPlayersNames() {
-        List<Player> gamePlayers = game.getPlayers();
-        for (int i = 0; i < gamePlayers.size(); i++) {
-            playersNames.get(i).setText(gamePlayers.get(i).getName());
+    private void fillPlayersNames(List<String> names) {
+        for (int i = 0; i < names.size(); i++) {
+            playersNames.get(i).setText(names.get(i));
         }
     }
 
@@ -323,11 +321,11 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     }
 
     private void updateCurrentPlayerTilesView() {
-        currentPlayerTilesData.clear();
+        clientPlayerTilesData.clear();
         ArrayList<Tile> playerTiles = game.getCurrentPlayer().getTiles();
         //Don't change to forEach, it won't work since the "equals" function of tile which ignores duplicate tiles with the same coloe and value
         for (int i = 0; i < playerTiles.size(); i++) {
-            currentPlayerTilesData.add(playerTiles.get(i));
+            clientPlayerTilesData.add(playerTiles.get(i));
         }
     }
 
@@ -676,5 +674,25 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         resignButton.setDisable(disabled);
         finishTurnButton.setDisable(disabled);
         currentPlayerTilesView.setDisable(disabled);
+    }
+
+    @Override
+    public void gameStart(String playerName, List<String> allPlayerNames, List<ws.rummikub.Tile> currPlayerTiles) {
+        this.playerName = playerName;
+        fillPlayersNames(allPlayerNames);
+        markCurrClientPlayerName(playerName);
+        
+        // Add tiles to stand
+        for (ws.rummikub.Tile tile : currPlayerTiles){
+            clientPlayerTilesData.add(new Tile(tile));
+        }
+    }
+
+    private void markCurrClientPlayerName(String playerName) {
+        for (Label playerNameLabel : playersNames) {
+            if (playerNameLabel.getText().toLowerCase().equals(playerName.toLowerCase())) {
+                playerNameLabel.getStyleClass().add("clientPlayer");
+            }
+        }
     }
 }

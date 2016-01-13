@@ -16,4 +16,18 @@ public enum Color {
         list.addAll(Arrays.asList(Color.values()));
         return list;
     }
+
+    static public Color toColor(ws.rummikub.Color color) {
+        switch (color) {
+            case BLACK:
+                return Black;
+            case BLUE:
+                return Blue;
+            case RED:
+                return Red;
+            case YELLOW:
+            default:
+                return Yellow;
+        }
+    }
 }

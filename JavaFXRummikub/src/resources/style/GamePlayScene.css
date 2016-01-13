@@ -15,6 +15,11 @@
     -fx-background-radius: 25;
 }
 
+.clientPlayer {
+    -fx-background-color: azure;
+    -fx-background-radius: 35;
+}
+
 .TilesView, .TileCellView, .TilesView:empty, .boardView {
     -fx-background-color: transparent;
 }

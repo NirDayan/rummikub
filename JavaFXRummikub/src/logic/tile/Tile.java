@@ -13,6 +13,11 @@ public class Tile implements Comparable<Tile> {
         this.color = color;
         this.value = value;
     }
+    
+    public Tile(ws.rummikub.Tile tile){
+        this.color = Color.toColor(tile.getColor());
+        this.value = tile.getValue();
+    }
 
     public boolean isJoker() {
         return value == JOKER_VALUE;
