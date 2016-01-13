@@ -45,10 +45,10 @@ public class MainController {
     private static final int FIRST_PLAYER_ID = 1;
     private static final int FIRST_EVENT_ID = 1;
     private static final String COMPUTER_NAME_PREFIX = "Computer #";
-    private Map<Integer, Player> playersIDs;
-    private AtomicInteger generatedID;
-    private Map<Game, List<Event>> gamesEventsMap;
-    private AtomicInteger eventID;
+    private final Map<Integer, Player> playersIDs;
+    private final AtomicInteger generatedID;
+    private final Map<Game, List<Event>> gamesEventsMap;
+    private final AtomicInteger eventID;
 
     public MainController() {
         playersIDs = new HashMap<Integer, Player>();
@@ -201,8 +201,14 @@ public class MainController {
     }
 
     public void resign(int playerId) throws InvalidParameters_Exception {
-        //TODO implement this method
-        throw new UnsupportedOperationException("Not implemented yet.");
+        Player player = getPlayerById(playerId);
+        Game game = getGameByPlayerID(player.getID());
+        //Check just on the safe side
+        if (game != null) {
+            game.playerResign(playerId);
+            playersIDs.remove(playerId);
+            createPlayerResignedEvent(game, player.getName());
+        }
     }
 
     private Game getGameByName(String gameName) {
@@ -436,6 +442,14 @@ public class MainController {
         event.setSourceSequencePosition(moveTileData.getSourceSequencePosition());
         event.setTargetSequenceIndex(moveTileData.getTargetSequenceIndex());
         event.setTargetSequencePosition(moveTileData.getTargetSequencePosition());
+        gamesEventsMap.get(game).add(event);
+    }
+
+    private void createPlayerResignedEvent(Game game, String playerName) {
+        Event event = new Event();
+        event.setId(eventID.getAndIncrement());
+        event.setType(EventType.PLAYER_RESIGNED);
+        event.setPlayerName(playerName);
         gamesEventsMap.get(game).add(event);
     }
 }

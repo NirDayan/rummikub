@@ -27,6 +27,9 @@ public class Player {
 
     public void setIsResign(boolean isResign) {
         this.isResign = isResign;
+        if (isResign) {
+            details.setStatus(PlayerStatus.RETIRED);
+        }
     }
 
     public boolean isResign() {
