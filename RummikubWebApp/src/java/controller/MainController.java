@@ -327,7 +327,8 @@ public class MainController {
         Game game = getGameByPlayerID(playerId);
         //game should not be null here since we already has the player with the ID
         if (eventId < 0
-                || !gamesEventsMap.get(game).stream().anyMatch((event) -> (event.getId() == eventId))) {
+                || (eventId > 0)
+                && !gamesEventsMap.get(game).stream().anyMatch((event) -> (event.getId() == eventId))) {
             throw new InvalidParameters_Exception(EVENT_ID_NOT_FOUND_ERR_MSG, null);
         }
 
