@@ -96,12 +96,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         String answer = CustomizablePromptDialog.show(
                 stage, "Are you sure you want to exit? All unsaved data will be lost.", "Exit", "Stay");
         if (answer.equals("Exit")) {
-//            try {
-//                server.resign(playerID);
-//            } catch (InvalidParameters_Exception ex) {
-//                System.err.println(ex.getMessage());
-//            }
-            isMainMenuButtonPressed.set(true);
+            onResignButton(event);
         }
     }
 
@@ -121,19 +116,11 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     @FXML
     private void onResignButton(ActionEvent event) {
         try {
-            String currentPlayerName = server.getPlayerDetails(playerID).getName();
             server.resign(playerID);
-
-            for (Label playerNameLabel : playersNames) {
-                if (playerNameLabel.getText().toLowerCase().equals(currentPlayerName.toLowerCase())) {
-                    playerNameLabel.setText("");
-                }
-            }
-            showMessage(currentPlayerName + " Has Resigned", REGULAR_MSG_TYPE);
-        } catch (InvalidParameters_Exception | GameDoesNotExists_Exception ex) {
+        } catch (InvalidParameters_Exception ex) {
             System.err.println(ex.getMessage());
         }
-        isCurrPlayerFinished.set(true);
+        isMainMenuButtonPressed.set(true);
     }
 
     @FXML

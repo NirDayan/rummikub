@@ -71,7 +71,11 @@ public class GamesListSceneController implements Initializable {
         gamesTable.setItems(gamesList);
         gamesTable.getSelectionModel().getSelectedItems().addListener(
                 (ListChangeListener.Change<? extends GameDetails> c) -> {
-                    isGameSelectedFromList.set(true);
+                    if (c.getList().size() == 1) {
+                        isGameSelectedFromList.set(true);
+                    } else {
+                        isGameSelectedFromList.set(false);
+                    }
                 });
 
         Platform.runLater(this::fillGamesTable);
@@ -86,9 +90,6 @@ public class GamesListSceneController implements Initializable {
                 System.err.println("Game " + gameName + "Does not exist in the server");
             }
         });
-    }
-
-    private void addGameToGamesTable(String name) {
     }
 
     @FXML
@@ -133,9 +134,8 @@ public class GamesListSceneController implements Initializable {
     public int getJoinedPlayerID() {
         return joinedPlayerID;
     }
-    
-     private void showErrorMessage(String msg)
-     {
-         errorMsgLabel.setText(msg);
-     }
+
+    private void showErrorMessage(String msg) {
+        errorMsgLabel.setText(msg);
+    }
 }
