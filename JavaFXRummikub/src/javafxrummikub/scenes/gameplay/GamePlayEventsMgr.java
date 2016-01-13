@@ -1,13 +1,10 @@
 package javafxrummikub.scenes.gameplay;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import ws.rummikub.Event;
 import ws.rummikub.GameDoesNotExists_Exception;
@@ -52,7 +49,7 @@ public class GamePlayEventsMgr {
         threadPool.shutdown();
     }
 
-    public void updateEvents() {
+    private void updateEvents() {
         try {
             //get events from server.
             eventsList = server.getEvents(playerID, eventIndex);
@@ -61,27 +58,37 @@ public class GamePlayEventsMgr {
                 eventIndex++;
                 switch (event.getType()) {
                     case GAME_OVER:
+                        handleGameOver();
                         break;
                     case GAME_START:
                         handleGameStart();
                         break;
                     case GAME_WINNER:
+                        handleGameWinner(event);
                         break;
                     case PLAYER_FINISHED_TURN:
+                        handlePlayerFinishedTurn();
                         break;
                     case PLAYER_RESIGNED:
+                        handlePlayerResigned();
                         break;
                     case PLAYER_TURN:
+                        handlePlayerTurn(event);
                         break;
                     case REVERT:
+                        handleRevert();
                         break;
                     case SEQUENCE_CREATED:
+                        handleSequenceCreated(event);
                         break;
                     case TILE_ADDED:
+                        handleTileAdded(event);
                         break;
                     case TILE_MOVED:
+                        handleTileMoved(event);
                         break;
                     case TILE_RETURNED:
+                        handleTileReturned(event);
                         break;
                     default:
                         break;
@@ -92,19 +99,49 @@ public class GamePlayEventsMgr {
         }
     }
 
+    private void handleGameOver() {
+    }
+
     private void handleGameStart() throws InvalidParameters_Exception, GameDoesNotExists_Exception {
         PlayerDetails currPlayerDetails = server.getPlayerDetails(playerID);
         playerName = currPlayerDetails.getName();
         List<Tile> currPlayerTiles = currPlayerDetails.getTiles();
-        
+
         List<PlayerDetails> playersDetails = server.getPlayersDetails(gameName);
         List<String> allPlayerNames = new ArrayList<>();
-        
+
         for (PlayerDetails details : playersDetails) {
             allPlayerNames.add(details.getName());
         }
-        
-        eventsHandler.gameStart(playerName, allPlayerNames,currPlayerTiles);
+
+        eventsHandler.gameStart(playerName, allPlayerNames, currPlayerTiles);
+    }
+
+    private void handleGameWinner(Event event) {
+    }
+
+    private void handlePlayerFinishedTurn() {
+    }
+
+    private void handlePlayerResigned() {
+    }
+
+    private void handlePlayerTurn(Event event) {
+    }
+
+    private void handleRevert() {
+    }
+
+    private void handleSequenceCreated(Event event) {
+    }
+
+    private void handleTileAdded(Event event) {
+    }
+
+    private void handleTileMoved(Event event) {
+    }
+
+    private void handleTileReturned(Event event) {
     }
 
 }
