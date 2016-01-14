@@ -10,6 +10,7 @@ import logic.MoveTileData;
 import logic.Player;
 import logic.WSObjToGameObjConverter;
 import logic.persistency.GamePersistency;
+import logic.tile.Sequence;
 import ws.rummikub.DuplicateGameName_Exception;
 import ws.rummikub.Event;
 import ws.rummikub.EventType;
@@ -155,7 +156,7 @@ public class MainController {
         if (game != null) {
             List<logic.tile.Tile> tilesList = WSObjToGameObjConverter.convertGeneratedTilesListIntoGameTiles(tiles);
             if (game.createSequenceByTilesList(playerId, tilesList)) {
-                createSequenceCreatedEvent(game, player);
+                createSequenceCreatedEvent(game, player, tilesList);
             }
         }
     }
@@ -311,6 +312,7 @@ public class MainController {
         //If the game status has been changed to ACTIVE, add GAME_START event
         if (game.getStatus().equals(GameStatus.ACTIVE)) {
             createGameStartEvent(game);
+            createBoardSequences(game);
         }
 
         return playerId;
@@ -381,11 +383,12 @@ public class MainController {
         return player;
     }
 
-    private void createSequenceCreatedEvent(Game game, Player player) {
+    private void createSequenceCreatedEvent(Game game, Player player, List<logic.tile.Tile> tilesList) {
         Event event = new Event();
         event.setId(eventID.getAndIncrement());
         event.setType(EventType.SEQUENCE_CREATED);
         event.setPlayerName(player.getName());
+        event.getTiles().addAll(WSObjToGameObjConverter.convertGameTilesListIntoGeneratedTilesList(tilesList));
         gamesEventsMap.get(game).add(event);
     }
 
@@ -451,5 +454,13 @@ public class MainController {
         event.setType(EventType.PLAYER_RESIGNED);
         event.setPlayerName(playerName);
         gamesEventsMap.get(game).add(event);
+    }
+
+    private void createBoardSequences(Game game) {
+        List<Sequence> sequences = game.getBoard().getSequences();
+        
+        sequences.stream().forEach((sequence) -> {
+            createSequenceCreatedEvent(game, null, sequence.toList());
+        });
     }
 }
