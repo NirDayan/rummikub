@@ -51,6 +51,9 @@ public class Game {
     }
 
     public void addPlayer(Player player) {
+        if (currentPlayer == null) {
+            currentPlayer = player;
+        }
         players.add(player);
     }
 
@@ -103,11 +106,15 @@ public class Game {
         }
     }
 
-    public void pullTileFromDeck(int playerID) {
+    public Tile pullTileFromDeck(int playerID) {
+        Tile tile = null;
         Player player = getPlayerByID(playerID);
         if (player != null && !getTilesDeck().isEmpty()) {
-            player.addTile(getTilesDeck().pullTile());
+            tile = getTilesDeck().pullTile();
+            player.addTile(tile);
         }
+        
+        return tile;
     }
 
     public boolean isPlayerFirstStep(int playerID) {
@@ -122,10 +129,17 @@ public class Game {
         return player.isResign();
     }
 
-    public void punishPlayer(int id) {
+    public List<Tile> punishPlayer(int id) {
+        List<Tile> tilesToAdd = new ArrayList<>();
+        Tile tile;
         for (int i = 0; i < PUNISH_TILES_NUMBER; i++) {
-            pullTileFromDeck(id);
+            tile = pullTileFromDeck(id);
+            if (tile != null) {
+                tilesToAdd.add(tile);
+            }
         }
+        
+        return tilesToAdd;
     }
 
     public void setCurrentPlayer(Player currentPlayer) {

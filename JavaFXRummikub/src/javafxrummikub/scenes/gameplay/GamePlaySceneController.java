@@ -129,7 +129,9 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     }
 
     @FXML
-    private void onFinishTurnButton(ActionEvent event) {
+    private void onFinishTurnButton(ActionEvent event
+    ) {
+        Player currentPlayer = game.getCurrentPlayer();
         if (isPlayerPerformAnyChange == false) {
             showMessage("No Changes have been made to the board", ERROR_MSG_TYPE);
             return;

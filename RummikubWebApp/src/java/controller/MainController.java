@@ -50,12 +50,14 @@ public class MainController {
     private final AtomicInteger generatedID;
     private final Map<Game, List<Event>> gamesEventsMap;
     private final AtomicInteger eventID;
+    private final Map<Game, List<Event>> currentPlayerActionsMap;
 
     public MainController() {
-        playersIDs = new HashMap<Integer, Player>();
+        playersIDs = new HashMap<>();
         generatedID = new AtomicInteger(FIRST_PLAYER_ID);
         eventID = new AtomicInteger(FIRST_EVENT_ID);
-        gamesEventsMap = new HashMap<Game, List<Event>>();
+        gamesEventsMap = new HashMap<>();
+        currentPlayerActionsMap = new HashMap<>();
     }
 
     public List<Event> getEvents(int playerId, int eventId) throws InvalidParameters_Exception {
@@ -79,7 +81,7 @@ public class MainController {
             throw new DuplicateGameName_Exception(DUP_GAME_NAME_ERR_MSG, null);
         }
         setIDsToPlayers(game.getPlayers());
-        gamesEventsMap.put(game, new ArrayList<Event>());
+        gamesEventsMap.put(game, new ArrayList<>());
 
         return game.getName();
     }
@@ -106,7 +108,7 @@ public class MainController {
         GameDetails gameDetails = createNewGameDetails(name, humanPlayers, computerizedPlayers, 0, false, GameStatus.WAITING);
         Game game = new Game(gameDetails);
         createComputerizedPlayers(game);
-        gamesEventsMap.put(game, new ArrayList<Event>());
+        gamesEventsMap.put(game, new ArrayList<>());
     }
 
     public GameDetails getGameDetails(String gameName) throws GameDoesNotExists_Exception {
@@ -154,6 +156,7 @@ public class MainController {
         Game game = getGameByPlayerID(playerId);
         //Check just on the safe side
         if (game != null) {
+            backupTurn(game);
             List<logic.tile.Tile> tilesList = WSObjToGameObjConverter.convertGeneratedTilesListIntoGameTiles(tiles);
             if (game.createSequenceByTilesList(playerId, tilesList)) {
                 createSequenceCreatedEvent(game, player.getName(), tilesList);
@@ -168,11 +171,12 @@ public class MainController {
         Game game = getGameByPlayerID(player.getID());
         //Check just on the safe side
         if (game != null) {
+            backupTurn(game);
             if (game.addTile(player.getID(), logicTile, sequenceIndex, sequencePosition)) {
                 createAddTileEvent(game, player, sequenceIndex, sequencePosition);
             } else {
                 throw new InvalidParameters_Exception(INVALID_ADD_TILE_PARAMETERS_ERR_MSG, null);
-            }            
+            }
         }
     }
 
@@ -188,17 +192,35 @@ public class MainController {
         Game game = getGameByPlayerID(player.getID());
         //Check just on the safe side
         if (game != null) {
+            backupTurn(game);
             if (game.moveTile(moveTileData)) {
                 createMoveTileEvent(game, player, moveTileData);
             } else {
                 throw new InvalidParameters_Exception(INVALID_MOVE_TILE_PARAMETERS_ERR_MSG, null);
-            }            
+            }
         }
     }
 
     public void finishTurn(int playerId) throws InvalidParameters_Exception {
-        //TODO implement this method
-        throw new UnsupportedOperationException("Not implemented yet.");
+        Player player = getPlayerById(playerId);
+        Game game = getGameByPlayerID(player.getID());
+
+        if (isPlayerPerformedAnyChange(playerId)) {
+            createPlayerFinishedTurnEvent(game, playerId);
+            if (game.getBoard().isValid() == false) {
+                punishPlayer(game, playerId);
+                moveToNextPlayer(game);
+                return;
+            }
+            if (game.isPlayerFirstStep(playerId)) {
+                if (isFirstStepCompleted(playerId)) {
+                    game.setPlayerCompletedFirstStep(playerId);
+                } else {
+                    punishPlayer(game, playerId);
+                }
+            }
+            moveToNextPlayer(game);
+        }
     }
 
     public void resign(int playerId) throws InvalidParameters_Exception {
@@ -339,6 +361,7 @@ public class MainController {
         int playerId = generatedID.getAndIncrement();
         Player player = new Player(playerId, playerName, true);
         game.addPlayer(player);
+        game.incJoinedHumanPlayersNum();
         playersIDs.put(playerId, player);
         return playerId;
     }
@@ -390,6 +413,7 @@ public class MainController {
         event.setPlayerName(playerName);
         event.getTiles().addAll(WSObjToGameObjConverter.convertGameTilesListIntoGeneratedTilesList(tilesList));
         gamesEventsMap.get(game).add(event);
+        addCurrentPlayerEvent(game, event);
     }
 
     private void createGameStartEvent(Game game) {
@@ -419,6 +443,7 @@ public class MainController {
         event.setTargetSequenceIndex(sequenceIndex);
         event.setTargetSequencePosition(sequencePosition);
         gamesEventsMap.get(game).add(event);
+        addCurrentPlayerEvent(game, event);
     }
 
     private void validateMoveTileParameters(MoveTileData moveTileData) throws InvalidParameters_Exception {
@@ -446,6 +471,7 @@ public class MainController {
         event.setTargetSequenceIndex(moveTileData.getTargetSequenceIndex());
         event.setTargetSequencePosition(moveTileData.getTargetSequencePosition());
         gamesEventsMap.get(game).add(event);
+        addCurrentPlayerEvent(game, event);
     }
 
     private void createPlayerResignedEvent(Game game, String playerName) {
@@ -454,13 +480,136 @@ public class MainController {
         event.setType(EventType.PLAYER_RESIGNED);
         event.setPlayerName(playerName);
         gamesEventsMap.get(game).add(event);
+        clearCurrentPlayerActionsList(game);
+    }
+
+    private boolean isFirstStepCompleted(int playerId) {
+        Game game = getGameByPlayerID(playerId);
+        List<Event> playerActions = currentPlayerActionsMap.get(game);
+        if (playerActions != null) {
+            boolean isNewSequenceCreated = playerActions.stream().anyMatch(event -> event.getType().equals(EventType.SEQUENCE_CREATED));
+            if (isNewSequenceCreated) {
+                if (isFirstStepCompleted(game, playerId)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return false;
+    }
+
+    private boolean isPlayerPerformedAnyChange(int playerId) {
+        Game game = getGameByPlayerID(playerId);
+        List<Event> playerActions = currentPlayerActionsMap.get(game);
+        return playerActions != null && playerActions.size() > 0;
+    }
+
+    private boolean isFirstStepCompleted(Game game, int playerId) {
+        List<Sequence> sequences = game.getBoard().getSequences();
+        if (sequences.isEmpty()) {
+            return false;
+        }
+        Sequence lastSequence = sequences.get(sequences.size() - 1);
+        return game.checkSequenceValidity(playerId, lastSequence.toList());
     }
 
     private void createBoardSequences(Game game) {
         List<Sequence> sequences = game.getBoard().getSequences();
-        
+
         sequences.stream().forEach((sequence) -> {
             createSequenceCreatedEvent(game, "", sequence.toList());
         });
+    }
+
+    private void punishPlayer(Game game, int playerId) {
+        game.restoreFromBackup();
+        //Punish player MUST be after restore from backup, otherwise the restore operation will remove additional tiles
+        List<logic.tile.Tile> tilesToAdd = game.punishPlayer(playerId);
+        createRevertEvent(game, playerId, tilesToAdd);
+    }
+
+    private void createRevertEvent(Game game, int playerId, List<logic.tile.Tile> tilesToAdd) {
+        Event event = new Event();
+        event.setId(eventID.getAndIncrement());
+        event.setType(EventType.REVERT);
+        event.setPlayerName(playersIDs.get(playerId).getName());
+        event.getTiles().addAll(WSObjToGameObjConverter.convertGameTilesListIntoGeneratedTilesList(tilesToAdd));
+        gamesEventsMap.get(game).add(event);
+    }
+
+    private void backupTurn(Game game) {
+        if (isBackupNeeded(game)) {
+            game.storeBackup();
+        }
+    }
+
+    private boolean isBackupNeeded(Game game) {
+        List<Event> playerActions = currentPlayerActionsMap.get(game);
+
+        return playerActions == null || playerActions.isEmpty();
+    }
+
+    private void createPlayerFinishedTurnEvent(Game game, int playerId) {
+        Event event = new Event();
+        event.setId(eventID.getAndIncrement());
+        event.setType(EventType.PLAYER_FINISHED_TURN);
+        event.setPlayerName(playersIDs.get(playerId).getName());
+        gamesEventsMap.get(game).add(event);
+    }
+
+    private void moveToNextPlayer(Game game) {
+        clearCurrentPlayerActionsList(game);
+        if (game.checkIsGameOver()) {
+            if (game.getWinner() != null) {
+                createGameWinnerEvent(game);
+            } else {
+                createGameOverEvent(game);
+            }
+            return;
+        }
+        game.moveToNextPlayer();
+        while (game.getCurrentPlayer().isResign()) {
+            game.moveToNextPlayer();
+        }
+        Player currentPlayer = game.getCurrentPlayer();
+        createPlayerTurnEvent(game, currentPlayer);
+    }
+
+    private void createGameOverEvent(Game game) {
+        Event event = new Event();
+        event.setId(eventID.getAndIncrement());
+        event.setType(EventType.GAME_OVER);
+        gamesEventsMap.get(game).add(event);
+    }
+
+    private void clearCurrentPlayerActionsList(Game game) {
+        List<Event> playerActions = currentPlayerActionsMap.get(game);
+        if (playerActions != null) {
+            playerActions.clear();
+        }
+    }
+
+    private void createPlayerTurnEvent(Game game, Player player) {
+        Event event = new Event();
+        event.setId(eventID.getAndIncrement());
+        event.setType(EventType.PLAYER_TURN);
+        event.setPlayerName(player.getName());
+        gamesEventsMap.get(game).add(event);
+    }
+
+    private void addCurrentPlayerEvent(Game game, Event event) {
+        List<Event> playerActions = currentPlayerActionsMap.get(game);
+        if (playerActions == null) {
+            currentPlayerActionsMap.put(game, new ArrayList<>());
+        }
+        currentPlayerActionsMap.get(game).add(event);
+    }
+
+    private void createGameWinnerEvent(Game game) {
+        Event event = new Event();
+        event.setId(eventID.getAndIncrement());
+        event.setType(EventType.GAME_WINNER);
+        event.setPlayerName(game.getWinner().getName());
+        gamesEventsMap.get(game).add(event);
     }
 }
