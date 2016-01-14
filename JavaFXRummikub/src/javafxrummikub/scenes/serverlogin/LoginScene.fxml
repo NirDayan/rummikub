@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.net.*?>
+<?import java.util.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.text.*?>
+<?scenebuilder-stylesheet ../../../resources/style/NewGameScene.css?>
+
+<AnchorPane id="newGamePane" minHeight="600.0" minWidth="800.0" prefHeight="600.0" prefWidth="800.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="javafxrummikub.scenes.serverlogin.LoginController">
+  <children>
+    <AnchorPane id="newGameInnerPane" prefHeight="372.0" prefWidth="572.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+      <children>
+        <Label fx:id="errorMsgLabel" maxWidth="-1.0" minHeight="-1.0" minWidth="-1.0" prefHeight="22.0" prefWidth="744.0" styleClass="error" text="" AnchorPane.bottomAnchor="48.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" />
+        <Button id="ExitButton" fx:id="connectButton" layoutX="336.0" layoutY="323.0" maxWidth="110.0" minWidth="100.0" mnemonicParsing="false" onAction="#onConnectButtonPressed" prefWidth="100.0" text="Connect" />
+        <TextField id="playerNameTextBox" fx:id="portText" layoutX="386.0" layoutY="274.0" maxHeight="25.0" maxWidth="150.0" onAction="#onConnectButtonPressed" onKeyPressed="#clearErrorMsg" prefHeight="25.0" prefWidth="132.0" />
+        <Label alignment="CENTER_LEFT" disable="false" focusTraversable="false" layoutX="286.0" layoutY="274.0" minHeight="25.0" minWidth="80.0" prefHeight="25.0" prefWidth="100.0" text="Server Port:" underline="true">
+          <font>
+            <Font size="14.0" fx:id="x1" />
+          </font>
+        </Label>
+        <Label alignment="CENTER_LEFT" disable="false" focusTraversable="false" font="$x1" layoutX="286.0" layoutY="240.0" minHeight="25.0" minWidth="80.0" prefHeight="25.0" prefWidth="100.0" text="Server Address:" underline="true" />
+        <TextField id="playerNameTextBox" fx:id="addressText" layoutX="386.0" layoutY="240.0" maxHeight="25.0" maxWidth="150.0" onAction="#onConnectButtonPressed" onKeyPressed="#clearErrorMsg" prefHeight="25.0" prefWidth="132.0" />
+        <Label alignment="CENTER" layoutX="320.0" layoutY="178.0" prefHeight="36.0" prefWidth="132.0" text="Login" textAlignment="CENTER" underline="true">
+          <font>
+            <Font name="Arial Bold" size="30.0" />
+          </font>
+        </Label>
+      </children>
+    </AnchorPane>
+  </children>
+  <stylesheets>
+    <URL value="@../../../resources/style/NewGameScene.css" />
+  </stylesheets>
+</AnchorPane>

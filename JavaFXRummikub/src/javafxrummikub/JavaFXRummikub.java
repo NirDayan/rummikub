@@ -1,7 +1,6 @@
 package javafxrummikub;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import javafx.application.Application;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -15,23 +14,20 @@ import javafxrummikub.scenes.gamelist.GamesListSceneController;
 import javafxrummikub.scenes.gameplay.GamePlayEventsMgr;
 import javafxrummikub.scenes.gameplay.GamePlaySceneController;
 import javafxrummikub.scenes.newGame.NewGameSceneController;
+import javafxrummikub.scenes.serverlogin.LoginController;
 import javafxrummikub.scenes.winner.WinnerSceneController;
 import ws.rummikub.RummikubWebService;
-import ws.rummikub.RummikubWebServiceService;
 
 public class JavaFXRummikub extends Application {
     private static final String GAME_PLAY_SCENE_FILE_PATH = "/javafxrummikub/scenes/gameplay/GamePlayScene.fxml";
     private static final String NEW_GAME_SCENE_FILE_PATH = "/javafxrummikub/scenes/newGame/newGameScene.fxml";
     private static final String WINNER_SCENE_FILE_PATH = "/javafxrummikub/scenes/winner/winnerScene.fxml";
     private static final String GAMES_LIST_SCENE_FILE_PATH = "/javafxrummikub/scenes/gamelist/GamesListScene.fxml";
-
+    private static final String LOGIN_SCENE_FILE_PATH = "/javafxrummikub/scenes/serverlogin/LoginScene.fxml";
     private int sceneWidth;
     private int sceneHeight;
     private Stage primaryStage;
     private final double screenFactor = 0.8;
-    private final String webserviceRoot = "rummikub";
-    private final String webserviceName = "RummikubWS";
-    private RummikubWebServiceService service;
     private RummikubWebService rummikubGameWS;
 
     public static void main(String[] args) {
@@ -45,17 +41,9 @@ public class JavaFXRummikub extends Application {
         sceneHeight = (int) (screenBounds.getHeight() * screenFactor);
         sceneWidth = (int) (screenBounds.getWidth() * screenFactor);
 
-        try {
-            //DOTO: chage it.. currently hard-coded
-            createWSClient("127.0.0.1", 8080);
-        } catch (MalformedURLException ex) {
-        }
-
-        Scene gamesListScene = getGamesListScene();
-
         primaryStage.setTitle("Welcome to Rumikub!");
         primaryStage.setResizable(false);
-        primaryStage.setScene(gamesListScene);
+        primaryStage.setScene(getServerLoginScene());
         primaryStage.show();
     }
 
@@ -65,7 +53,20 @@ public class JavaFXRummikub extends Application {
             eventsMgr.stop();
         }
     }
+    
+    private Scene getServerLoginScene() {
+        Scene loginScene = null;
+        FXMLLoader fxmlLoader = getFXMLLoaderByRelativePath(LOGIN_SCENE_FILE_PATH);
+        Parent loginRoot = (Parent) fxmlLoader.getRoot();
+        LoginController loginController = (LoginController) fxmlLoader.getController();
+        registerToLoginScene(loginController);
+        if (loginRoot != null) {
+            loginScene = new Scene(loginRoot, sceneWidth, sceneHeight);
+        }
 
+        return loginScene;
+    }
+    
     private Scene getGamesListScene() {
         Scene gamesListScene = null;
         FXMLLoader fxmlLoader = getFXMLLoaderByRelativePath(GAMES_LIST_SCENE_FILE_PATH);
@@ -170,12 +171,6 @@ public class JavaFXRummikub extends Application {
         return fxmlLoader;
     }
 
-    private void createWSClient(String serverAddress, int serverPort) throws MalformedURLException {
-        URL url = new URL("http://" + serverAddress + ":" + serverPort + "/" + webserviceRoot + "/" + webserviceName);
-        service = new RummikubWebServiceService(url);
-        rummikubGameWS = service.getRummikubWebServicePort();
-    }
-
     private GamesListSceneController getGamesListSceneController(FXMLLoader fxmlLoader) {
         return (GamesListSceneController) fxmlLoader.getController();
     }
@@ -192,6 +187,15 @@ public class JavaFXRummikub extends Application {
         controller.getIsPlayerJoinedGame().addListener((source, oldValue, isJoined) -> {
             if (isJoined) {
                 primaryStage.setScene(getGamePlayScene(controller.getJoinedGameName(), controller.getJoinedPlayerID()));
+            }
+        });
+    }
+
+    private void registerToLoginScene(LoginController controller) {
+                controller.getServerConnected().addListener((source, oldValue, isConnected) -> {
+            if (isConnected) {
+                rummikubGameWS = controller.getRummikubGameWS();
+                primaryStage.setScene(getGamesListScene());
             }
         });
     }
