@@ -6,6 +6,7 @@
 /dist/
 /JavaFXRummikub/build/
 /JavaFXRummikub/dist/
+/JavaFXRummikub/ServerConfig.xml
 /RummikubWebApp/nbproject/private/
 /RummikubWebApp/build/
 /RummikubClient/nbproject/private/

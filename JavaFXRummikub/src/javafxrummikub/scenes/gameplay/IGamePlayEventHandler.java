@@ -9,4 +9,6 @@ public interface IGamePlayEventHandler {
 
     public void sequenceCreated(List<Tile> tiles, String playerName);
 
+    public void PlayerTurn(String playerName);
+
 }

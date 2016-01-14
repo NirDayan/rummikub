@@ -127,6 +127,7 @@ public class GamePlayEventsMgr {
     }
 
     private void handlePlayerTurn(Event event) {
+        eventsHandler.PlayerTurn(event.getPlayerName());
     }
 
     private void handleRevert() {

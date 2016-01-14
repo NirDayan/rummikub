@@ -42,7 +42,7 @@ import ws.rummikub.InvalidParameters_Exception;
 import ws.rummikub.RummikubWebService;
 
 public class GamePlaySceneController implements Initializable, IGamePlayEventHandler {
-    private String playerName;
+    private String clientPlayerName;
     private List<Tile> playerTiles;
     private List<Sequence> boardSequences = new ArrayList<>();
     private static final int TILES_LIST_VIEW_WIDTH = 1050;
@@ -129,28 +129,16 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     }
 
     @FXML
-    private void onFinishTurnButton(ActionEvent event
-    ) {
-        Player currentPlayer = game.getCurrentPlayer();
+    private void onFinishTurnButton(ActionEvent event) {
         if (isPlayerPerformAnyChange == false) {
             showMessage("No Changes have been made to the board", ERROR_MSG_TYPE);
             return;
         }
-        if (game.getBoard().isValid() == false) {
-            punishPlayer();
-            isCurrPlayerFinished.set(true);
-            return;
+        try {
+            server.finishTurn(playerID);
+        } catch (InvalidParameters_Exception ex) {
+            System.err.println(ex.getMessage());
         }
-
-        if (game.isPlayerFirstStep(currentPlayer.getID())) {
-            if (isFirstStepCompleted()) {
-                game.setPlayerCompletedFirstStep(currentPlayer.getID());
-                showMessage("Player " + currentPlayer.getName() + " put his first sequence successfully!", REGULAR_MSG_TYPE);
-            } else {
-                punishPlayer();
-            }
-        }
-
         isCurrPlayerFinished.set(true);
     }
 
@@ -197,7 +185,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     private void registerFinishTurnProperty() {
         isCurrPlayerFinished.addListener((source, oldValue, isPlayerFinished) -> {
             if (isPlayerFinished == true) {
-                playerFinishedTurn();
+                disableAllControls(true);
             }
         });
     }
@@ -208,91 +196,20 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         this.gameName = gameName;
     }
 
-    private void playerFinishedTurn() {
-        if (game.checkIsGameOver()) {
-            isGameOver.set(true);
-            return;
-        }
-        getNextPlayingPlayer();
-        if (game.getCurrentPlayer().isHuman() == false) {
-            Platform.runLater(this::playComputerTurn);
-        }
-        updateSceneWithCurrentPlayer();
-        isCurrPlayerFinished.set(false);
-    }
-
-    public void playComputerTurn() {
-        Player compPlayer = game.getCurrentPlayer();
-        List<Tile> sequence = ai.getRelevantTiles(compPlayer.getTiles());
-
-        try {
-            // Simulate Computer "Thinking..."
-            Thread.sleep(COMPUTER_THINK_TIME_MSEC);
-        } catch (InterruptedException e) {
-        }
-
-        if (sequence != null) {
-            game.getBoard().addSequence(new Sequence(sequence));
-            compPlayer.removeTiles(sequence);
-
-            showMessage(compPlayer.getName() + " Added a Sequece to the borad.", REGULAR_MSG_TYPE);
-            playerActionOnBoardDone();
-
-            sequence = ai.getRelevantTiles(game.getCurrentPlayer().getTiles());
-            if (sequence != null) {
-                Platform.runLater(this::playComputerTurn);
-                return;
-            }
-        }
-
-        if (isPlayerPerformAnyChange == false) {
-            showMessage(compPlayer.getName() + " Pulled a tile from the deck.", REGULAR_MSG_TYPE);
-            game.pullTileFromDeck(compPlayer.getID());
-            updateCurrentPlayerTilesView();
-        }
-
-        isCurrPlayerFinished.set(true);
-    }
-
-    private void getNextPlayingPlayer() {
-        game.moveToNextPlayer();
-        while (game.getCurrentPlayer().isResign()) {
-            game.moveToNextPlayer();
-        }
-        isPlayerPerformAnyChange = false;
-        isBackupNeeded = true;
-        isPlayerPutNewSequence = false;
-        updateSceneWithCurrentPlayer();
-    }
-
-    public void setGame(Game game) {
-        this.game = game;
-        initSceneByCurrentGame();
-    }
-
-    private void initSceneByCurrentGame() {
-        updateSceneWithCurrentPlayer();
-        updateBoard();
-    }
-
     private void fillPlayersNames(List<String> names) {
         for (int i = 0; i < names.size(); i++) {
             playersNames.get(i).setText(names.get(i));
         }
     }
 
-    private void updateSceneWithCurrentPlayer() {
-        Player currentPlayer = game.getCurrentPlayer();
-
+    private void updatePlayerNamesWithCurrentPlayer(String currPlayer) {
         for (Label playerNameLabel : playersNames) {
-            if (playerNameLabel.getText().toLowerCase().equals(currentPlayer.getName().toLowerCase())) {
+            if (playerNameLabel.getText().toLowerCase().equals(currPlayer.toLowerCase())) {
                 playerNameLabel.getStyleClass().add("currentPlayer");
             } else {
                 playerNameLabel.getStyleClass().remove("currentPlayer");
             }
         }
-
-        updateCurrentPlayerTilesView();
     }
 
     private void updateBoard() {
@@ -669,13 +586,13 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
 
     @Override
     public void gameStart(String playerName, List<String> allPlayerNames, List<Tile> currPlayerTiles) {
-        this.playerName = playerName;
+        this.clientPlayerName = playerName;
         fillPlayersNames(allPlayerNames);
         markCurrClientPlayerName(playerName);
 
         // Add tiles to stand
         clientPlayerTilesData.addAll(currPlayerTiles);
-        
+
         playSound(GAME_START_SOUND_PATH);
     }
 
@@ -700,5 +617,14 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         if (!playerName.isEmpty()) {
             showMessage(playerName + " has added a new sequence.", REGULAR_MSG_TYPE);
         }
+    }
+
+    @Override
+    public void PlayerTurn(String playerName) {
+        if (playerName.equals(clientPlayerName)) {
+            playSound(PLAYER_TURN_SOUND_PATH);
+            disableAllControls(false);
+        }
+        updatePlayerNamesWithCurrentPlayer(playerName);
     }
 }
