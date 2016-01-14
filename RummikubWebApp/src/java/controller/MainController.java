@@ -156,7 +156,7 @@ public class MainController {
         if (game != null) {
             List<logic.tile.Tile> tilesList = WSObjToGameObjConverter.convertGeneratedTilesListIntoGameTiles(tiles);
             if (game.createSequenceByTilesList(playerId, tilesList)) {
-                createSequenceCreatedEvent(game, player, tilesList);
+                createSequenceCreatedEvent(game, player.getName(), tilesList);
             }
         }
     }
@@ -383,11 +383,11 @@ public class MainController {
         return player;
     }
 
-    private void createSequenceCreatedEvent(Game game, Player player, List<logic.tile.Tile> tilesList) {
+    private void createSequenceCreatedEvent(Game game, String playerName, List<logic.tile.Tile> tilesList) {
         Event event = new Event();
         event.setId(eventID.getAndIncrement());
         event.setType(EventType.SEQUENCE_CREATED);
-        event.setPlayerName(player.getName());
+        event.setPlayerName(playerName);
         event.getTiles().addAll(WSObjToGameObjConverter.convertGameTilesListIntoGeneratedTilesList(tilesList));
         gamesEventsMap.get(game).add(event);
     }
@@ -460,7 +460,7 @@ public class MainController {
         List<Sequence> sequences = game.getBoard().getSequences();
         
         sequences.stream().forEach((sequence) -> {
-            createSequenceCreatedEvent(game, null, sequence.toList());
+            createSequenceCreatedEvent(game, "", sequence.toList());
         });
     }
 }
