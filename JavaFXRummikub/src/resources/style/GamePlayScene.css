@@ -24,6 +24,10 @@
     -fx-background-color: transparent;
 }
 
+.TilesView:disabled, .boardView:disabled {
+    -fx-opacity: 0.85;
+}
+
 .list-cell:empty {
     visibility:hidden;
     -fx-background-color: transparent;

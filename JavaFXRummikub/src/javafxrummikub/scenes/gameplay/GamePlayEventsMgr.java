@@ -94,6 +94,7 @@ public class GamePlayEventsMgr {
                         break;
                 }
             }
+            eventsList.clear();
         } catch (Exception ex) {
             System.err.println(ex.getMessage());
         }

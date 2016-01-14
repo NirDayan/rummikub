@@ -43,8 +43,8 @@ import ws.rummikub.RummikubWebService;
 
 public class GamePlaySceneController implements Initializable, IGamePlayEventHandler {
     private String clientPlayerName;
-    private List<Tile> playerTiles;
-    private List<Sequence> boardSequences = new ArrayList<>();
+    private final List<Tile> playerTiles = new ArrayList<>();
+    private final List<Sequence> boardSequences = new ArrayList<>();
     private static final int TILES_LIST_VIEW_WIDTH = 1050;
     private static final int INDEX_NOT_FOUND = -1;
     private static final String GAME_START_SOUND_PATH = "./src/resources/gameStart.wav";
@@ -87,7 +87,6 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     private Tile draggedTile;
     private final String ERROR_MSG_TYPE = "error";
     private final String REGULAR_MSG_TYPE = "massage";
-    private final int COMPUTER_THINK_TIME_MSEC = 800;
     private ScheduledFuture<?> clearMsgTask = null;
     private final ComputerAI ai = new ComputerAI();
     private boolean isPlayerPutNewSequence;
@@ -584,6 +583,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         resignButton.setDisable(disabled);
         finishTurnButton.setDisable(disabled);
         currentPlayerTilesView.setDisable(disabled);
+        boardView.setDisable(disabled);
     }
 
     @Override
@@ -593,7 +593,8 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         markCurrClientPlayerName(playerName);
 
         // Add tiles to stand
-        clientPlayerTilesData.addAll(currPlayerTiles);
+        playerTiles.addAll(currPlayerTiles);
+        updateCurrentPlayerTilesView();
 
         playSound(GAME_START_SOUND_PATH);
     }

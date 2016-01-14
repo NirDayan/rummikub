@@ -19,6 +19,12 @@
     -fx-text-fill: red;
 }
 
+.message {
+    -fx-font-size: 14px;
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-text-fill: yellow;
+}
+
 .button {
     -fx-text-fill: white;
     -fx-font-family: "Arial Narrow";

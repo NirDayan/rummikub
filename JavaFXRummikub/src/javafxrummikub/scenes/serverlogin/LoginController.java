@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -74,29 +75,53 @@ public class LoginController implements Initializable {
     @FXML
     private void onConnectButtonPressed(ActionEvent event) {
         clearErrorMsg();
+
         String addressStr = addressText.getText();
-        if (!addressStr.isEmpty()) {
-            serverAddress = addressStr;
+        String portStr = portText.getText();
+        if (addressStr.isEmpty() || portStr.isEmpty()) {
+            errorMsgLabel.setText("Enter address and port");
+            return;
         }
 
-        String portStr = portText.getText();
-        if (!portStr.isEmpty()) {
+        serverAddress = addressStr;
+        try {
             serverPort = Integer.parseInt(portStr);
+        } catch (NumberFormatException numberFormatException) {
+            errorMsgLabel.setText("Port is invalid");
+            return;
         }
 
         if (!IPAddressUtil.isIPv4LiteralAddress(serverAddress)) {
             errorMsgLabel.setText("Server IP address is invalid.");
             return;
         }
+        errorMsgLabel.getStyleClass().clear();
+        errorMsgLabel.getStyleClass().add("message");
+        errorMsgLabel.setText("Connecting to server...");
 
+        Thread thread = new Thread(this::connectToServer);
+        thread.setDaemon(false);
+        thread.start();
+    }
+
+    private void connectToServer() {
         try {
             createWSClient();
+            buildServerConfigXML();
+            Platform.runLater(this::setConnected);
         } catch (Exception ex) {
-            errorMsgLabel.setText(CONNECT_FAILED_MSG);
-            return;
+            Platform.runLater(this::showConnectionFailure);
         }
-        buildServerConfigXML();
-        getServerConnected().set(true);
+    }
+
+    private void setConnected() {
+        serverConnected.set(true);
+    }
+
+    private void showConnectionFailure() {
+        errorMsgLabel.getStyleClass().clear();
+        errorMsgLabel.getStyleClass().add("error");
+        errorMsgLabel.setText(CONNECT_FAILED_MSG);
     }
 
     private void createWSClient() throws MalformedURLException {
