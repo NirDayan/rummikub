@@ -16,7 +16,7 @@ import ws.rummikub.Tile;
 public class GamePlayEventsMgr {
     private String playerName;
     private static final int INTERVAL = 5;
-    private IGamePlayEventHandler eventsHandler;
+    private final IGamePlayEventHandler eventsHandler;
     private final RummikubWebService server;
     private final int playerID;
     private int eventIndex;
@@ -105,7 +105,7 @@ public class GamePlayEventsMgr {
     private void handleGameStart() throws InvalidParameters_Exception, GameDoesNotExists_Exception {
         PlayerDetails currPlayerDetails = server.getPlayerDetails(playerID);
         playerName = currPlayerDetails.getName();
-        List<Tile> currPlayerTiles = currPlayerDetails.getTiles();
+        List<logic.tile.Tile> currPlayerTiles = convertWS2GameTiles(currPlayerDetails.getTiles());
 
         List<PlayerDetails> playersDetails = server.getPlayersDetails(gameName);
         List<String> allPlayerNames = new ArrayList<>();
@@ -133,6 +133,8 @@ public class GamePlayEventsMgr {
     }
 
     private void handleSequenceCreated(Event event) {
+        List<logic.tile.Tile> tiles = convertWS2GameTiles(event.getTiles());
+        eventsHandler.sequenceCreated(tiles, event.getPlayerName());
     }
 
     private void handleTileAdded(Event event) {
@@ -143,5 +145,12 @@ public class GamePlayEventsMgr {
 
     private void handleTileReturned(Event event) {
     }
-
+    
+    private List<logic.tile.Tile> convertWS2GameTiles(List<ws.rummikub.Tile> tiles){
+        List<logic.tile.Tile> resList = new ArrayList<>(tiles.size());
+        for (Tile tile : tiles){
+            resList.add(new logic.tile.Tile(tile));
+        }
+        return resList;
+    }  
 }

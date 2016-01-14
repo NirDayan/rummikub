@@ -1,5 +1,6 @@
 package javafxrummikub.scenes.gameplay;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
 import javafxrummikub.components.TileView;
 import javafxrummikub.utils.CustomizablePromptDialog;
@@ -35,15 +38,17 @@ import logic.Player;
 import logic.tile.Color;
 import logic.tile.Sequence;
 import logic.tile.Tile;
-import ws.rummikub.GameDoesNotExists_Exception;
 import ws.rummikub.InvalidParameters_Exception;
 import ws.rummikub.RummikubWebService;
 
 public class GamePlaySceneController implements Initializable, IGamePlayEventHandler {
     private String playerName;
     private List<Tile> playerTiles;
+    private List<Sequence> boardSequences = new ArrayList<>();
     private static final int TILES_LIST_VIEW_WIDTH = 1050;
     private static final int INDEX_NOT_FOUND = -1;
+    private static final String GAME_START_SOUND_PATH = "./src/resources/gameStart.wav";
+    private static final String PLAYER_TURN_SOUND_PATH = "./src/resources/notifyTurn.wav";
     @FXML
     private Label player1Name;
     @FXML
@@ -295,7 +300,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         ListView<Tile> seqView;
         boardData.clear();
 
-        for (Sequence sequence : game.getBoard().getSequences()) {
+        for (Sequence sequence : boardSequences) {
             seqBinding = FXCollections.observableArrayList(sequence.toList());
             seqView = getTilesListView(seqBinding);
             seqView.getStyleClass().add("sequenceView");
@@ -309,7 +314,6 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
 
     private void updateCurrentPlayerTilesView() {
         clientPlayerTilesData.clear();
-        ArrayList<Tile> playerTiles = game.getCurrentPlayer().getTiles();
         //Don't change to forEach, it won't work since the "equals" function of tile which ignores duplicate tiles with the same coloe and value
         for (int i = 0; i < playerTiles.size(); i++) {
             clientPlayerTilesData.add(playerTiles.get(i));
@@ -664,15 +668,21 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     }
 
     @Override
-    public void gameStart(String playerName, List<String> allPlayerNames, List<ws.rummikub.Tile> currPlayerTiles) {
+    public void gameStart(String playerName, List<String> allPlayerNames, List<Tile> currPlayerTiles) {
         this.playerName = playerName;
         fillPlayersNames(allPlayerNames);
         markCurrClientPlayerName(playerName);
-        
+
         // Add tiles to stand
-        for (ws.rummikub.Tile tile : currPlayerTiles){
-            clientPlayerTilesData.add(new Tile(tile));
-        }
+        clientPlayerTilesData.addAll(currPlayerTiles);
+        
+        playSound(GAME_START_SOUND_PATH);
+    }
+
+    private void playSound(String soundPath) {
+        Media sound = new Media(new File(soundPath).toURI().toString());
+        MediaPlayer mediaPlayer = new MediaPlayer(sound);
+        mediaPlayer.play();
     }
 
     private void markCurrClientPlayerName(String playerName) {
@@ -680,6 +690,15 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
             if (playerNameLabel.getText().toLowerCase().equals(playerName.toLowerCase())) {
                 playerNameLabel.getStyleClass().add("clientPlayer");
             }
+        }
+    }
+
+    @Override
+    public void sequenceCreated(List<Tile> tiles, String playerName) {
+        boardSequences.add(new Sequence(tiles));
+        updateBoard();
+        if (!playerName.isEmpty()) {
+            showMessage(playerName + " has added a new sequence.", REGULAR_MSG_TYPE);
         }
     }
 }
