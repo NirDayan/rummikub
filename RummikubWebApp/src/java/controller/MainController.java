@@ -49,13 +49,13 @@ public class MainController {
     private final Map<Integer, Player> playersIDs;
     private final AtomicInteger generatedID;
     private final Map<Game, List<Event>> gamesEventsMap;
-    private final AtomicInteger eventID;
+    private final Map<Game, AtomicInteger> eventIDMap;
     private final Map<Game, List<Event>> currentPlayerActionsMap;
 
     public MainController() {
         playersIDs = new HashMap<>();
         generatedID = new AtomicInteger(FIRST_PLAYER_ID);
-        eventID = new AtomicInteger(FIRST_EVENT_ID);
+        eventIDMap = new HashMap<>();
         gamesEventsMap = new HashMap<>();
         currentPlayerActionsMap = new HashMap<>();
     }
@@ -82,6 +82,7 @@ public class MainController {
         }
         setIDsToPlayers(game.getPlayers());
         gamesEventsMap.put(game, new ArrayList<>());
+        eventIDMap.put(game, new AtomicInteger(FIRST_EVENT_ID));
 
         return game.getName();
     }
@@ -335,6 +336,7 @@ public class MainController {
         if (game.getStatus().equals(GameStatus.ACTIVE)) {
             createGameStartEvent(game);
             createBoardSequences(game);
+            createPlayerTurnEvent(game,game.getCurrentPlayer());
         }
 
         return playerId;
@@ -408,7 +410,7 @@ public class MainController {
 
     private void createSequenceCreatedEvent(Game game, String playerName, List<logic.tile.Tile> tilesList) {
         Event event = new Event();
-        event.setId(eventID.getAndIncrement());
+        event.setId(eventIDMap.get(game).getAndIncrement());
         event.setType(EventType.SEQUENCE_CREATED);
         event.setPlayerName(playerName);
         event.getTiles().addAll(WSObjToGameObjConverter.convertGameTilesListIntoGeneratedTilesList(tilesList));
@@ -418,7 +420,7 @@ public class MainController {
 
     private void createGameStartEvent(Game game) {
         Event event = new Event();
-        event.setId(eventID.getAndIncrement());
+        event.setId(eventIDMap.get(game).getAndIncrement());
         event.setType(EventType.GAME_START);
         gamesEventsMap.get(game).add(event);
     }
@@ -437,7 +439,7 @@ public class MainController {
 
     private void createAddTileEvent(Game game, Player player, int sequenceIndex, int sequencePosition) {
         Event event = new Event();
-        event.setId(eventID.getAndIncrement());
+        event.setId(eventIDMap.get(game).getAndIncrement());
         event.setType(EventType.TILE_ADDED);
         event.setPlayerName(player.getName());
         event.setTargetSequenceIndex(sequenceIndex);
@@ -463,7 +465,7 @@ public class MainController {
 
     private void createMoveTileEvent(Game game, Player player, MoveTileData moveTileData) {
         Event event = new Event();
-        event.setId(eventID.getAndIncrement());
+        event.setId(eventIDMap.get(game).getAndIncrement());
         event.setType(EventType.TILE_MOVED);
         event.setPlayerName(player.getName());
         event.setSourceSequenceIndex(moveTileData.getSourceSequenceIndex());
@@ -476,7 +478,7 @@ public class MainController {
 
     private void createPlayerResignedEvent(Game game, String playerName) {
         Event event = new Event();
-        event.setId(eventID.getAndIncrement());
+        event.setId(eventIDMap.get(game).getAndIncrement());
         event.setType(EventType.PLAYER_RESIGNED);
         event.setPlayerName(playerName);
         gamesEventsMap.get(game).add(event);
@@ -530,7 +532,7 @@ public class MainController {
 
     private void createRevertEvent(Game game, int playerId, List<logic.tile.Tile> tilesToAdd) {
         Event event = new Event();
-        event.setId(eventID.getAndIncrement());
+        event.setId(eventIDMap.get(game).getAndIncrement());
         event.setType(EventType.REVERT);
         event.setPlayerName(playersIDs.get(playerId).getName());
         event.getTiles().addAll(WSObjToGameObjConverter.convertGameTilesListIntoGeneratedTilesList(tilesToAdd));
@@ -551,7 +553,7 @@ public class MainController {
 
     private void createPlayerFinishedTurnEvent(Game game, int playerId) {
         Event event = new Event();
-        event.setId(eventID.getAndIncrement());
+        event.setId(eventIDMap.get(game).getAndIncrement());
         event.setType(EventType.PLAYER_FINISHED_TURN);
         event.setPlayerName(playersIDs.get(playerId).getName());
         gamesEventsMap.get(game).add(event);
@@ -577,7 +579,7 @@ public class MainController {
 
     private void createGameOverEvent(Game game) {
         Event event = new Event();
-        event.setId(eventID.getAndIncrement());
+        event.setId(eventIDMap.get(game).getAndIncrement());
         event.setType(EventType.GAME_OVER);
         gamesEventsMap.get(game).add(event);
     }
@@ -591,7 +593,7 @@ public class MainController {
 
     private void createPlayerTurnEvent(Game game, Player player) {
         Event event = new Event();
-        event.setId(eventID.getAndIncrement());
+        event.setId(eventIDMap.get(game).getAndIncrement());
         event.setType(EventType.PLAYER_TURN);
         event.setPlayerName(player.getName());
         gamesEventsMap.get(game).add(event);
@@ -607,7 +609,7 @@ public class MainController {
 
     private void createGameWinnerEvent(Game game) {
         Event event = new Event();
-        event.setId(eventID.getAndIncrement());
+        event.setId(eventIDMap.get(game).getAndIncrement());
         event.setType(EventType.GAME_WINNER);
         event.setPlayerName(game.getWinner().getName());
         gamesEventsMap.get(game).add(event);
