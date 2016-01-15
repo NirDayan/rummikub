@@ -264,13 +264,6 @@ public class Game {
 
         currentPlayerAddedTiles.addAll(tiles);
         Sequence sequence = new Sequence(tiles);
-        if (!sequence.isValid()) {
-            return false;
-        }
-        if (player.isFirstStep() && !isFirstSequenceValid(sequence)) {
-            return false;
-        }
-
         player.removeTiles(tiles);
         board.addSequence(sequence);
 
