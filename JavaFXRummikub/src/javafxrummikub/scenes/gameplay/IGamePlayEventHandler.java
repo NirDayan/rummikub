@@ -11,4 +11,8 @@ public interface IGamePlayEventHandler {
 
     public void PlayerTurn(String playerName);
 
+    public void addTile(int playerTilePosition, int targetSequenceIndex, int targetSequencePosition);
+
+    public void moveTile(int sourceSequenceIndex, int sourceSequencePosition, int targetSequenceIndex, int targetSequencePosition);
+
 }

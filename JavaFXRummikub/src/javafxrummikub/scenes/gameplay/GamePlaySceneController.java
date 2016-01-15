@@ -4,14 +4,11 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
@@ -20,7 +17,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Orientation;
-import javafx.print.Collation;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -117,7 +113,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
 
         if (!isPlayerPerformAnyChange) {
             game.pullTileFromDeck(player.getID());
-            updateCurrentPlayerTilesView();
+            updatePlayerTilesView();
             isCurrPlayerFinished.set(true);
         } else {
             showMessage("Pull tile from deck is not possible since you performed board changes", ERROR_MSG_TYPE);
@@ -135,9 +131,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     }
 
     @FXML
-    private void onFinishTurnButton(ActionEvent event
-    ) {
-        Player currentPlayer = game.getCurrentPlayer();
+    private void onFinishTurnButton(ActionEvent event) {
         if (isPlayerPerformAnyChange == false) {
             showMessage("No Changes have been made to the board", ERROR_MSG_TYPE);
             return;
@@ -154,7 +148,6 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     public void initialize(URL url, ResourceBundle rb) {
         initializeGamePlay();
         disableAllControls(true);
-
     }
 
     private void initializeGamePlay() {
@@ -239,11 +232,11 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         }
     }
 
-    private void updateCurrentPlayerTilesView() {
+    private void updatePlayerTilesView() {
         clientPlayerTilesData.clear();
         //Don't change to forEach, it won't work since the "equals" function of tile which ignores duplicate tiles with the same coloe and value
         for (int i = 0; i < playerTiles.size(); i++) {
-            clientPlayerTilesData.add(playerTiles.get(i));
+            clientPlayerTilesData.add(playerTiles.get(i)); 
         }
     }
 
@@ -427,14 +420,12 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
             addTileToBoardByMoveTileData(addTileData, draggedTile);
         }
 
-        removeFromPlayerTiles(addTileData);
-
         playerActionOnBoardDone();
     }
 
-    private void removeFromPlayerTiles(MoveTileData addTileData) {
+    private void removeFromPlayerTiles(int playerTilePosition) {
         // Remove Tile From Player
-        playerTiles.remove(addTileData.getSourceSequencePosition());
+        playerTiles.remove(playerTilePosition);
     }
 
     private void performMoveTileInBoard(MoveTileData moveTileData) {
@@ -468,7 +459,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     private void playerActionOnBoardDone() {
         isPlayerPerformAnyChange = true;
         updateBoard();
-        updateCurrentPlayerTilesView();
+        updatePlayerTilesView();
     }
 
     private void performDragDetected(ListView<Tile> listView) {
@@ -531,9 +522,6 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         // Add Tile To Board
         boardSequences.add(new Sequence(draggedTile));
 
-        //delete the source from the player
-        removeFromPlayerTiles(dragTileData);
-
         playerActionOnBoardDone();
     }
 
@@ -576,7 +564,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
 
         // Add tiles to stand
         playerTiles.addAll(currPlayerTiles);
-        updateCurrentPlayerTilesView();
+        updatePlayerTilesView();
 
         playSound(GAME_START_SOUND_PATH);
     }
@@ -611,5 +599,24 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
             disableAllControls(false);
         }
         updatePlayerNamesWithCurrentPlayer(playerName);
+    }
+
+    @Override
+    public void addTile(int playerTilePosition, int targetSequenceIndex, int targetSequencePosition) {
+        Tile tile = playerTiles.remove(playerTilePosition);
+        Sequence targetSeq = boardSequences.get(targetSequenceIndex);
+        targetSeq.addTile(targetSequencePosition, tile);
+        
+        updateBoard();
+        updatePlayerTilesView();
+    }
+    
+    @Override
+    public void moveTile(int sourceSeqIndex, int sourceSeqPos ,int targetSeqIndex, int targetSeqPos) {
+        Tile tile = boardSequences.get(sourceSeqIndex).removeTile(sourceSeqPos);
+        Sequence targetSeq = boardSequences.get(targetSeqIndex);
+        targetSeq.addTile(targetSeqPos, tile);
+        
+        updateBoard();
     }
 }

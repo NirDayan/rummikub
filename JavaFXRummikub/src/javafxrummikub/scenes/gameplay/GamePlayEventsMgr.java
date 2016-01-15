@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import ws.rummikub.Event;
 import ws.rummikub.GameDoesNotExists_Exception;
@@ -15,7 +17,7 @@ import ws.rummikub.Tile;
 
 public class GamePlayEventsMgr {
     private String playerName;
-    private static final int INTERVAL = 5;
+    private static final int INTERVAL = 1;
     private final IGamePlayEventHandler eventsHandler;
     private final RummikubWebService server;
     private final int playerID;
@@ -55,44 +57,44 @@ public class GamePlayEventsMgr {
             eventsList = server.getEvents(playerID, eventIndex);
             //for each event, handle it with the eventsHandler.
             for (Event event : eventsList) {
-                eventIndex++;
-                switch (event.getType()) {
-                    case GAME_OVER:
-                        handleGameOver();
-                        break;
-                    case GAME_START:
-                        handleGameStart();
-                        break;
-                    case GAME_WINNER:
-                        handleGameWinner(event);
-                        break;
-                    case PLAYER_FINISHED_TURN:
-                        handlePlayerFinishedTurn();
-                        break;
-                    case PLAYER_RESIGNED:
-                        handlePlayerResigned();
-                        break;
-                    case PLAYER_TURN:
-                        handlePlayerTurn(event);
-                        break;
-                    case REVERT:
-                        handleRevert();
-                        break;
-                    case SEQUENCE_CREATED:
-                        handleSequenceCreated(event);
-                        break;
-                    case TILE_ADDED:
-                        handleTileAdded(event);
-                        break;
-                    case TILE_MOVED:
-                        handleTileMoved(event);
-                        break;
-                    case TILE_RETURNED:
-                        handleTileReturned(event);
-                        break;
+            eventIndex++;
+            switch (event.getType()) {
+                case GAME_OVER:
+                    handleGameOver();
+                    break;
+                case GAME_START:
+                    handleGameStart();
+                    break;
+                case GAME_WINNER:
+                    handleGameWinner(event);
+                    break;
+                case PLAYER_FINISHED_TURN:
+                    handlePlayerFinishedTurn();
+                    break;
+                case PLAYER_RESIGNED:
+                    handlePlayerResigned();
+                    break;
+                case PLAYER_TURN:
+                    handlePlayerTurn(event);
+                    break;
+                case REVERT:
+                    handleRevert();
+                    break;
+                case SEQUENCE_CREATED:
+                    handleSequenceCreated(event);
+                    break;
+                case TILE_ADDED:
+                    handleTileAdded(event);
+                    break;
+                case TILE_MOVED:
+                    handleTileMoved(event);
+                    break;
+                case TILE_RETURNED:
+                    handleTileReturned(event);
+                    break;
                     default:
                         break;
-                }
+            }
             }
             eventsList.clear();
         } catch (Exception ex) {
@@ -140,19 +142,30 @@ public class GamePlayEventsMgr {
     }
 
     private void handleTileAdded(Event event) {
+        eventsHandler.addTile(
+                event.getSourceSequencePosition(),
+                event.getTargetSequenceIndex(),
+                event.getTargetSequencePosition()
+        );
     }
 
     private void handleTileMoved(Event event) {
+        eventsHandler.moveTile(
+                event.getSourceSequenceIndex(),
+                event.getSourceSequencePosition(),
+                event.getTargetSequenceIndex(),
+                event.getTargetSequencePosition()
+        );
     }
 
     private void handleTileReturned(Event event) {
     }
-    
-    private List<logic.tile.Tile> convertWS2GameTiles(List<ws.rummikub.Tile> tiles){
+
+    private List<logic.tile.Tile> convertWS2GameTiles(List<ws.rummikub.Tile> tiles) {
         List<logic.tile.Tile> resList = new ArrayList<>(tiles.size());
-        for (Tile tile : tiles){
+        for (Tile tile : tiles) {
             resList.add(new logic.tile.Tile(tile));
         }
         return resList;
-    }  
+    }
 }
