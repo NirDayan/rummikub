@@ -3,11 +3,15 @@ package javafxrummikub.scenes.gameplay;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
@@ -16,6 +20,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Orientation;
+import javafx.print.Collation;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -35,6 +40,7 @@ import logic.ComputerAI;
 import logic.Game;
 import logic.MoveTileData;
 import logic.Player;
+import logic.WSObjToGameObjConverter;
 import logic.tile.Color;
 import logic.tile.Sequence;
 import logic.tile.Tile;
@@ -47,6 +53,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     private final List<Sequence> boardSequences = new ArrayList<>();
     private static final int TILES_LIST_VIEW_WIDTH = 1050;
     private static final int INDEX_NOT_FOUND = -1;
+    private static final int FROM_PLAYER = -1;
     private static final String GAME_START_SOUND_PATH = "./src/resources/gameStart.wav";
     private static final String PLAYER_TURN_SOUND_PATH = "./src/resources/notifyTurn.wav";
     @FXML
@@ -164,10 +171,12 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
 
     private void groupPlayerNamesToList() {
         playersNames = new ArrayList<>(4);
-        playersNames.add(player1Name);
-        playersNames.add(player2Name);
-        playersNames.add(player3Name);
-        playersNames.add(player4Name);
+        playersNames.addAll(Arrays.asList(
+                player1Name,
+                player2Name,
+                player3Name,
+                player4Name
+        ));
     }
 
     private void initBoard() {
@@ -306,7 +315,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
             //Find the sequence index
             moveTileData.setSourceSequenceIndex(getListTilesViewBoardIndex(listView));
         } else {
-            moveTileData.setSourceSequenceIndex(INDEX_NOT_FOUND);
+            moveTileData.setSourceSequenceIndex(FROM_PLAYER);
         }
 
         //Find the position in the sequence
@@ -317,7 +326,6 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         }
 
         draggedTile = listView.getSelectionModel().getSelectedItem();
-        moveTileData.setPlayerID(game.getCurrentPlayer().getID());
         return moveTileData;
     }
 
@@ -331,16 +339,10 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     }
 
     private void addPlusTilesToBoard() {
-        if (isPlayerFirstStepAndNoNewSequence()) {
+        addPlusTilesToAllSequences();
+        //If the source tile is dragged from player's tiles we woule like to present a new sequence placeholder
+        if (dragTileData.getSourceSequenceIndex() == INDEX_NOT_FOUND) {
             addNewSequencePlaceholder();
-        } else if (isPlayerFirstStepWithNewSequence()) {
-            addPlusTilesToLastSequence();
-        } else { //Add plus tile to existing sequences if this is not the first step of the player
-            addPlusTilesToAllSequences();
-            //If the source tile is dragged from player's tiles we woule like to present a new sequence placeholder
-            if (dragTileData.getSourceSequenceIndex() == INDEX_NOT_FOUND) {
-                addNewSequencePlaceholder();
-            }
         }
     }
 
@@ -363,18 +365,18 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
                 return false;
             }
 
+            // TODO: Lior- there is no way for me to know if this is my first step.
             //if this is the first step and player didnt put a new sequence yet, drag from board is not valid
-            if (isPlayerFirstStepAndNoNewSequence()) {
-                return false;
-            }
-
+//            if (isPlayerFirstStepAndNoNewSequence()) {
+//                return false;
+//            }
             //if this is the first step and the player already put a new sequence,
             //make sure the drag is performed from the last sequence!
-            if (isPlayerFirstStepWithNewSequence()) {
-                boolean isLastSequence = (dragTileData.getSourceSequenceIndex() == (boardData.size() - 1));
-
-                return isLastSequence;
-            }
+//            if (isPlayerFirstStepWithNewSequence()) {
+//                boolean isLastSequence = (dragTileData.getSourceSequenceIndex() == (boardData.size() - 1));
+//
+//                return isLastSequence;
+//            }
         }
 
         return true;
@@ -407,21 +409,60 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     }
 
     private void performAddTileToBoard(MoveTileData addTileData) {
-        boolean isValid = game.addTile(game.getCurrentPlayer().getID(), addTileData);
-
-        if (isValid) {
-            playerActionOnBoardDone();
-        } else {
-            showMessage("Invalid add tile action", ERROR_MSG_TYPE);
+        //Send addTile event to the server
+        try {
+            server.addTile(playerID,
+                    WSObjToGameObjConverter.convertGameTileIntoGeneratedTile(draggedTile),
+                    addTileData.getTargetSequenceIndex(),
+                    addTileData.getTargetSequencePosition());
+        } catch (InvalidParameters_Exception ex) {
+            showMessage(ex.getMessage(), ERROR_MSG_TYPE);
+            return;
         }
+
+        //Add the tile to the borad
+        if (isDropIntoLastSequence()) {
+            boardSequences.add(new Sequence(draggedTile));
+        } else {
+            addTileToBoardByMoveTileData(addTileData, draggedTile);
+        }
+
+        removeFromPlayerTiles(addTileData);
+
+        playerActionOnBoardDone();
+    }
+
+    private void removeFromPlayerTiles(MoveTileData addTileData) {
+        // Remove Tile From Player
+        playerTiles.remove(addTileData.getSourceSequencePosition());
     }
 
     private void performMoveTileInBoard(MoveTileData moveTileData) {
-        if (game.moveTile(moveTileData)) {
-            playerActionOnBoardDone();
-        } else {
+        // Send MoveTile event to server
+        try {
+            server.moveTile(playerID,
+                    moveTileData.getSourceSequenceIndex(),
+                    moveTileData.getSourceSequencePosition(),
+                    moveTileData.getTargetSequenceIndex(),
+                    moveTileData.getTargetSequencePosition()
+            );
+        } catch (InvalidParameters_Exception invalidParameters_Exception) {
             showMessage("Invalid move tile action", ERROR_MSG_TYPE);
+            return;
         }
+
+        // Remove tile from old location
+        Sequence srcSeq = boardSequences.get(moveTileData.getSourceSequenceIndex());
+        srcSeq.removeTile(moveTileData.getSourceSequencePosition());
+
+        addTileToBoardByMoveTileData(moveTileData, draggedTile);
+
+        playerActionOnBoardDone();
+    }
+
+    private void addTileToBoardByMoveTileData(MoveTileData moveTileData, Tile tile) {
+        Sequence targetSeq = boardSequences.get(moveTileData.getTargetSequenceIndex());
+        targetSeq.addTile(moveTileData.getTargetSequencePosition(), tile);
     }
 
     private void playerActionOnBoardDone() {
@@ -430,20 +471,9 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         updateCurrentPlayerTilesView();
     }
 
-    private void backupTurn() {
-        if (isBackupNeeded) {
-            game.storeBackup();
-            isBackupNeeded = false;
-        }
-    }
-
     private void performDragDetected(ListView<Tile> listView) {
         if (listView.getSelectionModel().getSelectedItem() == null) {
             return;
-        }
-
-        if (isBackupNeeded) {
-            backupTurn();
         }
 
         dragTileData = getDraggedTileData(listView);
@@ -480,8 +510,6 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     }
 
     private void addNewSequencePlaceholder() {
-        int playerID = game.getCurrentPlayer().getID();
-
         ObservableList<Tile> seqBinding = FXCollections.observableArrayList();
         seqBinding.add(new Tile(Color.Red, Tile.PLUS_TILE));
         ListView<Tile> seqView = getTilesListView(seqBinding);
@@ -489,9 +517,23 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         boardData.add(seqView);
     }
 
-    private void performCreateNewSequence(MoveTileData dragTileData) {
-        int tilePosition = dragTileData.getSourceSequencePosition();
-        game.createSequenceByPlayerTile(game.getCurrentPlayer().getID(), tilePosition);
+    private void performCreateNewSequenceFromPlayer(MoveTileData dragTileData) {
+        // Send AddTile event to server
+        ArrayList<Tile> tileListToServer = new ArrayList<>();
+        tileListToServer.add(draggedTile);
+        try {
+            server.createSequence(playerID,
+                    WSObjToGameObjConverter.convertGameTilesListIntoGeneratedTilesList(tileListToServer));
+        } catch (InvalidParameters_Exception ex) {
+            showMessage(ex.getMessage(), ERROR_MSG_TYPE);
+            return;
+        }
+        // Add Tile To Board
+        boardSequences.add(new Sequence(draggedTile));
+
+        //delete the source from the player
+        removeFromPlayerTiles(dragTileData);
+
         playerActionOnBoardDone();
     }
 
@@ -500,82 +542,22 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         return dragTileData.getTargetSequenceIndex() == boardData.size() - 1;
     }
 
-    private boolean isPlayerFirstStepAndNoNewSequence() {
-        int playerID = game.getCurrentPlayer().getID();
-        boolean isFirstStep = game.isPlayerFirstStep(playerID);
-
-        return (isFirstStep && !isPlayerPutNewSequence);
-    }
-
-    private boolean isPlayerFirstStepWithNewSequence() {
-        int playerID = game.getCurrentPlayer().getID();
-        boolean isFirstStep = game.isPlayerFirstStep(playerID);
-
-        return (isFirstStep && isPlayerPutNewSequence);
-    }
-
     private void addPlusTilesToAllSequences() {
         ObservableList<Tile> sequence;
-        for (ListView<Tile> boardSequences : boardData) {
-            sequence = boardSequences.getItems();
+        for (ListView<Tile> boardSequence : boardData) {
+            sequence = boardSequence.getItems();
             for (int j = 0; j < sequence.size() + 1; j = j + 2) {
                 sequence.add(j, new Tile(Color.Red, Tile.PLUS_TILE));
             }
         }
     }
 
-    private void addPlusTilesToLastSequence() {
-        ListView<Tile> lastSequence = boardData.get(boardData.size() - 1);
-        if (lastSequence != null) {
-            for (int i = 0; i < lastSequence.getItems().size() + 1; i = i + 2) {
-                lastSequence.getItems().add(i, new Tile(Color.Red, Tile.PLUS_TILE));
-            }
-        }
-    }
-
     private void handleDropTileFromPlayerTiles() {
-        if (isPlayerFirstStepAndNoNewSequence()) {
-            if (isDropIntoLastSequence()) {
-                performCreateNewSequence(dragTileData);
-                isPlayerPutNewSequence = true;
-            } else {
-                showMessage("You must drop the tile into the last new sequence", ERROR_MSG_TYPE);
-            }
-        } else if (isPlayerFirstStepWithNewSequence()) {
-            if (isDropIntoLastSequence()) {
-                performAddTileToBoard(dragTileData);
-            } else {
-                showMessage("You must drop the tile into the last new sequence", ERROR_MSG_TYPE);
-            }
+        if (isDropIntoLastSequence()) {
+            performCreateNewSequenceFromPlayer(dragTileData);
         } else {
-            if (isDropIntoLastSequence()) {
-                performCreateNewSequence(dragTileData);
-            } else {
-                performAddTileToBoard(dragTileData);
-            }
+            performAddTileToBoard(dragTileData);
         }
-    }
-
-    private boolean isFirstStepCompleted() {
-        int playerID = game.getCurrentPlayer().getID();
-        ListView<Tile> lastSequence;
-
-        if (boardData.size() > 0) {
-            lastSequence = boardData.get(boardData.size() - 1);
-            return game.checkSequenceValidity(playerID, lastSequence.getItems());
-        }
-
-        return false;
-    }
-
-    private void punishPlayer() {
-        Player currentPlayer = game.getCurrentPlayer();
-
-        showMessage("Board is invalid. " + currentPlayer.getName() + " is punished.", ERROR_MSG_TYPE);
-        game.restoreFromBackup();
-        updateBoard();
-        //Punish player MUST be after restore from backup, otherwise the restore operation will remove additional tiles
-        game.punishPlayer(currentPlayer.getID());
     }
 
     private void disableAllControls(boolean disabled) {
