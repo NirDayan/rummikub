@@ -42,6 +42,7 @@ public class MainController {
     private static final String INVALID_ADD_TILE_PARAMETERS_ERR_MSG = "Invalid add tile parameters";
     private static final String INVALID_MOVE_TILE_PARAMETERS_ERR_MSG = "Invalid move tile parameters";
     private static final String INVALID_TAKE_BACK_TILE_PARAMETERS_ERR_MSG = "Invalid take back tile parameters";
+    private static final String EMPTY_PLAYER_NAME = "";
     private static final int MAX_PLAYERS_NUMBER = 4;
     private static final int MIN_PLAYERS_NUMBER = 2;
     private static final int MIN_HUMAN_PLAYERS_NUMBER = 1;
@@ -53,7 +54,7 @@ public class MainController {
     private final Map<Game, List<Event>> gamesEventsMap;
     private final Map<Game, AtomicInteger> eventIDMap;
     private final Map<Game, List<Event>> currentPlayerActionsMap;
-    
+
     public MainController() {
         playersIDs = new HashMap<>();
         generatedID = new AtomicInteger(FIRST_PLAYER_ID);
@@ -170,17 +171,17 @@ public class MainController {
 
     public void addTile(int playerId, Tile tile, int sequenceIndex, int sequencePosition) throws InvalidParameters_Exception {
         Player player = getPlayerById(playerId);
-        validateAddTileParameters(tile, sequenceIndex, sequencePosition);
-        logic.tile.Tile logicTile = WSObjToGameObjConverter.convertWSTileIntoGameTile(tile);
         Game game = getGameByPlayerID(player.getID());
+        validateAddTileParameters(game, player, tile, sequenceIndex, sequencePosition);
+        logic.tile.Tile logicTile = WSObjToGameObjConverter.convertWSTileIntoGameTile(tile);
         //Check just on the safe side
         if (game != null) {
             backupTurn(game);
-            if (game.addTile(player.getID(), logicTile, sequenceIndex, sequencePosition)) {
-                createAddTileEvent(game, player, sequenceIndex, sequencePosition);
-            } else {
-                throw new InvalidParameters_Exception(INVALID_ADD_TILE_PARAMETERS_ERR_MSG, null);
+            if (game.isSplitRequired(sequenceIndex, sequencePosition)) {
+                createSplitEvents(game, playerId, logicTile, sequenceIndex, sequencePosition);
             }
+            game.addTile(player.getID(), logicTile, sequenceIndex, sequencePosition);
+            createAddTileEvent(game, player, sequenceIndex, sequencePosition);
         }
     }
 
@@ -209,7 +210,7 @@ public class MainController {
         if (game != null) {
             backupTurn(game);
             if (game.moveTile(moveTileData)) {
-                createMoveTileEvent(game, player, moveTileData);
+                createMoveTileEvent(game, player.getName(), moveTileData);
             } else {
                 throw new InvalidParameters_Exception(INVALID_MOVE_TILE_PARAMETERS_ERR_MSG, null);
             }
@@ -350,7 +351,7 @@ public class MainController {
         if (game.getStatus().equals(GameStatus.ACTIVE)) {
             createGameStartEvent(game);
             createBoardSequences(game);
-            createPlayerTurnEvent(game,game.getCurrentPlayer());
+            createPlayerTurnEvent(game, game.getCurrentPlayer());
         }
 
         return playerId;
@@ -429,7 +430,9 @@ public class MainController {
         event.setPlayerName(playerName);
         event.getTiles().addAll(WSObjToGameObjConverter.convertGameTilesListIntoGeneratedTilesList(tilesList));
         gamesEventsMap.get(game).add(event);
-        addCurrentPlayerEvent(game, event);
+        if (!playerName.isEmpty()) {
+            addCurrentPlayerEvent(game, event);
+        }        
     }
 
     private void createGameStartEvent(Game game) {
@@ -439,15 +442,13 @@ public class MainController {
         gamesEventsMap.get(game).add(event);
     }
 
-    private void validateAddTileParameters(Tile tile, int sequenceIndex, int sequencePosition) throws InvalidParameters_Exception {
+    private void validateAddTileParameters(Game game, Player player, Tile tile, int sequenceIndex, int sequencePosition) throws InvalidParameters_Exception {
         if (tile == null) {
             throw new InvalidParameters_Exception(NULL_TILE_ERR_MSG, null);
         }
-        if (sequenceIndex < 0) {
-            throw new InvalidParameters_Exception(INVALID_TARGET_SEQUENCE_INDEX_ERR_MSG, null);
-        }
-        if (sequencePosition < 0) {
-            throw new InvalidParameters_Exception(INVALID_TARGET_SEQUENCE_POSITION_ERR_MSG, null);
+        logic.tile.Tile logicTile = WSObjToGameObjConverter.convertWSTileIntoGameTile(tile);
+        if (!game.checkAddTileValidity(player, logicTile, sequenceIndex, sequencePosition)) {
+            throw new InvalidParameters_Exception(INVALID_ADD_TILE_PARAMETERS_ERR_MSG, null);
         }
     }
 
@@ -477,17 +478,19 @@ public class MainController {
         }
     }
 
-    private void createMoveTileEvent(Game game, Player player, MoveTileData moveTileData) {
+    private void createMoveTileEvent(Game game, String playerName, MoveTileData moveTileData) {
         Event event = new Event();
         event.setId(eventIDMap.get(game).getAndIncrement());
         event.setType(EventType.TILE_MOVED);
-        event.setPlayerName(player.getName());
+        event.setPlayerName(playerName);
         event.setSourceSequenceIndex(moveTileData.getSourceSequenceIndex());
         event.setSourceSequencePosition(moveTileData.getSourceSequencePosition());
         event.setTargetSequenceIndex(moveTileData.getTargetSequenceIndex());
         event.setTargetSequencePosition(moveTileData.getTargetSequencePosition());
         gamesEventsMap.get(game).add(event);
-        addCurrentPlayerEvent(game, event);
+        if (!playerName.isEmpty()) {
+            addCurrentPlayerEvent(game, event);
+        }
     }
 
     private void createPlayerResignedEvent(Game game, String playerName) {
@@ -533,7 +536,7 @@ public class MainController {
         List<Sequence> sequences = game.getBoard().getSequences();
 
         sequences.stream().forEach((sequence) -> {
-            createSequenceCreatedEvent(game, "", sequence.toList());
+            createSequenceCreatedEvent(game, EMPTY_PLAYER_NAME, sequence.toList());
         });
     }
 
@@ -642,5 +645,24 @@ public class MainController {
         event.getTiles().add(returnedTile);
         gamesEventsMap.get(game).add(event);
         addCurrentPlayerEvent(game, event);
+    }
+
+    /**
+     * This function creates split operation events BEFORE performing the split on the game object.
+     * game.addTile is responsible for the split operation.
+     * @param game
+     * @param playerId
+     * @param tile
+     * @param sequenceIndex
+     * @param sequencePosition
+     */
+    private void createSplitEvents(Game game, int playerId, logic.tile.Tile tile, int sequenceIndex, int sequencePosition) {
+        List<logic.tile.Tile> emptyTilesList = new ArrayList<>();
+        createSequenceCreatedEvent(game, EMPTY_PLAYER_NAME, emptyTilesList);
+        List<MoveTileData> movedTilesList = game.getMovedTileListForSplitOperation(sequenceIndex, sequencePosition);
+        
+        for (MoveTileData moveTileData : movedTilesList) {
+            createMoveTileEvent(game, EMPTY_PLAYER_NAME, moveTileData);
+        }
     }
 }

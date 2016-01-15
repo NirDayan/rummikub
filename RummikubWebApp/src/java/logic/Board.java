@@ -30,7 +30,7 @@ public class Board {
         int sourcePosition = data.getSourceSequencePosition();
         int targetIndex = data.getTargetSequenceIndex();
         int targetPosition = data.getTargetSequencePosition();
-        
+
         if (isMoveValid(data)) {
             if (isSequenceContainsOneTileOnly(sourceIndex) && sourceIndex < targetIndex) {
                 //This sequence will be removed after "removeTile" operation
@@ -63,21 +63,18 @@ public class Board {
         return tile;
     }
 
-    public boolean addTile(int sequenceIndex, int indexInSequence, Tile tile) {
-        if (sequencesArray.size() == 0) {
+    public boolean addTile(int sequenceIndex, int sequencePosition, Tile tile) {
+        if (sequencesArray.isEmpty()) {
             sequencesArray.add(new Sequence(tile));
             return true;
-        }
-        else if (tile != null && sequenceIndex < sequencesArray.size() && sequenceIndex >= 0) {
+        } else if (tile != null && sequenceIndex < sequencesArray.size() && sequenceIndex >= 0) {
             Sequence sequence = sequencesArray.get(sequenceIndex);
-            if (indexInSequence == 0) {//add at the beginning of the sequence
+            if (sequencePosition == 0) {//add at the beginning of the sequence
                 return sequence.addTile(0, tile);
-            }
-            else if (indexInSequence == sequence.getSize()) {//add at the end of the sequence
+            } else if (sequencePosition == sequence.getSize()) {//add at the end of the sequence
                 return sequence.addTile(sequence.getSize(), tile);
-            }
-            else {//Split flow
-                return split(sequenceIndex, indexInSequence, tile);
+            } else {//Split flow
+                return split(sequenceIndex, sequencePosition, tile);
             }
         }
 
@@ -86,8 +83,9 @@ public class Board {
 
     public boolean isValid() {
         for (Sequence sequence : sequencesArray) {
-            if (sequence.isValid() == false)
+            if (sequence.isValid() == false) {
                 return false;
+            }
         }
         return true;
     }
@@ -113,12 +111,14 @@ public class Board {
     }
 
     public boolean isTargetValid(int sequenceIndex, int sequencePosition) {
-        if (sequenceIndex == 0 && sequencesArray.size() == 0)
+        if (sequenceIndex == 0 && sequencesArray.size() == 0) {
             return true;
+        }
         if (sequenceIndex < sequencesArray.size()
                 && sequencePosition <= sequencesArray.get(sequenceIndex).getSize()
-                && sequenceIndex >= 0 && sequencePosition >= 0)
+                && sequenceIndex >= 0 && sequencePosition >= 0) {
             return true;
+        }
 
         return false;
     }
@@ -127,11 +127,12 @@ public class Board {
         boolean isSequenceExist = sequenceIndex < sequencesArray.size();
         boolean isPositionValid;
 
-        if (!isSequenceExist)
+        if (!isSequenceExist) {
             return false;
+        }
 
         isPositionValid = (sequencePosition == 0)
-                || (sequencePosition == sequencesArray.get(sequenceIndex).getSize()-1);
+                || (sequencePosition == sequencesArray.get(sequenceIndex).getSize() - 1);
 
         return isPositionValid;
     }
@@ -147,13 +148,15 @@ public class Board {
     }
 
     private boolean split(int sequenceIndex, int indexInSequence, Tile tile) {
-        if (!isTargetValid(sequenceIndex, indexInSequence))
+        if (!isTargetValid(sequenceIndex, indexInSequence)) {
             return false;
+        }
 
         Sequence sequence = sequencesArray.get(sequenceIndex);
         Sequence newSequence = sequence.split(indexInSequence);
-        if (newSequence == null)
+        if (newSequence == null) {
             return false;
+        }
         sequence.addTile(indexInSequence, tile);
         sequencesArray.add(newSequence);
 
@@ -166,18 +169,43 @@ public class Board {
             sequencesArrayBackup.add(sequence.clone());
         }
     }
-    
+
     public void restoreFromBackup() {
         if (sequencesArrayBackup != null) {
             sequencesArray = sequencesArrayBackup;
         }
     }
-    
+
     public Tile getTile(int sequenceIndex, int sequencePosition) {
         if (sequenceIndex < 0 || sequenceIndex > sequencesArray.size() - 1) {
-            return null;            
+            return null;
         }
         return sequencesArray.get(sequenceIndex).getTile(sequencePosition);
+    }
+
+    public boolean isSplitRequired(int sequenceIndex, int sequencePosition) {
+        Sequence sequence = sequencesArray.get(sequenceIndex);
+        return !(sequencePosition == 0 || sequencePosition == sequence.getSize());
+    }
+
+    public List<MoveTileData> getMovedTileListForSplitOperation(int sequenceIndex, int sequencePosition) {
+        List<MoveTileData> moveTileDataList = new ArrayList<>();
+        MoveTileData moveTileData;
+        int lastNewSequenceIndex = sequencesArray.size();
+        int sequenceSize = sequencesArray.get(sequenceIndex).getSize();
+        int targetSequencePosition = 0;
+        
+        for (int i = sequencePosition; i < sequenceSize; i++) {
+            moveTileData = new MoveTileData();
+            moveTileData.setSourceSequenceIndex(sequenceIndex);
+            moveTileData.setSourceSequencePosition(i);
+            moveTileData.setTargetSequenceIndex(lastNewSequenceIndex);
+            moveTileData.setTargetSequencePosition(targetSequencePosition);
+            moveTileDataList.add(moveTileData);
+            targetSequencePosition++;
+        }
+        
+        return moveTileDataList;
     }
 
     private boolean isSequenceContainsOneTileOnly(int sourceSequenceIndex) {

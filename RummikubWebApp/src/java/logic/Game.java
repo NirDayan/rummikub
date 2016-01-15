@@ -334,4 +334,19 @@ public class Game {
             player.setStatus(PlayerStatus.ACTIVE);
         }
     }
+
+    public boolean isSplitRequired(int sequenceIndex, int sequencePosition) {
+        return board.isSplitRequired(sequenceIndex, sequencePosition);
+    }
+
+    public boolean checkAddTileValidity(Player player, Tile tile, int sequenceIndex, int sequencePosition) {
+        if (!player.getTiles().contains(tile)) {
+            return false;
+        }
+        return board.isTargetValid(sequenceIndex, sequencePosition);
+    }
+    
+    public List<MoveTileData> getMovedTileListForSplitOperation(int sequenceIndex, int sequencePosition) {
+        return board.getMovedTileListForSplitOperation(sequenceIndex, sequencePosition);
+    }
 }
