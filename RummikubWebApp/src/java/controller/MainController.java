@@ -350,7 +350,7 @@ public class MainController {
         //If the game status has been changed to ACTIVE, add GAME_START event
         if (game.getStatus().equals(GameStatus.ACTIVE)) {
             createGameStartEvent(game);
-            createBoardSequences(game);
+            createBoardSequencesEvents(game);
             createPlayerTurnEvent(game, game.getCurrentPlayer());
         }
 
@@ -532,7 +532,7 @@ public class MainController {
         return game.checkSequenceValidity(playerId, lastSequence.toList());
     }
 
-    private void createBoardSequences(Game game) {
+    private void createBoardSequencesEvents(Game game) {
         List<Sequence> sequences = game.getBoard().getSequences();
 
         sequences.stream().forEach((sequence) -> {
@@ -545,6 +545,7 @@ public class MainController {
         //Punish player MUST be after restore from backup, otherwise the restore operation will remove additional tiles
         List<logic.tile.Tile> tilesToAdd = game.punishPlayer(playerId);
         createRevertEvent(game, playerId, tilesToAdd);
+        createBoardSequencesEvents(game);
     }
 
     private void createRevertEvent(Game game, int playerId, List<logic.tile.Tile> tilesToAdd) {
