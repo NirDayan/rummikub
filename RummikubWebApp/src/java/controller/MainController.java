@@ -9,6 +9,7 @@ import logic.Game;
 import logic.MoveTileData;
 import logic.Player;
 import logic.WSObjToGameObjConverter;
+import static logic.WSObjToGameObjConverter.convertGameColorIntoGeneratedColor;
 import logic.persistency.GamePersistency;
 import logic.tile.Sequence;
 import ws.rummikub.DuplicateGameName_Exception;
@@ -40,6 +41,7 @@ public class MainController {
     private static final String INVALID_TARGET_SEQUENCE_POSITION_ERR_MSG = "Invalid target sequence position parameter";
     private static final String INVALID_ADD_TILE_PARAMETERS_ERR_MSG = "Invalid add tile parameters";
     private static final String INVALID_MOVE_TILE_PARAMETERS_ERR_MSG = "Invalid move tile parameters";
+    private static final String INVALID_TAKE_BACK_TILE_PARAMETERS_ERR_MSG = "Invalid take back tile parameters";
     private static final int MAX_PLAYERS_NUMBER = 4;
     private static final int MIN_PLAYERS_NUMBER = 2;
     private static final int MIN_HUMAN_PLAYERS_NUMBER = 1;
@@ -51,7 +53,7 @@ public class MainController {
     private final Map<Game, List<Event>> gamesEventsMap;
     private final Map<Game, AtomicInteger> eventIDMap;
     private final Map<Game, List<Event>> currentPlayerActionsMap;
-
+    
     public MainController() {
         playersIDs = new HashMap<>();
         generatedID = new AtomicInteger(FIRST_PLAYER_ID);
@@ -110,6 +112,7 @@ public class MainController {
         Game game = new Game(gameDetails);
         createComputerizedPlayers(game);
         gamesEventsMap.put(game, new ArrayList<>());
+        eventIDMap.put(game, new AtomicInteger(FIRST_EVENT_ID));
     }
 
     public GameDetails getGameDetails(String gameName) throws GameDoesNotExists_Exception {
@@ -182,8 +185,19 @@ public class MainController {
     }
 
     public void takeBackTile(int playerId, int sequenceIndex, int sequencePosition) throws InvalidParameters_Exception {
-        //TODO implement this method
-        throw new UnsupportedOperationException("Not implemented yet.");
+        Player player = getPlayerById(playerId);
+        if (sequenceIndex < 0) {
+            throw new InvalidParameters_Exception(INVALID_SOURCE_SEQUENCE_INDEX_ERR_MSG, null);
+        }
+        if (sequencePosition < 0) {
+            throw new InvalidParameters_Exception(INVALID_SOURCE_SEQUENCE_POSITION_ERR_MSG, null);
+        }
+        Game game = getGameByPlayerID(player.getID());
+        logic.tile.Tile tile = game.takeBackTile(playerId, sequenceIndex, sequencePosition);
+        if (tile == null) {
+            throw new InvalidParameters_Exception(INVALID_TAKE_BACK_TILE_PARAMETERS_ERR_MSG, null);
+        }
+        createTileReturnedEvent(game, playerId, sequenceIndex, sequencePosition, tile);
     }
 
     public void moveTile(int playerId, int sourceSequenceIndex, int sourceSequencePosition, int targetSequenceIndex, int targetSequencePosition) throws InvalidParameters_Exception {
@@ -613,5 +627,20 @@ public class MainController {
         event.setType(EventType.GAME_WINNER);
         event.setPlayerName(game.getWinner().getName());
         gamesEventsMap.get(game).add(event);
+    }
+
+    private void createTileReturnedEvent(Game game, int playerId, int sequenceIndex, int sequencePosition, logic.tile.Tile tile) {
+        Event event = new Event();
+        event.setId(eventIDMap.get(game).getAndIncrement());
+        event.setType(EventType.TILE_RETURNED);
+        event.setPlayerName(playersIDs.get(playerId).getName());
+        event.setSourceSequenceIndex(sequenceIndex);
+        event.setSourceSequencePosition(sequencePosition);
+        Tile returnedTile = new ws.rummikub.Tile();
+        returnedTile.setColor(convertGameColorIntoGeneratedColor(tile.getColor()));
+        returnedTile.setValue(tile.getValue());
+        event.getTiles().add(returnedTile);
+        gamesEventsMap.get(game).add(event);
+        addCurrentPlayerEvent(game, event);
     }
 }

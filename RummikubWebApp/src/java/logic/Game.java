@@ -25,9 +25,11 @@ public class Game {
     private static final int INITIAL_TILES_COUNT = 14;
     private static final int PUNISH_TILES_NUMBER = 3;
     private static final int MINIMUM_SUM_SEQUENCE_VALUE_FOR_FIRST_STEP = 30;
+    private final List<Tile> currentPlayerAddedTiles;
 
     public Game(GameDetails gameDetails) {
         players = new ArrayList<>();
+        currentPlayerAddedTiles = new ArrayList<>();
         tilesDeck = new Deck();
         board = new Board();
 
@@ -45,6 +47,7 @@ public class Game {
         }
         board.reset();
         getTilesDeck().reset();
+        currentPlayerAddedTiles.clear();
         winner = null;
         setCurrentPlayer(players.get(0));
         distributeTiles();
@@ -98,6 +101,7 @@ public class Game {
     }
 
     public void moveToNextPlayer() {
+        currentPlayerAddedTiles.clear();
         int currPlayerIndex = players.indexOf(currentPlayer);
         if (currPlayerIndex == players.size() - 1) {
             setCurrentPlayer(players.get(0));
@@ -113,7 +117,7 @@ public class Game {
             tile = getTilesDeck().pullTile();
             player.addTile(tile);
         }
-        
+
         return tile;
     }
 
@@ -138,7 +142,7 @@ public class Game {
                 tilesToAdd.add(tile);
             }
         }
-        
+
         return tilesToAdd;
     }
 
@@ -167,7 +171,11 @@ public class Game {
 
         if (player != null && board.isTargetValid(sequenceIndex, sequencePosition)) {
             if (player.removeTile(tile)) {
-                return board.addTile(sequenceIndex, sequencePosition, tile);
+                boolean isAddTileSuccess = board.addTile(sequenceIndex, sequencePosition, tile);
+                if (isAddTileSuccess) {
+                    currentPlayerAddedTiles.add(tile);
+                }
+                return isAddTileSuccess;
             }
         }
 
@@ -179,22 +187,6 @@ public class Game {
         if (player != null) {
             player.setIsResign(true);
         }
-    }
-
-    /**
-     * player creates a new sequence on the board.
-     *
-     * @param playerID
-     * @param tilesIndices
-     * @return true if a new sequence was created, false otherwise
-     */
-    public boolean createSequence(int playerID, List<Integer> tilesIndices) {
-        Player player = getPlayerByID(playerID);
-        if (player == null || tilesIndices == null) {
-            return false;
-        }
-
-        return createSequenceFromTileIndices(player, tilesIndices);
     }
 
     public boolean checkSequenceValidity(int playerID, List<Tile> tiles) {
@@ -223,26 +215,6 @@ public class Game {
         return createSequenceFromTilesList(player, tiles);
     }
 
-    public boolean createSequenceByPlayerTile(int playerID, int tileIndex) {
-        Player player = getPlayerByID(playerID);
-        if (player == null) {
-            return false;
-        }
-
-        List<Integer> tilesIndicesList = new ArrayList<>();
-        tilesIndicesList.add(tileIndex);
-        List<Tile> tilesToAdd = player.getTilesByIndices(tilesIndicesList);
-        if (tilesToAdd == null) {
-            return false;
-        }
-
-        Sequence sequence = new Sequence(tilesToAdd);
-        player.removeTilesByIndices(tilesIndicesList);
-        board.addSequence(sequence);
-
-        return true;
-    }
-
     public void storeBackup() {
         board.storeBackup();
         currentPlayer.storeBackup();
@@ -260,28 +232,29 @@ public class Game {
         }
     }
 
-    private boolean createSequenceFromTileIndices(Player player, List<Integer> tilesIndices) {
-        List<Tile> preSequence = player.getTilesByIndices(tilesIndices);
-        if (preSequence == null) {
-            return false;
-        }
-
-        Sequence sequence = new Sequence(preSequence);
-        if (!sequence.isValid()) {
-            return false;
-        }
-        if (player.isFirstStep() && !isFirstSequenceValid(sequence)) {
-            return false;
-        }
-
-        player.removeTilesByIndices(tilesIndices);
-        board.addSequence(sequence);
-
-        return true;
-    }
-
     public boolean isLoadedFromFile() {
         return isLoadedFromFile;
+    }
+
+    public Tile takeBackTile(int playerId, int sequenceIndex, int sequencePosition) {
+        //If the current player id is not the playerId or there are no currentPlayerAddedTiles
+        if (currentPlayerAddedTiles.isEmpty() || currentPlayer.getID() != playerId) {
+            return null;
+        }
+        Tile tile = board.getTile(sequenceIndex, sequencePosition);
+        //If the required tile is not moved into the board by the current player in the current turn, return null
+        if (tile == null || !currentPlayerAddedTiles.contains(tile)) {
+            return null;
+        }
+        tile = board.removeTile(sequenceIndex, sequencePosition);
+        //If the remove is not valid, tile will be null
+        if (tile == null) {
+            return null;            
+        }
+        Player player = getPlayerByID(playerId);
+        player.addTile(tile);
+        
+        return tile;
     }
 
     private boolean createSequenceFromTilesList(Player player, List<Tile> tiles) {
@@ -289,6 +262,7 @@ public class Game {
             return false;
         }
 
+        currentPlayerAddedTiles.addAll(tiles);
         Sequence sequence = new Sequence(tiles);
         if (!sequence.isValid()) {
             return false;

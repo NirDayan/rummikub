@@ -172,6 +172,13 @@ public class Board {
             sequencesArray = sequencesArrayBackup;
         }
     }
+    
+    public Tile getTile(int sequenceIndex, int sequencePosition) {
+        if (sequenceIndex < 0 || sequenceIndex > sequencesArray.size() - 1) {
+            return null;            
+        }
+        return sequencesArray.get(sequenceIndex).getTile(sequencePosition);
+    }
 
     private boolean isSequenceContainsOneTileOnly(int sourceSequenceIndex) {
         return sequencesArray.get(sourceSequenceIndex).getSize() == 1;
