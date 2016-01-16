@@ -27,6 +27,7 @@ import ws.rummikub.PlayerDetails;
 import ws.rummikub.PlayerType;
 import ws.rummikub.Tile;
 import javax.swing.Timer;
+import logic.ComputerAI;
 
 public class MainController {
 
@@ -46,6 +47,8 @@ public class MainController {
     private static final String INVALID_MOVE_TILE_PARAMETERS_ERR_MSG = "Invalid move tile parameters";
     private static final String INVALID_TAKE_BACK_TILE_PARAMETERS_ERR_MSG = "Invalid take back tile parameters";
     private static final String RESIGN_AFTER_TIMER_ERR_MSG = "Failed on Resign operation";
+    private static final String NOT_CURRENT_PLAYER_ERR_MSG = "Player is parameter does not match current player";
+    private static final String COMPUTERIZED_PLAYER_ERR_MSG = "Computer player action was corrupted";
     private static final String EMPTY_PLAYER_NAME = "";
     private static final int TIMEOUT_DELAY_MS = 5 * 60 * 1000;//5 seconds
     private static final int MAX_PLAYERS_NUMBER = 4;
@@ -53,6 +56,7 @@ public class MainController {
     private static final int MIN_HUMAN_PLAYERS_NUMBER = 1;
     private static final int FIRST_PLAYER_ID = 1;
     private static final int FIRST_EVENT_ID = 1;
+    private static final int COMPUTER_THINK_TIME_MS = 5 * 1000;//5 seconds
     private static final String COMPUTER_NAME_PREFIX = "Computer #";
     private final Map<Integer, Player> playersIDs;
     private final AtomicInteger generatedID;
@@ -60,6 +64,7 @@ public class MainController {
     private final Map<Game, AtomicInteger> eventIDMap;
     private final Map<Game, List<Event>> currentPlayerActionsMap;
     final private Map<Game, Timer> timersMap;
+    private final ComputerAI computerAI = new ComputerAI();
 
     public MainController() {
         playersIDs = new HashMap<>();
@@ -166,6 +171,9 @@ public class MainController {
             throw new InvalidParameters_Exception(EMPTY_TILES_LIST_ERR_MSG, null);
         }
         Game game = getGameByPlayerID(playerId);
+        if (game.getCurrentPlayer().getID() != playerId) {
+            throw new InvalidParameters_Exception(NOT_CURRENT_PLAYER_ERR_MSG, null);
+        }
         startTimer(game);
         backupTurn(game);
         List<logic.tile.Tile> tilesList = WSObjToGameObjConverter.convertGeneratedTilesListIntoGameTiles(tiles);
@@ -196,6 +204,9 @@ public class MainController {
             throw new InvalidParameters_Exception(INVALID_SOURCE_SEQUENCE_POSITION_ERR_MSG, null);
         }
         Game game = getGameByPlayerID(player.getID());
+        if (game.getCurrentPlayer().getID() != playerId) {
+            throw new InvalidParameters_Exception(NOT_CURRENT_PLAYER_ERR_MSG, null);
+        }
         startTimer(game);
         logic.tile.Tile tile = game.takeBackTile(playerId, sequenceIndex, sequencePosition);
         if (tile == null) {
@@ -209,6 +220,9 @@ public class MainController {
         MoveTileData moveTileData = new MoveTileData(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
         validateMoveTileParameters(moveTileData);
         Game game = getGameByPlayerID(player.getID());
+        if (game.getCurrentPlayer().getID() != playerId) {
+            throw new InvalidParameters_Exception(NOT_CURRENT_PLAYER_ERR_MSG, null);
+        }
         startTimer(game);
         if (game.moveTile(moveTileData)) {
             createMoveTileEvent(game, player.getName(), moveTileData);
@@ -220,7 +234,9 @@ public class MainController {
     public void finishTurn(int playerId) throws InvalidParameters_Exception {
         Player player = getPlayerById(playerId);
         Game game = getGameByPlayerID(player.getID());
-
+        if (game.getCurrentPlayer().getID() != playerId) {
+            throw new InvalidParameters_Exception(NOT_CURRENT_PLAYER_ERR_MSG, null);
+        }
         if (isPlayerPerformedAnyChange(playerId)) {
             createPlayerFinishedTurnEvent(game, playerId, new ArrayList<>());
             if (game.getBoard().isValid() == false) {
@@ -263,8 +279,11 @@ public class MainController {
                     createBoardSequencesEvents(game);
                 }
             }
-            startTimer(game);
-            moveToNextPlayer(game);
+            //move to the next player if the current player is resigned
+            if (game.getCurrentPlayer().getID() == playerId) {
+                startTimer(game);
+                moveToNextPlayer(game);
+            }
         }
         playersIDs.remove(playerId);
     }
@@ -374,6 +393,9 @@ public class MainController {
             createBoardSequencesEvents(game);
             createPlayerTurnEvent(game, game.getCurrentPlayer());
             startTimer(game);
+            if (!game.getCurrentPlayer().isHuman()) {
+                playComputerTurn(game);
+            }
         }
 
         return playerId;
@@ -445,6 +467,9 @@ public class MainController {
         logic.tile.Tile logicTile = WSObjToGameObjConverter.convertWSTileIntoGameTile(tile);
         if (!game.checkAddTileValidity(player, logicTile, sequenceIndex, sequencePosition)) {
             throw new InvalidParameters_Exception(INVALID_ADD_TILE_PARAMETERS_ERR_MSG, null);
+        }
+        if (game.getCurrentPlayer().getID() != player.getID()) {
+            throw new InvalidParameters_Exception(NOT_CURRENT_PLAYER_ERR_MSG, null);
         }
     }
 
@@ -592,6 +617,9 @@ public class MainController {
         Player currentPlayer = game.getCurrentPlayer();
         createPlayerTurnEvent(game, currentPlayer);
         startTimer(game);
+        if (!game.getCurrentPlayer().isHuman()) {
+            playComputerTurn(game);
+        }
     }
 
     private void createGameOverEvent(Game game) {
@@ -697,5 +725,30 @@ public class MainController {
         if (timer != null) {
             timer.stop();
         }
+    }
+
+    private void playComputerTurn(Game game) {
+        Runnable task = () -> {
+            try {
+                Player compPlayer = game.getCurrentPlayer();
+                List<logic.tile.Tile> logicTileList = computerAI.getRelevantTiles(compPlayer.getTiles());
+                List<Tile> wsTilesList;
+
+                while (logicTileList != null) {
+                    // Simulate Computer "Thinking..."
+                    Thread.sleep(COMPUTER_THINK_TIME_MS);
+                    wsTilesList = WSObjToGameObjConverter.convertGameTilesListIntoGeneratedTilesList(logicTileList);
+                    createSequence(compPlayer.getID(), wsTilesList);
+                    logicTileList = computerAI.getRelevantTiles(game.getCurrentPlayer().getTiles());
+                }
+                finishTurn(compPlayer.getID());
+            } catch (Exception ex) {
+                Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, COMPUTERIZED_PLAYER_ERR_MSG, ex);
+            }
+        };
+        
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
     }
 }
