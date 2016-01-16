@@ -11,8 +11,16 @@ public interface IGamePlayEventHandler {
 
     public void PlayerTurn(String playerName);
 
-    public void addTile(int playerTilePosition, int targetSequenceIndex, int targetSequencePosition);
+    public void addTile(String playerName, int playerTilePosition, int targetSequenceIndex, int targetSequencePosition, logic.tile.Tile tile);
 
     public void moveTile(int sourceSequenceIndex, int sourceSequencePosition, int targetSequenceIndex, int targetSequencePosition);
+
+    public void playerFinishTurn(List<Tile> tiles);
+
+    public void playerResigned(String playerName);
+
+    public void gameOver();
+
+    public void gameWinner(String winnerName);
 
 }
