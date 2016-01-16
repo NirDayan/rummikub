@@ -9,8 +9,6 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
@@ -595,7 +593,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
             isPlayerPerformAnyChange = true;
             updatePlayerTilesView();
         } else {
-            showMessage(playerName + "has added tile to board", gameName);
+            showMessage(playerName + " has added tile to board", REGULAR_MSG_TYPE);
         }
         Sequence targetSeq = boardSequences.get(targetSequenceIndex);
         targetSeq.addTile(targetSequencePosition, tile);

@@ -54,7 +54,6 @@ public class GamePlayEventsMgr {
         try {
             //get events from server.
             eventsList = server.getEvents(playerID, eventIndex);
-            //for each event, handle it with the eventsHandler.
             for (Event event : eventsList) {
                 eventIndex++;
                 switch (event.getType()) {
