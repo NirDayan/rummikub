@@ -285,7 +285,6 @@ public class MainController {
                 moveToNextPlayer(game);
             }
         }
-        playersIDs.remove(playerId);
     }
 
     private Game getGameByName(String gameName) {
@@ -746,7 +745,7 @@ public class MainController {
                 Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, COMPUTERIZED_PLAYER_ERR_MSG, ex);
             }
         };
-        
+
         Thread thread = new Thread(task);
         thread.setDaemon(true);
         thread.start();

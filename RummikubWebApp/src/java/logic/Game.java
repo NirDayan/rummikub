@@ -192,6 +192,7 @@ public class Game {
         Player player = getPlayerByID(playerID);
         if (player != null) {
             player.setIsResign(true);
+            player.setStatus(PlayerStatus.RETIRED);
         }
     }
 
