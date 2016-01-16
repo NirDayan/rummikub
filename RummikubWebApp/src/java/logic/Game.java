@@ -67,10 +67,12 @@ public class Game {
         //if there is a winner
         if (currentPlayer.isFinished()) {
             winner = currentPlayer;
+            status = GameStatus.FINISHED;
             return true;
         }
         //if the deck is empty
         if (getTilesDeck().isEmpty()) {
+            status = GameStatus.FINISHED;
             return true;
         }
         //if all players resigned
@@ -81,6 +83,7 @@ public class Game {
             }
         }
         if (resignedPlayersCount == players.size() - 1) {
+            status = GameStatus.FINISHED;
             return true;
         }
 
