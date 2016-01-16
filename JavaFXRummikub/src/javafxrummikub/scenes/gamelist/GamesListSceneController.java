@@ -60,6 +60,7 @@ public class GamesListSceneController implements Initializable {
     private ScheduledThreadPoolExecutor threadPool;
     private ScheduledFuture<?> updateTask;
     private Timer timer;
+    private static final int UPDATE_GAMES_LIST_TIME_INTERVAL_MS = 5000;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -86,11 +87,11 @@ public class GamesListSceneController implements Initializable {
                 });
         Platform.runLater(this::start);
     }
-
+    
     private void updateGamesTable() {
         List<String> gameNames = server.getWaitingGames();
-        gameNames.clear();
-        gameNames.forEach((gameName) -> {
+        gamesList.clear();
+        gameNames.stream().forEach((gameName) -> {
             try {
                 gamesList.add(server.getGameDetails(gameName));
             } catch (GameDoesNotExists_Exception ex) {
@@ -156,6 +157,6 @@ public class GamesListSceneController implements Initializable {
                     }
                 },
                 0,
-                3000);
+                UPDATE_GAMES_LIST_TIME_INTERVAL_MS);
     }
 }
