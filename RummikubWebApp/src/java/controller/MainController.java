@@ -211,7 +211,7 @@ public class MainController {
         Game game = getGameByPlayerID(player.getID());
 
         if (isPlayerPerformedAnyChange(playerId)) {
-            createPlayerFinishedTurnEvent(game, playerId);
+            createPlayerFinishedTurnEvent(game, playerId, new ArrayList<>());
             if (game.getBoard().isValid() == false) {
                 punishPlayer(game, playerId);
                 moveToNextPlayer(game);
@@ -225,6 +225,12 @@ public class MainController {
                 }
             }
             moveToNextPlayer(game);
+        } else { 
+            //Here the player chose to finishe the turn without performing any action.
+            //In this case he will pull tile from deck.
+            List<logic.tile.Tile> tilesList = new ArrayList<>();
+            tilesList.add(game.pullTileFromDeck(playerId));
+            createPlayerFinishedTurnEvent(game, playerId, tilesList);
         }
     }
 
@@ -544,11 +550,12 @@ public class MainController {
         return playerActions == null || playerActions.isEmpty();
     }
 
-    private void createPlayerFinishedTurnEvent(Game game, int playerId) {
+    private void createPlayerFinishedTurnEvent(Game game, int playerId, List<logic.tile.Tile> tilesToAdd) {
         Event event = new Event();
         event.setId(eventIDMap.get(game).getAndIncrement());
         event.setType(EventType.PLAYER_FINISHED_TURN);
         event.setPlayerName(playersIDs.get(playerId).getName());
+        event.getTiles().addAll(WSObjToGameObjConverter.convertGameTilesListIntoGeneratedTilesList(tilesToAdd));
         gamesEventsMap.get(game).add(event);
     }
 
