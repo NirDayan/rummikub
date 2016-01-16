@@ -152,8 +152,7 @@ public class GamePlayEventsMgr {
     private void handleRevert(Event event) {
         if (!isPlayerNameExistInEvent(event))
             return;
-        List<logic.tile.Tile> tiles = convertWS2GameTiles(event.getTiles());
-        eventsHandler.revert(tiles, event.getPlayerName());
+        eventsHandler.revert(event.getPlayerName());
     }
 
     private void handleSequenceCreated(Event event) {

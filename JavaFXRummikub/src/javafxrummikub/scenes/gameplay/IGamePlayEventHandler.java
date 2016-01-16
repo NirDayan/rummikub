@@ -23,7 +23,7 @@ public interface IGamePlayEventHandler {
 
     public void gameWinner(String winnerName);
 
-    public void revert(List<Tile> tiles, String playerName);
+    public void revert(String playerName);
 
     public void tileReturned(String playerName, int sourceSequenceIndex, int sourceSequencePosition, Tile tile);
 

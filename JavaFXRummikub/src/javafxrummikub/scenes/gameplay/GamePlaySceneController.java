@@ -36,10 +36,11 @@ import javafxrummikub.components.TileView;
 import javafxrummikub.utils.CustomizablePromptDialog;
 import logic.MoveTileData;
 import logic.WSObjToGameObjConverter;
-import static logic.WSObjToGameObjConverter.convertGameTilesListIntoGeneratedTilesList;
+import static logic.WSObjToGameObjConverter.*;
 import logic.tile.Color;
 import logic.tile.Sequence;
 import logic.tile.Tile;
+import ws.rummikub.GameDoesNotExists_Exception;
 import ws.rummikub.InvalidParameters_Exception;
 import ws.rummikub.RummikubWebService;
 
@@ -66,11 +67,11 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     private HBox tilesContainer;
     @FXML
     private VBox boardContainer;
-    
+
     private SimpleBooleanProperty isMainMenuButtonPressed;
     private SimpleBooleanProperty isGameOver;
     private String clientPlayerName;
-    private final List<Tile> playerTiles = new ArrayList<>();
+    private List<Tile> playerTiles = new ArrayList<>();
     private final List<Sequence> boardSequences = new ArrayList<>();
     private String gameWinnerName = "";
     private List<Label> playersNames;
@@ -92,7 +93,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     private static final String PLAYER_TURN_SOUND_PATH = "./src/resources/notifyTurn.wav";
     private static final String ERROR_MSG_TYPE = "error";
     private static final String REGULAR_MSG_TYPE = "massage";
-    
+
     @FXML
     private void onMainMenuButton(ActionEvent event) {
         Stage stage = (Stage) mainMenuButton.getScene().getWindow();
@@ -102,14 +103,14 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
             onResignButton(event);
         }
     }
-    
+
     @FXML
     private void onPullTileButton(ActionEvent event) {
         if (isPlayerPerformAnyChange) {
             showMessage("Pull tile from deck is not possible since you performed board changes", ERROR_MSG_TYPE);
             return;
         }
-        
+
         try {
             server.finishTurn(playerID);
             disableAllControls(true);
@@ -117,7 +118,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
             showMessage(ex.getMessage(), ERROR_MSG_TYPE);
         }
     }
-    
+
     @FXML
     private void onResignButton(ActionEvent event) {
         try {
@@ -127,7 +128,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         }
         isMainMenuButtonPressed.set(true);
     }
-    
+
     @FXML
     private void onFinishTurnButton(ActionEvent event) {
         if (isPlayerPerformAnyChange == false) {
@@ -141,23 +142,23 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         }
         disableAllControls(true);
     }
-    
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         initializeGamePlay();
         disableAllControls(true);
     }
-    
+
     private void initializeGamePlay() {
         isMainMenuButtonPressed = new SimpleBooleanProperty(false);
         isGameOver = new SimpleBooleanProperty(false);
-        
+
         groupPlayerNamesToList();
         initBoard();
         initCurrentPlayerTilesView();
         clearMsgLabel();
     }
-    
+
     private void groupPlayerNamesToList() {
         playersNames = new ArrayList<>(4);
         playersNames.addAll(Arrays.asList(
@@ -167,32 +168,32 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
                 player4Name
         ));
     }
-    
+
     private void initBoard() {
         boardData = FXCollections.observableArrayList();
         boardView = new ListView<>();
         boardView.setItems(boardData);
     }
-    
+
     private void initCurrentPlayerTilesView() {
         clientPlayerTilesData = FXCollections.observableArrayList();
         clientPlayerTilesView = getTilesListView(clientPlayerTilesData);
         clientPlayerTilesView.setPrefWidth(TILES_LIST_VIEW_WIDTH);
         tilesContainer.getChildren().add(clientPlayerTilesView);
     }
-    
+
     public void initGameParmeters(RummikubWebService rummikubGameWS, String gameName, int playerID) {
         this.server = rummikubGameWS;
         this.playerID = playerID;
         this.gameName = gameName;
     }
-    
+
     private void fillPlayersNames(List<String> names) {
         for (int i = 0; i < names.size(); i++) {
             playersNames.get(i).setText(names.get(i));
         }
     }
-    
+
     private void updatePlayerNamesWithCurrentPlayer(String currPlayer) {
         for (Label playerNameLabel : playersNames) {
             if (playerNameLabel.getText().toLowerCase().equals(currPlayer.toLowerCase())) {
@@ -202,12 +203,12 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
             }
         }
     }
-    
+
     private void updateBoard() {
         ObservableList<Tile> seqBinding;
         ListView<Tile> seqView;
         boardData.clear();
-        
+
         for (Sequence sequence : boardSequences) {
             seqBinding = FXCollections.observableArrayList(sequence.toList());
             seqView = getTilesListView(seqBinding);
@@ -219,7 +220,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
             boardContainer.getChildren().add(boardView);
         }
     }
-    
+
     private void updatePlayerTilesView() {
         clientPlayerTilesData.clear();
         //Don't change to forEach, it won't work since the "equals" function of tile which ignores duplicate tiles with the same coloe and value
@@ -227,7 +228,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
             clientPlayerTilesData.add(playerTiles.get(i));
         }
     }
-    
+
     private ListView<Tile> getTilesListView(ObservableList<Tile> tiles) {
         ListView<Tile> tilesListView = new ListView<>();
         tilesListView.setOrientation(Orientation.HORIZONTAL);
@@ -237,11 +238,11 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         manageDragAndDrop(tilesListView);
         return tilesListView;
     }
-    
+
     public SimpleBooleanProperty IsGameOver() {
         return isGameOver;
     }
-    
+
     public String getWinnerName() {
         if (gameWinnerName.isEmpty()) {
             return null;
@@ -249,11 +250,11 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
             return gameWinnerName;
         }
     }
-    
+
     public SimpleBooleanProperty IsMainMenuButtonPressed() {
         return isMainMenuButtonPressed;
     }
-    
+
     private void showMessage(String msg, String msgType) {
         if (clearMsgTask != null) {
             clearMsgTask.cancel(true);
@@ -266,30 +267,30 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         msgLabel.getStyleClass().add(msgType);
         msgLabel.setText(msg);
     }
-    
+
     private void clearMsgLabel() {
         msgLabel.setText("");
     }
-    
+
     private void manageDragAndDrop(ListView<Tile> listView) {
         listView.setOnDragDetected((MouseEvent event) -> {
             performDragDetected(listView);
         });
-        
+
         listView.setOnDragOver(event -> {
             event.acceptTransferModes(TransferMode.MOVE);
         });
-        
+
         listView.setOnDragDone(event -> {
             updateBoard();
             updatePlayerTilesView();
         });
-        
+
         listView.setOnDragDropped(event -> {
             performDropDetected(listView, event);
         });
     }
-    
+
     private MoveTileData getDraggedTileData(ListView<Tile> listView) {
         Tile selectedTile = listView.getSelectionModel().getSelectedItem();
         MoveTileData moveTileData = new MoveTileData();
@@ -306,11 +307,11 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
                 moveTileData.setSourceSequencePosition(i);
             }
         }
-        
+
         draggedTile = listView.getSelectionModel().getSelectedItem();
         return moveTileData;
     }
-    
+
     private int getListTilesViewBoardIndex(ListView<Tile> listView) {
         for (int i = 0; i < boardData.size(); i++) {
             if (boardData.get(i).equals(listView)) {
@@ -319,7 +320,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         }
         return INDEX_NOT_FOUND;
     }
-    
+
     private void addPlusTilesToBoard() {
         addPlusTilesToAllSequences();
         //If the source tile is dragged from player's tiles we woule like to present a new sequence placeholder
@@ -329,12 +330,12 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
             addNewPlaceholderToPlayerTiles();
         }
     }
-    
+
     private boolean checkIsDragTileValid(ListView<Tile> listView) {
         if (draggedTile == null || dragTileData == null) {
             return false;
         }
-        
+
         if (isBoardSequence(listView)) {
             int tilePoition = dragTileData.getSourceSequencePosition();
             //Check if this is the first or the last tile in the sequence
@@ -342,20 +343,20 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
                 return false;
             }
         }
-        
+
         return true;
     }
-    
+
     private boolean isBoardSequence(ListView<Tile> listView) {
         for (ListView<Tile> sequenceView : boardView.getItems()) {
             if (sequenceView.equals(listView)) {
                 return true;
             }
         }
-        
+
         return false;
     }
-    
+
     private int getTargetBoardSequencePosition(ListView<Tile> listView) {
         Tile currentTile;
         int plusTilesCounter = 0;
@@ -368,10 +369,10 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
                 plusTilesCounter++;
             }
         }
-        
+
         return INDEX_NOT_FOUND;
     }
-    
+
     private void performAddTileToBoard(MoveTileData addTileData) {
         //Send addTile event to the server
         try {
@@ -384,7 +385,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
             showMessage(ex.getMessage(), ERROR_MSG_TYPE);
         }
     }
-    
+
     private void performMoveTileInBoard(MoveTileData moveTileData) {
         // Send MoveTile event to server
         try {
@@ -398,12 +399,12 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
             showMessage("Invalid move tile action", ERROR_MSG_TYPE);
         }
     }
-    
+
     private void performDragDetected(ListView<Tile> listView) {
         if (listView.getSelectionModel().getSelectedItem() == null) {
             return;
         }
-        
+
         dragTileData = getDraggedTileData(listView);
         if (checkIsDragTileValid(listView)) {
             addPlusTilesToBoard();
@@ -413,7 +414,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
             dragBoard.setContent(content);
         }
     }
-    
+
     private void performDropDetected(ListView<Tile> listView, DragEvent event) {
         if (draggedTile != null && dragTileData != null) {
             int targetSequenceBoardIndex = getListTilesViewBoardIndex(listView);
@@ -425,7 +426,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
                 } else {
                     performMoveTileInBoard(dragTileData);
                 }
-                
+
                 event.setDropCompleted(true);
             } else if (isTileDraggedFromBoardToPlayer(listView)) {
                 performTakeBackTile(dragTileData);
@@ -436,16 +437,16 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         } else {
             event.setDropCompleted(false);
         }
-        
+
         dragTileData = null;
         draggedTile = null;
     }
-    
+
     private boolean isTileDraggedFromBoardToPlayer(ListView<Tile> listView) {
         return listView.equals(clientPlayerTilesView)
                 && dragTileData.getSourceSequenceIndex() != INDEX_NOT_FOUND;
     }
-    
+
     private void addNewSequencePlaceholder() {
         ObservableList<Tile> seqBinding = FXCollections.observableArrayList();
         seqBinding.add(new Tile(Color.Red, Tile.PLUS_TILE));
@@ -453,11 +454,11 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         seqView.getStyleClass().add("sequenceView");
         boardData.add(seqView);
     }
-    
+
     private void addNewPlaceholderToPlayerTiles() {
         clientPlayerTilesData.add(new Tile(Color.Red, Tile.PLUS_TILE));
     }
-    
+
     private void performCreateNewSequenceFromPlayer(MoveTileData dragTileData) {
         ArrayList<Tile> tileListToServer = new ArrayList<>();
         tileListToServer.add(draggedTile);
@@ -469,7 +470,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
             showMessage(ex.getMessage(), ERROR_MSG_TYPE);
         }
     }
-    
+
     private void performTakeBackTile(MoveTileData dragTileData) {
         try {
             server.takeBackTile(playerID,
@@ -480,12 +481,12 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
             showMessage(ex.getMessage(), ERROR_MSG_TYPE);
         }
     }
-    
+
     private boolean isDropIntoLastSequence() {
         //The player drop tile into a new sequence if the position is the last sequence        
         return dragTileData.getTargetSequenceIndex() == boardData.size() - 1;
     }
-    
+
     private void addPlusTilesToAllSequences() {
         ObservableList<Tile> sequence;
         for (ListView<Tile> boardSequence : boardData) {
@@ -495,7 +496,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
             }
         }
     }
-    
+
     private void handleDropTileFromPlayerTiles() {
         if (isDropIntoLastSequence()) {
             performCreateNewSequenceFromPlayer(dragTileData);
@@ -503,7 +504,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
             performAddTileToBoard(dragTileData);
         }
     }
-    
+
     private void disableAllControls(boolean disabled) {
         pullTileButton.setDisable(disabled);
         resignButton.setDisable(disabled);
@@ -511,7 +512,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         clientPlayerTilesView.setDisable(disabled);
         boardView.setDisable(disabled);
     }
-    
+
     @Override
     public void gameStart(String playerName, List<String> allPlayerNames, List<Tile> currPlayerTiles) {
         this.clientPlayerName = playerName;
@@ -521,21 +522,21 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         // Add tiles to stand
         playerTiles.addAll(currPlayerTiles);
         updatePlayerTilesView();
-        
+
         playSound(GAME_START_SOUND_PATH);
     }
-    
+
     @Override
     public void gameOver() {
         isGameOver.set(true);
     }
-    
+
     @Override
     public void gameWinner(String winnerName) {
         gameWinnerName = winnerName;
         isGameOver.set(true);
     }
-    
+
     @Override
     public void playerFinishTurn(List<Tile> tiles, String playerName) {
         if (tiles.size() == 1) {
@@ -550,7 +551,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
             System.err.println("playerFinishTurn(): Unknown finish turn event recieved.");
         }
     }
-    
+
     @Override
     public void playerResigned(String playerName) {
         playersNames.forEach((label) -> {
@@ -559,7 +560,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         });
         showMessage(playerName + " Has Resigned.", REGULAR_MSG_TYPE);
     }
-    
+
     @Override
     public void sequenceCreated(List<Tile> tiles, String playerName) {
         if (playerName.equalsIgnoreCase(clientPlayerName)) {
@@ -573,7 +574,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         boardSequences.add(new Sequence(tiles));
         updateBoard();
     }
-    
+
     @Override
     public void PlayerTurn(String playerName) {
         if (playerName.equalsIgnoreCase(clientPlayerName)) {
@@ -581,9 +582,10 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
             disableAllControls(false);
             isPlayerPerformAnyChange = false;
         }
+
         updatePlayerNamesWithCurrentPlayer(playerName);
     }
-    
+
     @Override
     public void addTile(String playerName, int targetSequenceIndex, int targetSequencePosition, logic.tile.Tile tile) {
         if (playerName.equalsIgnoreCase(clientPlayerName)) {
@@ -597,23 +599,27 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         }
         Sequence targetSeq = boardSequences.get(targetSequenceIndex);
         targetSeq.addTile(targetSequencePosition, tile);
-        
+
         updateBoard();
     }
-    
+
     @Override
     public void moveTile(int sourceSeqIndex, int sourceSeqPos, int targetSeqIndex, int targetSeqPos) {
         Tile tile = boardSequences.get(sourceSeqIndex).removeTile(sourceSeqPos);
         Sequence targetSeq = boardSequences.get(targetSeqIndex);
         targetSeq.addTile(targetSeqPos, tile);
-        
+
         updateBoard();
     }
-    
+
     @Override
-    public void revert(List<Tile> tiles, String playerName) {
+    public void revert(String playerName) {
         if (playerName.equalsIgnoreCase(clientPlayerName)) {
-            playerTiles.addAll(tiles);
+            try {
+                playerTiles = convertGeneratedTilesListIntoGameTiles(server.getPlayerDetails(playerID).getTiles());
+            } catch (GameDoesNotExists_Exception | InvalidParameters_Exception ex) {
+                System.err.println(ex.getMessage());
+            }
             updatePlayerTilesView();
         } else {
             showMessage(playerName + "was punished with 3 tiles", REGULAR_MSG_TYPE);
@@ -621,7 +627,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         boardSequences.clear();
         updateBoard();
     }
-    
+
     @Override
     public void tileReturned(String playerName, int sequenceIndex, int SequencePosition, Tile tile) {
         if (playerName.equalsIgnoreCase(clientPlayerName)) {
@@ -637,16 +643,16 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         if (srcSeq.getSize() == 0) {
             boardSequences.remove(sequenceIndex);
         }
-        
+
         updateBoard();
     }
-    
+
     private void playSound(String soundPath) {
         Media sound = new Media(new File(soundPath).toURI().toString());
         MediaPlayer mediaPlayer = new MediaPlayer(sound);
         mediaPlayer.play();
     }
-    
+
     private void markCurrClientPlayerName(String playerName) {
         for (Label playerNameLabel : playersNames) {
             if (playerNameLabel.getText().toLowerCase().equals(playerName.toLowerCase())) {
@@ -654,5 +660,5 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
             }
         }
     }
-    
+
 }
