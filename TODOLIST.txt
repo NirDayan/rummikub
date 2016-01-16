@@ -1,10 +1,6 @@
-1. Implement in JAVAFX connection screen to the server
-	1.1. Connect to existing game
-	1.2. Create a new game
-2. Implement in JAVAFX waiting screen
-3. User can take back a tile he put on the board
-4. Notification to the user when new action is requiret from the user
-5. Implement user response timer
-6. Load file scenario - show informative error in the UI (for example, duplicate game name)
-7. Replay game scenario...?
-8. Remove console application from JAVAFX project
+* Implement in JAVAFX waiting screen
+* User can take back a tile he put on the board
+* Notification to the user when new action is requiret from the user
+* Load file scenario - show informative error in the UI (for example, duplicate game name)
+* Replay game scenario...?
+* Remove console application from JAVAFX project
