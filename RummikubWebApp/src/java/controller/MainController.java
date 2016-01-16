@@ -175,7 +175,7 @@ public class MainController {
             createSplitEvents(game, playerId, logicTile, sequenceIndex, sequencePosition);
         }
         game.addTile(player.getID(), logicTile, sequenceIndex, sequencePosition);
-        createAddTileEvent(game, player, sequenceIndex, sequencePosition);
+        createAddTileEvent(game, player, tile, sequenceIndex, sequencePosition);
     }
 
     public void takeBackTile(int playerId, int sequenceIndex, int sequencePosition) throws InvalidParameters_Exception {
@@ -426,13 +426,14 @@ public class MainController {
         }
     }
 
-    private void createAddTileEvent(Game game, Player player, int sequenceIndex, int sequencePosition) {
+    private void createAddTileEvent(Game game, Player player, Tile tile, int sequenceIndex, int sequencePosition) {
         Event event = new Event();
         event.setId(eventIDMap.get(game).getAndIncrement());
         event.setType(EventType.TILE_ADDED);
         event.setPlayerName(player.getName());
         event.setTargetSequenceIndex(sequenceIndex);
         event.setTargetSequencePosition(sequencePosition);
+        event.getTiles().add(tile);
         gamesEventsMap.get(game).add(event);
         addCurrentPlayerEvent(game, event);
     }
