@@ -77,7 +77,7 @@ public class GamePlayEventsMgr {
                         handlePlayerTurn(event);
                         break;
                     case REVERT:
-                        handleRevert();
+                        handleRevert(event);
                         break;
                     case SEQUENCE_CREATED:
                         handleSequenceCreated(event);
@@ -128,7 +128,7 @@ public class GamePlayEventsMgr {
     }
 
     private void handlePlayerFinishedTurn(Event event) {
-        if (!isPlayerNameExistInEvent(event)){
+        if (!isPlayerNameExistInEvent(event)) {
             return;
         }
         List<logic.tile.Tile> tiles = convertWS2GameTiles(event.getTiles());
@@ -149,7 +149,11 @@ public class GamePlayEventsMgr {
         eventsHandler.PlayerTurn(event.getPlayerName());
     }
 
-    private void handleRevert() {
+    private void handleRevert(Event event) {
+        if (!isPlayerNameExistInEvent(event))
+            return;
+        List<logic.tile.Tile> tiles = convertWS2GameTiles(event.getTiles());
+        eventsHandler.revert(tiles, event.getPlayerName());
     }
 
     private void handleSequenceCreated(Event event) {
@@ -169,15 +173,6 @@ public class GamePlayEventsMgr {
         );
     }
 
-    private boolean isPlayerNameExistInEvent(Event event) {
-        if (playerName == null || playerName.isEmpty()) {
-            System.err.println(event.getType().toString() + " came with no playerName");
-            return false;
-        }
-
-        return true;
-    }
-
     private void handleTileMoved(Event event) {
         eventsHandler.moveTile(
                 event.getSourceSequenceIndex(),
@@ -188,6 +183,15 @@ public class GamePlayEventsMgr {
     }
 
     private void handleTileReturned(Event event) {
+        if (!isPlayerNameExistInEvent(event))
+            return;
+        
+        logic.tile.Tile tile = convertWSTileIntoGameTile(event.getTiles().get(0));
+        eventsHandler.tileReturned(
+                event.getPlayerName(),
+                event.getSourceSequenceIndex(),
+                event.getSourceSequencePosition(),
+                tile);
     }
 
     private List<logic.tile.Tile> convertWS2GameTiles(List<ws.rummikub.Tile> tiles) {
@@ -196,5 +200,14 @@ public class GamePlayEventsMgr {
             resList.add(new logic.tile.Tile(tile));
         }
         return resList;
+    }
+    
+        private boolean isPlayerNameExistInEvent(Event event) {
+        if (playerName == null || playerName.isEmpty()) {
+            System.err.println(event.getType().toString() + " came with no playerName");
+            return false;
+        }
+
+        return true;
     }
 }
