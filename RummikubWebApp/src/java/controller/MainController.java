@@ -1,10 +1,13 @@
 package controller;
 
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import logic.Game;
 import logic.MoveTileData;
 import logic.Player;
@@ -21,9 +24,9 @@ import ws.rummikub.GameStatus;
 import ws.rummikub.InvalidParameters_Exception;
 import ws.rummikub.InvalidXML_Exception;
 import ws.rummikub.PlayerDetails;
-import ws.rummikub.PlayerStatus;
 import ws.rummikub.PlayerType;
 import ws.rummikub.Tile;
+import javax.swing.Timer;
 
 public class MainController {
 
@@ -42,7 +45,9 @@ public class MainController {
     private static final String INVALID_ADD_TILE_PARAMETERS_ERR_MSG = "Invalid add tile parameters";
     private static final String INVALID_MOVE_TILE_PARAMETERS_ERR_MSG = "Invalid move tile parameters";
     private static final String INVALID_TAKE_BACK_TILE_PARAMETERS_ERR_MSG = "Invalid take back tile parameters";
+    private static final String RESIGN_AFTER_TIMER_ERR_MSG = "Failed on Resign operation";
     private static final String EMPTY_PLAYER_NAME = "";
+    private static final int TIMEOUT_DELAY_MS = 5 * 60 * 1000;//5 seconds
     private static final int MAX_PLAYERS_NUMBER = 4;
     private static final int MIN_PLAYERS_NUMBER = 2;
     private static final int MIN_HUMAN_PLAYERS_NUMBER = 1;
@@ -54,6 +59,7 @@ public class MainController {
     private final Map<Game, List<Event>> gamesEventsMap;
     private final Map<Game, AtomicInteger> eventIDMap;
     private final Map<Game, List<Event>> currentPlayerActionsMap;
+    final private Map<Game, Timer> timersMap;
 
     public MainController() {
         playersIDs = new HashMap<>();
@@ -61,6 +67,7 @@ public class MainController {
         eventIDMap = new HashMap<>();
         gamesEventsMap = new HashMap<>();
         currentPlayerActionsMap = new HashMap<>();
+        timersMap = new HashMap<>();
     }
 
     public List<Event> getEvents(int playerId, int eventId) throws InvalidParameters_Exception {
@@ -159,6 +166,7 @@ public class MainController {
             throw new InvalidParameters_Exception(EMPTY_TILES_LIST_ERR_MSG, null);
         }
         Game game = getGameByPlayerID(playerId);
+        startTimer(game);
         backupTurn(game);
         List<logic.tile.Tile> tilesList = WSObjToGameObjConverter.convertGeneratedTilesListIntoGameTiles(tiles);
         if (game.createSequenceByTilesList(playerId, tilesList)) {
@@ -170,6 +178,7 @@ public class MainController {
         Player player = getPlayerById(playerId);
         Game game = getGameByPlayerID(player.getID());
         validateAddTileParameters(game, player, tile, sequenceIndex, sequencePosition);
+        startTimer(game);
         logic.tile.Tile logicTile = WSObjToGameObjConverter.convertWSTileIntoGameTile(tile);
         if (game.isSplitRequired(sequenceIndex, sequencePosition)) {
             createSplitEvents(game, playerId, logicTile, sequenceIndex, sequencePosition);
@@ -187,6 +196,7 @@ public class MainController {
             throw new InvalidParameters_Exception(INVALID_SOURCE_SEQUENCE_POSITION_ERR_MSG, null);
         }
         Game game = getGameByPlayerID(player.getID());
+        startTimer(game);
         logic.tile.Tile tile = game.takeBackTile(playerId, sequenceIndex, sequencePosition);
         if (tile == null) {
             throw new InvalidParameters_Exception(INVALID_TAKE_BACK_TILE_PARAMETERS_ERR_MSG, null);
@@ -199,6 +209,7 @@ public class MainController {
         MoveTileData moveTileData = new MoveTileData(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
         validateMoveTileParameters(moveTileData);
         Game game = getGameByPlayerID(player.getID());
+        startTimer(game);
         if (game.moveTile(moveTileData)) {
             createMoveTileEvent(game, player.getName(), moveTileData);
         } else {
@@ -214,6 +225,7 @@ public class MainController {
             createPlayerFinishedTurnEvent(game, playerId, new ArrayList<>());
             if (game.getBoard().isValid() == false) {
                 punishPlayer(game, playerId);
+                startTimer(game);
                 moveToNextPlayer(game);
                 return;
             }
@@ -231,6 +243,7 @@ public class MainController {
             tilesList.add(game.pullTileFromDeck(playerId));
             createPlayerFinishedTurnEvent(game, playerId, tilesList);
         }
+        startTimer(game);
         moveToNextPlayer(game);
     }
 
@@ -241,6 +254,7 @@ public class MainController {
         createPlayerResignedEvent(game, player.getName());
         if (game.checkIsGameOver()) {
             createGameOverEvent(game);
+            stopTimer(game);
         } else {
             if (isPlayerPerformedAnyChange(playerId)) {
                 if (game.getBoard().isValid() == false) {
@@ -249,6 +263,7 @@ public class MainController {
                     createBoardSequencesEvents(game);
                 }
             }
+            startTimer(game);
             moveToNextPlayer(game);
         }
         playersIDs.remove(playerId);
@@ -358,6 +373,7 @@ public class MainController {
             createGameStartEvent(game);
             createBoardSequencesEvents(game);
             createPlayerTurnEvent(game, game.getCurrentPlayer());
+            startTimer(game);
         }
 
         return playerId;
@@ -575,6 +591,7 @@ public class MainController {
         }
         Player currentPlayer = game.getCurrentPlayer();
         createPlayerTurnEvent(game, currentPlayer);
+        startTimer(game);
     }
 
     private void createGameOverEvent(Game game) {
@@ -647,6 +664,38 @@ public class MainController {
 
         for (MoveTileData moveTileData : movedTilesList) {
             createMoveTileEvent(game, EMPTY_PLAYER_NAME, moveTileData);
+        }
+    }
+
+    /**
+     * Start a timer after player action. Call player resign function if timeout
+     * is reached;
+     *
+     * @param game
+     */
+    private void startTimer(Game game) {
+        //Stop previous timer first
+        stopTimer(game);
+        //Then create a new timer
+        Timer timer = new Timer(TIMEOUT_DELAY_MS, (ActionEvent event) -> {
+            try {
+                ((Timer) event.getSource()).stop();
+                int currentPlayerId = game.getCurrentPlayer().getID();
+                resign(currentPlayerId);
+            } catch (InvalidParameters_Exception ex) {
+                //We should not get into here at all
+                Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, RESIGN_AFTER_TIMER_ERR_MSG, ex);
+            }
+        });
+        timer.start();
+        //Add the timer into timers map
+        timersMap.put(game, timer);
+    }
+
+    private void stopTimer(Game game) {
+        Timer timer = timersMap.get(game);
+        if (timer != null) {
+            timer.stop();
         }
     }
 }
