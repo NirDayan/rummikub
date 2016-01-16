@@ -1,6 +1,3 @@
 * Implement in JAVAFX waiting screen
 * User can take back a tile he put on the board
-* Notification to the user when new action is requiret from the user
 * Load file scenario - show informative error in the UI (for example, duplicate game name)
-* Replay game scenario...?
-* Remove console application from JAVAFX project
