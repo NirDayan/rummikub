@@ -172,7 +172,7 @@ public class LoginController implements Initializable {
             StreamResult result = new StreamResult(new File(SERVER_CONFIG_FILE_PATH));
 
             transformer.transform(source, result);
-        } catch (ParserConfigurationException | TransformerException pce) {
+        } catch (ParserConfigurationException | TransformerException ex) {
             System.err.println("Could not save ServerConfig.xml");
         }
     }

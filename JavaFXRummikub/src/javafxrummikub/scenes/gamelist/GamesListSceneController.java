@@ -1,12 +1,16 @@
 package javafxrummikub.scenes.gamelist;
 
 import java.net.URL;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.function.Predicate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -24,6 +28,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import ws.rummikub.GameDetails;
 import ws.rummikub.GameDoesNotExists_Exception;
+import ws.rummikub.GameStatus;
 import ws.rummikub.InvalidParameters_Exception;
 import ws.rummikub.RummikubWebService;
 
@@ -87,17 +92,48 @@ public class GamesListSceneController implements Initializable {
                 });
         Platform.runLater(this::start);
     }
-    
+
     private void updateGamesTable() {
         List<String> gameNames = server.getWaitingGames();
-        gamesList.clear();
-        gameNames.stream().forEach((gameName) -> {
-            try {
-                gamesList.add(server.getGameDetails(gameName));
-            } catch (GameDoesNotExists_Exception ex) {
-                System.err.println("Game " + gameName + "Does not exist in the server");
+        addNewGames(gameNames);
+        deleteNonWaitingGamesFromTheList();
+    }
+
+    private void addNewGames(List<String> gameNames) {
+        gameNames.stream()
+                .filter((name) -> !isGameNameExistInTheList(name))
+                .forEach((gameName) -> {
+                    try {
+                        gamesList.add(server.getGameDetails(gameName));
+                    } catch (GameDoesNotExists_Exception ex) {
+                        System.err.println("Game " + gameName + "Does not exist in the server");
+                    }
+                });
+    }
+
+    private boolean isGameNameExistInTheList(String gameName) {
+        for (GameDetails game : gamesList) {
+            if (game.getName().equals(gameName)) {
+                return true;
             }
-        });
+        }
+
+        return false;
+    }
+
+    private void deleteNonWaitingGamesFromTheList() {
+        Iterator<GameDetails> gameIt = gamesList.iterator();
+        while (gameIt.hasNext()) {
+            GameDetails game = gameIt.next();
+            try {
+                GameStatus status = server.getGameDetails(game.getName()).getStatus();
+                if (status != GameStatus.WAITING) {
+                    gameIt.remove();
+                }
+            } catch (GameDoesNotExists_Exception ex) {
+                gameIt.remove();
+            }
+        }
     }
 
     @FXML
