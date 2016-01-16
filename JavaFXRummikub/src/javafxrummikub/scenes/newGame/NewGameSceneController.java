@@ -49,7 +49,6 @@ public class NewGameSceneController implements Initializable {
     @FXML
     private TextField computerPlayersNumText;
 
-    private static int CURRENT_PLAYER_ID = 1;
     private static final int MAX_PLAYERS_NUMBER = 4;
     private static final int MIN_PLAYERS_NUMBER = 2;
     private static final int MIN_HUMAN_PLAYERS_NUMBER = 1;

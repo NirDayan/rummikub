@@ -6,11 +6,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.function.Predicate;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.TimeUnit;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -37,10 +33,6 @@ public class GamesListSceneController implements Initializable {
     @FXML
     private Button joinGameButton;
     @FXML
-    private Button createGameButton;
-    @FXML
-    private Button exitGameButton;
-    @FXML
     private Label errorMsgLabel;
     @FXML
     private TableView<GameDetails> gamesTable;
@@ -62,10 +54,9 @@ public class GamesListSceneController implements Initializable {
     private RummikubWebService server;
     private String joinedGameName;
     private int joinedPlayerID;
-    private ScheduledThreadPoolExecutor threadPool;
-    private ScheduledFuture<?> updateTask;
     private Timer timer;
-    private static final int UPDATE_GAMES_LIST_TIME_INTERVAL_MS = 5000;
+    private static final int UPDATE_GAMES_LIST_TIME_INTERVAL_MS = 
+            (int)TimeUnit.MILLISECONDS.convert(2, TimeUnit.SECONDS);
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
