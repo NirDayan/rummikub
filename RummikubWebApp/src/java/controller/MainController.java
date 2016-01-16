@@ -341,9 +341,11 @@ public class MainController {
         int playerId;
         //Different handling for saved game regarding the player which already exist for saved games
         if (game.isLoadedFromFile()) {
-            playerId = playerJoinIntoSavedGame(game, playerName);
+            playerId = game.joinPlayerIntoSavedGame(playerName);
         } else {
-            playerId = playerJoinIntoNewGame(game, playerName);
+            playerId = generatedID.getAndIncrement();
+            Player player = game.joinPlayerIntoNewGame(playerName, playerId);
+            playersIDs.put(playerId, player);
         }
         //If the game status has been changed to ACTIVE, add GAME_START event
         if (game.getStatus().equals(GameStatus.ACTIVE)) {
@@ -352,32 +354,6 @@ public class MainController {
             createPlayerTurnEvent(game, game.getCurrentPlayer());
         }
 
-        return playerId;
-    }
-
-    private int playerJoinIntoSavedGame(Game game, String playerName) throws InvalidParameters_Exception {
-        Player player = null;
-        for (Player currPlayer : game.getPlayers()) {
-            if (currPlayer.getName().toLowerCase().equals(playerName.toLowerCase())) {
-                player = currPlayer;
-                break;
-            }
-        }
-        //If player not found or this is not a human player, throw exception or the player has already joined
-        if (player == null || (player != null && !player.isHuman()) || player.getStatus() != PlayerStatus.RETIRED) {
-            throw new InvalidParameters_Exception(PLAYER_NOT_FOUND_ERR_MSG, null);
-        }
-        player.setStatus(PlayerStatus.JOINED);
-        game.incJoinedHumanPlayersNum();
-        return player.getID();
-    }
-
-    private int playerJoinIntoNewGame(Game game, String playerName) {
-        int playerId = generatedID.getAndIncrement();
-        Player player = new Player(playerId, playerName, true);
-        game.addPlayer(player);
-        game.incJoinedHumanPlayersNum();
-        playersIDs.put(playerId, player);
         return playerId;
     }
 

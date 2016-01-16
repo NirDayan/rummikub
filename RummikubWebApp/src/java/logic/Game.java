@@ -7,6 +7,7 @@ import java.util.Set;
 import logic.tile.*;
 import ws.rummikub.GameDetails;
 import ws.rummikub.GameStatus;
+import ws.rummikub.InvalidParameters_Exception;
 import ws.rummikub.PlayerStatus;
 
 public class Game {
@@ -26,6 +27,8 @@ public class Game {
     private static final int PUNISH_TILES_NUMBER = 3;
     private static final int MINIMUM_SUM_SEQUENCE_VALUE_FOR_FIRST_STEP = 30;
     private final List<Tile> currentPlayerAddedTiles;
+    private static final String PLAYER_NOT_FOUND_ERR_MSG = "Could not find player name";
+    private static final String DUP_PLAYER_NAME_ERR_MSG = "Player with the same name is already exist";
 
     public Game(GameDetails gameDetails) {
         players = new ArrayList<>();
@@ -249,11 +252,11 @@ public class Game {
         tile = board.removeTile(sequenceIndex, sequencePosition);
         //If the remove is not valid, tile will be null
         if (tile == null) {
-            return null;            
+            return null;
         }
         Player player = getPlayerByID(playerId);
         player.addTile(tile);
-        
+
         return tile;
     }
 
@@ -345,8 +348,46 @@ public class Game {
         }
         return board.isTargetValid(sequenceIndex, sequencePosition);
     }
-    
+
     public List<MoveTileData> getMovedTileListForSplitOperation(int sequenceIndex, int sequencePosition) {
         return board.getMovedTileListForSplitOperation(sequenceIndex, sequencePosition);
+    }
+
+    public int  joinPlayerIntoSavedGame(String playerName) throws InvalidParameters_Exception {
+        Player player = null;
+        for (Player currPlayer : players) {
+            if (currPlayer.getName().toLowerCase().equals(playerName.toLowerCase())) {
+                player = currPlayer;
+                break;
+            }
+        }
+        //If player not found or this is not a human player throw exception
+        if (player == null || (!player.isHuman())) {
+            throw new InvalidParameters_Exception(PLAYER_NOT_FOUND_ERR_MSG, null);
+        }
+        //If the player has already joined
+        if (player.getStatus() != PlayerStatus.RETIRED) {
+             throw new InvalidParameters_Exception(DUP_PLAYER_NAME_ERR_MSG, null);            
+        }
+        player.setStatus(PlayerStatus.JOINED);
+        incJoinedHumanPlayersNum();
+        
+        return player.getID();
+    }
+
+    public Player joinPlayerIntoNewGame(String playerName, int playerId) throws InvalidParameters_Exception {
+        boolean isNameAlreadyExists = players.stream().anyMatch(player -> player.getName().toLowerCase().equals(playerName.toLowerCase()));
+        if (isNameAlreadyExists) {
+            throw new InvalidParameters_Exception(DUP_PLAYER_NAME_ERR_MSG, null);
+        }
+
+        Player player = new Player(playerId, playerName, true);
+        for (int i = 0; i < INITIAL_TILES_COUNT; i++) {
+            player.addTile(getTilesDeck().pullTile());
+        }
+        addPlayer(player);
+        incJoinedHumanPlayersNum();
+        
+        return player;
     }
 }
