@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -50,13 +51,13 @@ public class MainController {
     private static final String NOT_CURRENT_PLAYER_ERR_MSG = "Player is parameter does not match current player";
     private static final String COMPUTERIZED_PLAYER_ERR_MSG = "Computer player action was corrupted";
     private static final String EMPTY_PLAYER_NAME = "";
-    private static final int TIMEOUT_DELAY_MS = 5 * 60 * 1000;//5 seconds
+    private static final int TIMEOUT_DELAY_MS = (int)TimeUnit.MILLISECONDS.convert(5, TimeUnit.MINUTES);
     private static final int MAX_PLAYERS_NUMBER = 4;
     private static final int MIN_PLAYERS_NUMBER = 2;
     private static final int MIN_HUMAN_PLAYERS_NUMBER = 1;
     private static final int FIRST_PLAYER_ID = 1;
     private static final int FIRST_EVENT_ID = 1;
-    private static final int COMPUTER_THINK_TIME_MS = 5 * 1000;//5 seconds
+    private static final int COMPUTER_THINK_TIME_MS = (int)TimeUnit.MILLISECONDS.convert(3, TimeUnit.SECONDS);
     private static final String COMPUTER_NAME_PREFIX = "Computer #";
     private final Map<Integer, Player> playersIDs;
     private final AtomicInteger generatedID;
@@ -732,12 +733,15 @@ public class MainController {
                 Player compPlayer = game.getCurrentPlayer();
                 List<logic.tile.Tile> logicTileList = computerAI.getRelevantTiles(compPlayer.getTiles());
                 List<Tile> wsTilesList;
-
+                Thread.sleep(COMPUTER_THINK_TIME_MS); // Simulate Computer "Thinking..."
+                
                 while (logicTileList != null) {
-                    // Simulate Computer "Thinking..."
-                    Thread.sleep(COMPUTER_THINK_TIME_MS);
                     wsTilesList = WSObjToGameObjConverter.convertGameTilesListIntoGeneratedTilesList(logicTileList);
                     createSequence(compPlayer.getID(), wsTilesList);
+                    if (compPlayer.isFirstStep() && new Sequence(logicTileList).getValueSum() >= 30){
+                        compPlayer.setFirstStepCompleted(true);
+                    }
+                    Thread.sleep(COMPUTER_THINK_TIME_MS); // Simulate Computer "Thinking..."
                     logicTileList = computerAI.getRelevantTiles(game.getCurrentPlayer().getTiles());
                 }
                 finishTurn(compPlayer.getID());
