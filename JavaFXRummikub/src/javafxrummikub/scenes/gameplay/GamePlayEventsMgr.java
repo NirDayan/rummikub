@@ -123,18 +123,16 @@ public class GamePlayEventsMgr {
     private void handleGameWinner(Event event) {
         if (!isPlayerNameExistInEvent(event))
             return;
-        
+
         eventsHandler.gameWinner(event.getPlayerName());
     }
 
     private void handlePlayerFinishedTurn(Event event) {
-        if (!isPlayerNameExistInEvent(event))
+        if (!isPlayerNameExistInEvent(event)){
             return;
-
-        if (event.getPlayerName().equalsIgnoreCase(playerName)) {
-            List<logic.tile.Tile> tiles = convertWS2GameTiles(event.getTiles());
-            eventsHandler.playerFinishTurn(tiles);
         }
+        List<logic.tile.Tile> tiles = convertWS2GameTiles(event.getTiles());
+        eventsHandler.playerFinishTurn(tiles, event.getPlayerName());
     }
 
     private void handlePlayerResigned(Event event) {
@@ -155,9 +153,6 @@ public class GamePlayEventsMgr {
     }
 
     private void handleSequenceCreated(Event event) {
-        if (!isPlayerNameExistInEvent(event))
-            return;
-
         List<logic.tile.Tile> tiles = convertWS2GameTiles(event.getTiles());
         eventsHandler.sequenceCreated(tiles, event.getPlayerName());
     }
@@ -168,7 +163,6 @@ public class GamePlayEventsMgr {
 
         logic.tile.Tile tile = convertWSTileIntoGameTile(event.getTiles().get(0));
         eventsHandler.addTile(event.getPlayerName(),
-                event.getSourceSequencePosition(),
                 event.getTargetSequenceIndex(),
                 event.getTargetSequencePosition(),
                 tile

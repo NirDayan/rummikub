@@ -9,9 +9,6 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
@@ -35,11 +32,9 @@ import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
 import javafxrummikub.components.TileView;
 import javafxrummikub.utils.CustomizablePromptDialog;
-import logic.ComputerAI;
-import logic.Game;
 import logic.MoveTileData;
-import logic.Player;
 import logic.WSObjToGameObjConverter;
+import static logic.WSObjToGameObjConverter.convertGameTilesListIntoGeneratedTilesList;
 import logic.tile.Color;
 import logic.tile.Sequence;
 import logic.tile.Tile;
@@ -47,15 +42,6 @@ import ws.rummikub.InvalidParameters_Exception;
 import ws.rummikub.RummikubWebService;
 
 public class GamePlaySceneController implements Initializable, IGamePlayEventHandler {
-    private String clientPlayerName;
-    private final List<Tile> playerTiles = new ArrayList<>();
-    private final List<Sequence> boardSequences = new ArrayList<>();
-    private String gameWinnerName = "";
-    private static final int TILES_LIST_VIEW_WIDTH = 1050;
-    private static final int INDEX_NOT_FOUND = -1;
-    private static final int FROM_PLAYER = -1;
-    private static final String GAME_START_SOUND_PATH = "./src/resources/gameStart.wav";
-    private static final String PLAYER_TURN_SOUND_PATH = "./src/resources/notifyTurn.wav";
     @FXML
     private Label player1Name;
     @FXML
@@ -79,27 +65,31 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     @FXML
     private VBox boardContainer;
 
-    private Game game;
-    private List<Label> playersNames;
-    private ObservableList<Tile> clientPlayerTilesData;
     private SimpleBooleanProperty isMainMenuButtonPressed;
-    private ListView<Tile> currentPlayerTilesView;
-    private SimpleBooleanProperty isCurrPlayerFinished;
     private SimpleBooleanProperty isGameOver;
+    private String clientPlayerName;
+    private final List<Tile> playerTiles = new ArrayList<>();
+    private final List<Sequence> boardSequences = new ArrayList<>();
+    private String gameWinnerName = "";
+    private List<Label> playersNames;
+    private ObservableList<Tile> clientPlayerTilesView;
+    private ListView<Tile> currentPlayerTilesView;
     private ObservableList<ListView<Tile>> boardData;
     private ListView<ListView<Tile>> boardView;
     private boolean isPlayerPerformAnyChange = false;
-    private boolean isBackupNeeded = true;
     private MoveTileData dragTileData;
     private Tile draggedTile;
-    private final String ERROR_MSG_TYPE = "error";
-    private final String REGULAR_MSG_TYPE = "massage";
     private ScheduledFuture<?> clearMsgTask = null;
-    private final ComputerAI ai = new ComputerAI();
-    private boolean isPlayerPutNewSequence;
     private RummikubWebService server;
     private int playerID;
     private String gameName;
+    private static final int TILES_LIST_VIEW_WIDTH = 1050;
+    private static final int INDEX_NOT_FOUND = -1;
+    private static final int FROM_PLAYER = -1;
+    private static final String GAME_START_SOUND_PATH = "./src/resources/gameStart.wav";
+    private static final String PLAYER_TURN_SOUND_PATH = "./src/resources/notifyTurn.wav";
+    private static final String ERROR_MSG_TYPE = "error";
+    private static final String REGULAR_MSG_TYPE = "massage";
 
     @FXML
     private void onMainMenuButton(ActionEvent event) {
@@ -120,7 +110,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
 
         try {
             server.finishTurn(playerID);
-            isCurrPlayerFinished.set(true);
+            disableAllControls(true);
         } catch (InvalidParameters_Exception ex) {
             showMessage(ex.getMessage(), ERROR_MSG_TYPE);
         }
@@ -147,7 +137,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         } catch (InvalidParameters_Exception ex) {
             System.err.println(ex.getMessage());
         }
-        isCurrPlayerFinished.set(true);
+        disableAllControls(true);
     }
 
     @Override
@@ -158,13 +148,11 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
 
     private void initializeGamePlay() {
         isMainMenuButtonPressed = new SimpleBooleanProperty(false);
-        isCurrPlayerFinished = new SimpleBooleanProperty(false);
         isGameOver = new SimpleBooleanProperty(false);
 
         groupPlayerNamesToList();
         initBoard();
         initCurrentPlayerTilesView();
-        registerFinishTurnProperty();
         clearMsgLabel();
     }
 
@@ -185,18 +173,10 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     }
 
     private void initCurrentPlayerTilesView() {
-        clientPlayerTilesData = FXCollections.observableArrayList();
-        currentPlayerTilesView = getTilesListView(clientPlayerTilesData);
+        clientPlayerTilesView = FXCollections.observableArrayList();
+        currentPlayerTilesView = getTilesListView(clientPlayerTilesView);
         currentPlayerTilesView.setPrefWidth(TILES_LIST_VIEW_WIDTH);
         tilesContainer.getChildren().add(currentPlayerTilesView);
-    }
-
-    private void registerFinishTurnProperty() {
-        isCurrPlayerFinished.addListener((source, oldValue, isPlayerFinished) -> {
-            if (isPlayerFinished == true) {
-                disableAllControls(true);
-            }
-        });
     }
 
     public void initGameParmeters(RummikubWebService rummikubGameWS, String gameName, int playerID) {
@@ -239,10 +219,10 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     }
 
     private void updatePlayerTilesView() {
-        clientPlayerTilesData.clear();
+        clientPlayerTilesView.clear();
         //Don't change to forEach, it won't work since the "equals" function of tile which ignores duplicate tiles with the same coloe and value
         for (int i = 0; i < playerTiles.size(); i++) {
-            clientPlayerTilesData.add(playerTiles.get(i));
+            clientPlayerTilesView.add(playerTiles.get(i));
         }
     }
 
@@ -345,13 +325,6 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         }
     }
 
-    /**
-     * This function checks if the selected tile could be dragged out of its
-     * position [for example, tile from the middle of a board sequence could not
-     * be dragged out of the sequence]
-     *
-     * @return boolean
-     */
     private boolean checkIsDragTileValid(ListView<Tile> listView) {
         if (draggedTile == null || dragTileData == null) {
             return false;
@@ -363,19 +336,6 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
             if (!(tilePoition == 0 || (tilePoition == listView.getItems().size() - 1))) {
                 return false;
             }
-
-            // TODO: Lior- there is no way for me to know if this is my first step.
-            //if this is the first step and player didnt put a new sequence yet, drag from board is not valid
-//            if (isPlayerFirstStepAndNoNewSequence()) {
-//                return false;
-//            }
-            //if this is the first step and the player already put a new sequence,
-            //make sure the drag is performed from the last sequence!
-//            if (isPlayerFirstStepWithNewSequence()) {
-//                boolean isLastSequence = (dragTileData.getSourceSequenceIndex() == (boardData.size() - 1));
-//
-//                return isLastSequence;
-//            }
         }
 
         return true;
@@ -420,11 +380,6 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         }
     }
 
-    private void removeFromPlayerTiles(int playerTilePosition) {
-        // Remove Tile From Player
-        playerTiles.remove(playerTilePosition);
-    }
-
     private void performMoveTileInBoard(MoveTileData moveTileData) {
         // Send MoveTile event to server
         try {
@@ -434,7 +389,6 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
                     moveTileData.getTargetSequenceIndex(),
                     moveTileData.getTargetSequencePosition()
             );
-            disableAllControls(true);
         } catch (InvalidParameters_Exception invalidParameters_Exception) {
             showMessage("Invalid move tile action", ERROR_MSG_TYPE);
         }
@@ -493,12 +447,11 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     }
 
     private void performCreateNewSequenceFromPlayer(MoveTileData dragTileData) {
-        // Send AddTile event to server
         ArrayList<Tile> tileListToServer = new ArrayList<>();
         tileListToServer.add(draggedTile);
         try {
             server.createSequence(playerID,
-                    WSObjToGameObjConverter.convertGameTilesListIntoGeneratedTilesList(tileListToServer));
+                    convertGameTilesListIntoGeneratedTilesList(tileListToServer));
             disableAllControls(true);
         } catch (InvalidParameters_Exception ex) {
             showMessage(ex.getMessage(), ERROR_MSG_TYPE);
@@ -561,11 +514,15 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     }
 
     @Override
-    public void playerFinishTurn(List<Tile> tiles) {
+    public void playerFinishTurn(List<Tile> tiles, String playerName) {
         if (tiles.size() == 1) {
-            //handle pullTile
-            playerTiles.add(tiles.get(0));
-            updatePlayerTilesView();
+            if (playerName.equalsIgnoreCase(clientPlayerName)) {
+                //handle pullTile
+                playerTiles.add(tiles.get(0));
+                updatePlayerTilesView();
+            } else {
+                showMessage(playerName + " has pulled a tile from the deck", REGULAR_MSG_TYPE);
+            }
         } else if (!tiles.isEmpty()) {
             System.err.println("playerFinishTurn(): Unknown finish turn event recieved.");
         }
@@ -583,36 +540,42 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     @Override
     public void sequenceCreated(List<Tile> tiles, String playerName) {
         if (playerName.equalsIgnoreCase(clientPlayerName)) {
-            boardSequences.add(new Sequence(tiles));
+            playerTiles.remove(tiles.get(0));
             disableAllControls(false);
-        } else {
+            updatePlayerTilesView();
+            isPlayerPerformAnyChange = true;
+        } else if (!playerName.isEmpty()) {
             showMessage(playerName + " has added a new sequence.", REGULAR_MSG_TYPE);
         }
+        boardSequences.add(new Sequence(tiles));
+        updateBoard();
     }
 
     @Override
     public void PlayerTurn(String playerName) {
-        if (playerName.equals(clientPlayerName)) {
+        if (playerName.equalsIgnoreCase(clientPlayerName)) {
             playSound(PLAYER_TURN_SOUND_PATH);
             disableAllControls(false);
+            isPlayerPerformAnyChange = false;
         }
         updatePlayerNamesWithCurrentPlayer(playerName);
     }
 
     @Override
-    public void addTile(String playerName, int playerTilePosition, int targetSequenceIndex, int targetSequencePosition, logic.tile.Tile tile) {
+    public void addTile(String playerName, int targetSequenceIndex, int targetSequencePosition, logic.tile.Tile tile) {
         if (playerName.equalsIgnoreCase(clientPlayerName)) {
             // Remove tile from player stand
-            Tile playerTile = playerTiles.remove(playerTilePosition);
-            if (!playerTile.equals(tile))
-                System.err.println("addTile(): Index and tile does not match!");
+            playerTiles.remove(tile);
+            disableAllControls(false);
+            isPlayerPerformAnyChange = true;
+            updatePlayerTilesView();
         } else {
             showMessage(playerName + "has added tile to board", gameName);
         }
         Sequence targetSeq = boardSequences.get(targetSequenceIndex);
         targetSeq.addTile(targetSequencePosition, tile);
 
-        playerActionOnBoardDone();
+        updateBoard();
     }
 
     @Override
@@ -621,7 +584,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         Sequence targetSeq = boardSequences.get(targetSeqIndex);
         targetSeq.addTile(targetSeqPos, tile);
 
-        playerActionOnBoardDone();
+        updateBoard();
     }
 
     private void playSound(String soundPath) {
