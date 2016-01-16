@@ -224,14 +224,14 @@ public class MainController {
                     punishPlayer(game, playerId);
                 }
             }
-            moveToNextPlayer(game);
-        } else { 
+        } else {
             //Here the player chose to finishe the turn without performing any action.
             //In this case he will pull tile from deck.
             List<logic.tile.Tile> tilesList = new ArrayList<>();
             tilesList.add(game.pullTileFromDeck(playerId));
             createPlayerFinishedTurnEvent(game, playerId, tilesList);
         }
+        moveToNextPlayer(game);
     }
 
     public void resign(int playerId) throws InvalidParameters_Exception {
