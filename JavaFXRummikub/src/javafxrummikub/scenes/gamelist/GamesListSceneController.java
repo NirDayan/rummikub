@@ -3,6 +3,10 @@ package javafxrummikub.scenes.gamelist;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -53,6 +57,9 @@ public class GamesListSceneController implements Initializable {
     private RummikubWebService server;
     private String joinedGameName;
     private int joinedPlayerID;
+    private ScheduledThreadPoolExecutor threadPool;
+    private ScheduledFuture<?> updateTask;
+    private Timer timer;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -77,12 +84,12 @@ public class GamesListSceneController implements Initializable {
                         isGameSelectedFromList.set(false);
                     }
                 });
-
-        Platform.runLater(this::fillGamesTable);
+        Platform.runLater(this::start);
     }
 
-    private void fillGamesTable() {
+    private void updateGamesTable() {
         List<String> gameNames = server.getWaitingGames();
+        gameNames.clear();
         gameNames.forEach((gameName) -> {
             try {
                 gamesList.add(server.getGameDetails(gameName));
@@ -137,5 +144,18 @@ public class GamesListSceneController implements Initializable {
 
     private void showErrorMessage(String msg) {
         errorMsgLabel.setText(msg);
+    }
+
+    private void start() {
+        timer = new Timer(true);
+        timer.scheduleAtFixedRate(
+                new TimerTask() {
+                    @Override
+                    public void run() {
+                        Platform.runLater(() -> updateGamesTable());
+                    }
+                },
+                0,
+                3000);
     }
 }
