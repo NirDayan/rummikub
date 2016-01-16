@@ -155,6 +155,9 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         initBoard();
         initCurrentPlayerTilesView();
         clearMsgLabel();
+        //Show waiting for players message
+        msgLabel.getStyleClass().add(REGULAR_MSG_TYPE);
+        msgLabel.setText("Waiting for other players to join...");
     }
 
     private void groupPlayerNamesToList() {
@@ -522,6 +525,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         updatePlayerTilesView();
 
         playSound(GAME_START_SOUND_PATH);
+        showMessage("Game Started!", REGULAR_MSG_TYPE);
     }
 
     @Override
