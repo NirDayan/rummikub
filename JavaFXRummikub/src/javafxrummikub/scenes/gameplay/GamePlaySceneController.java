@@ -323,12 +323,13 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     }
 
     private void addPlusTilesToBoard() {
-        addPlusTilesToAllSequences();
         //If the source tile is dragged from player's tiles we woule like to present a new sequence placeholder
         if (dragTileData.getSourceSequenceIndex() == INDEX_NOT_FOUND) {
+            addPlusTilesToAllSequences();
             addNewSequencePlaceholder();
         } else {
             addNewPlaceholderToPlayerTiles();
+            addPlusTilesToFrontAndEnd();
         }
     }
 
@@ -663,4 +664,12 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         }
     }
 
+    private void addPlusTilesToFrontAndEnd() {
+        ObservableList<Tile> sequence;
+        for (ListView<Tile> boardSequence : boardData) {
+            sequence = boardSequence.getItems();
+            sequence.add(0, new Tile(Color.Red, Tile.PLUS_TILE));
+            sequence.add(sequence.size(), new Tile(Color.Red, Tile.PLUS_TILE));
+        }
+    }
 }
