@@ -389,7 +389,11 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     }
 
     private void performMoveTileInBoard(MoveTileData moveTileData) {
-        // Send MoveTile event to server
+        if (isMoveTileValid(moveTileData)) {
+            showMessage("Invalid move tile action", ERROR_MSG_TYPE);
+            return;
+        }
+
         try {
             server.moveTile(playerID,
                     moveTileData.getSourceSequenceIndex(),
@@ -400,6 +404,18 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
         } catch (InvalidParameters_Exception invalidParameters_Exception) {
             showMessage("Invalid move tile action", ERROR_MSG_TYPE);
         }
+    }
+
+    private boolean isMoveTileValid(MoveTileData moveTileData) {
+        if (moveTileData.getSourceSequenceIndex() == moveTileData.getTargetSequenceIndex()) {
+            int seqSize = boardSequences.get(moveTileData.getTargetSequencePosition()).getSize();
+            
+            if (moveTileData.getTargetSequencePosition() == seqSize) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private void performDragDetected(ListView<Tile> listView) {
