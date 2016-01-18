@@ -1,3 +1,0 @@
-* Implement in JAVAFX waiting screen
-* User can take back a tile he put on the board
-* Load file scenario - show informative error in the UI (for example, duplicate game name)
