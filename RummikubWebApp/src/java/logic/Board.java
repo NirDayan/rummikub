@@ -142,9 +142,12 @@ public class Board {
         int sourceSeqPosition = data.getSourceSequencePosition();
         int targetSeqIndex = data.getTargetSequenceIndex();
         int targetSeqPosition = data.getTargetSequencePosition();
+        
+        boolean isMoveToNextPlace = (sourceSeqIndex == targetSeqIndex) && 
+                (sourceSeqPosition == targetSeqPosition + 1 || sourceSeqPosition + 1 == targetSeqPosition);
 
         return isMovePositionValid(sourceSeqIndex, sourceSeqPosition)
-                && isTargetValid(targetSeqIndex, targetSeqPosition);
+                && isTargetValid(targetSeqIndex, targetSeqPosition) && !isMoveToNextPlace;
     }
 
     private boolean split(int sequenceIndex, int indexInSequence, Tile tile) {
