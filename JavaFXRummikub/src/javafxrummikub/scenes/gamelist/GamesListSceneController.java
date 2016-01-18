@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -50,6 +51,7 @@ public class GamesListSceneController implements Initializable {
     private SimpleBooleanProperty isGameSelectedFromList = new SimpleBooleanProperty(false);
     private SimpleBooleanProperty isCreateGameButtonPressed = new SimpleBooleanProperty(false);
     private SimpleBooleanProperty isPlayerJoinedGame = new SimpleBooleanProperty(false);
+    private SimpleBooleanProperty playerNameValid = new SimpleBooleanProperty(false);
     private ObservableList<GameDetails> gamesList;
     private RummikubWebService server;
     private String joinedGameName;
@@ -60,7 +62,17 @@ public class GamesListSceneController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        joinGameButton.disableProperty().bind(Bindings.not(isGameSelectedFromList));
+            playerNameTextBox.textProperty().addListener((ObservableValue<? extends String> observableValue, String s, String s2) -> {
+            boolean isEmptyPlayerName = playerNameTextBox.textProperty().get().isEmpty();
+            boolean containsCharsExceptWhitespace = (playerNameTextBox.textProperty().get().trim().length() > 0);
+            if (!isEmptyPlayerName && containsCharsExceptWhitespace) {
+                playerNameValid.set(true);
+            } else {
+                playerNameValid.set(false);
+            }
+        });
+
+        joinGameButton.disableProperty().bind(Bindings.or(playerNameValid.not(), isGameSelectedFromList.not()));
         playerNameTextBox.disableProperty().bind(Bindings.not(isGameSelectedFromList));
         initGamesTable();
     }
