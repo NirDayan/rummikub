@@ -193,12 +193,12 @@ public class Board {
         MoveTileData moveTileData;
         int lastNewSequenceIndex = sequencesArray.size();
         int sequenceSize = sequencesArray.get(sequenceIndex).getSize();
-        int targetSequencePosition = 0;
+        int targetSequencePosition = 0;        
         
         for (int i = sequencePosition; i < sequenceSize; i++) {
             moveTileData = new MoveTileData();
             moveTileData.setSourceSequenceIndex(sequenceIndex);
-            moveTileData.setSourceSequencePosition(i);
+            moveTileData.setSourceSequencePosition(sequencePosition);
             moveTileData.setTargetSequenceIndex(lastNewSequenceIndex);
             moveTileData.setTargetSequencePosition(targetSequencePosition);
             moveTileDataList.add(moveTileData);

@@ -187,6 +187,7 @@ public class MainController {
         Player player = getPlayerById(playerId);
         Game game = getGameByPlayerID(player.getID());
         validateAddTileParameters(game, player, tile, sequenceIndex, sequencePosition);
+        backupTurn(game);
         startTimer(game);
         logic.tile.Tile logicTile = WSObjToGameObjConverter.convertWSTileIntoGameTile(tile);
         if (game.isSplitRequired(sequenceIndex, sequencePosition)) {
