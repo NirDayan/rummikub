@@ -389,7 +389,7 @@ public class GamePlaySceneController implements Initializable, IGamePlayEventHan
     }
 
     private void performMoveTileInBoard(MoveTileData moveTileData) {
-        if (isMoveTileValid(moveTileData)) {
+        if (!isMoveTileValid(moveTileData)) {
             showMessage("Invalid move tile action", ERROR_MSG_TYPE);
             return;
         }
