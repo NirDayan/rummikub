@@ -1,11 +1,15 @@
 package servlets.joingame;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import servlets.utils.ServletUtils;
+import ws.rummikub.RummikubWebService;
 
 // Will return a list of gameDetails to show in the waiting games table.
 @WebServlet(name = "WaitingGamesServlet", urlPatterns = {"/updatewaiting"})
@@ -13,7 +17,10 @@ public class WaitingGamesServlet extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+        RummikubWebService webService = ServletUtils.getWebService(getServletContext());
+        List<String> waitingGames = webService.getWaitingGames();
+        PrintWriter writer = response.getWriter();
+        waitingGames.forEach((s) -> writer.write(s));
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods.">
