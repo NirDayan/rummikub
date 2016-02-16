@@ -7,7 +7,7 @@ import ws.rummikub.RummikubWebService;
 import ws.rummikub.RummikubWebServiceService;
 
 public class ServletUtils {
-    private static final String WS_ATTRIBUTE_NAME = "wsManager";
+    private static final String WS_ATTRIBUTE_NAME = "rummikubWS";
     private static final String serverAddress = "127.0.0.1";
     private static final String serverPort = "8080";
     private static final String webserviceRoot = "rummikub";
@@ -26,7 +26,6 @@ public class ServletUtils {
             RummikubWebServiceService service = new RummikubWebServiceService(url);
             return service.getRummikubWebServicePort();
         } catch (MalformedURLException ex) {
-            //TODO: handle
             System.err.println(ex.getMessage());
             return null;
         }

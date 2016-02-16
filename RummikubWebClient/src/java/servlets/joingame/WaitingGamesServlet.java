@@ -17,9 +17,13 @@ public class WaitingGamesServlet extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        RummikubWebService webService = ServletUtils.getWebService(getServletContext());
-        List<String> waitingGames = webService.getWaitingGames();
         PrintWriter writer = response.getWriter();
+        RummikubWebService webService = ServletUtils.getWebService(getServletContext());
+        if (webService == null){
+            writer.write("Could not connect to the server at this time.");
+            return;
+        }
+        List<String> waitingGames = webService.getWaitingGames();
         waitingGames.forEach((s) -> writer.write(s));
     }
 
