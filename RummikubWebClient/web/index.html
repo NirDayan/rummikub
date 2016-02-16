@@ -4,11 +4,31 @@
         <title>Rummikub</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="assets/css/styles.css">
+        <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+        <script data-main="assets/js/main" src="assets/js/libs/require.js"></script>
     </head>
     <body>
-        <h1>Choose option:</h1>
-        <h3><a href="createGame">Create game</a></h3>
-        <h3><a href="loadGame">Load game from XML</a></h3>
-        <h3><a href="updatewaiting">Show waiting games</a></h3>
+        <div id="main-content">
+            <div class="waitingGames page">
+                <table id="waitingGamesTable" class="table">
+                    <thead>
+                        <tr>
+                            <th>Game name</th>
+                            <th>Human players</th>
+                            <th>Computerize players</th>
+                            <th>Joined human</th>
+                            <th>Players names</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <div class="newGame page"></div>
+            <div class="mainGame page"></div>
+            <div class="winner page"></div>
+            <div class="error page"></div>
+        </div>        
     </body>
 </html>

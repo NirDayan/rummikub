@@ -1,5 +1,6 @@
 package servlets.joingame;
 
+import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
@@ -12,7 +13,7 @@ import servlets.utils.ServletUtils;
 import ws.rummikub.RummikubWebService;
 
 // Will return a list of gameDetails to show in the waiting games table.
-@WebServlet(name = "WaitingGamesServlet", urlPatterns = {"/updatewaiting"})
+@WebServlet(name = "WaitingGamesServlet", urlPatterns = {"/waitingGames"})
 public class WaitingGamesServlet extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -24,7 +25,18 @@ public class WaitingGamesServlet extends HttpServlet {
             return;
         }
         List<String> waitingGames = webService.getWaitingGames();
-        waitingGames.forEach((s) -> writer.println(s));
+        
+        /*
+         * TODO: we need to change the JSON object to structure like:
+         * [
+         *  {gameName: "game1", humanPlayers, compPlayers, joinedHuman, playerNames}
+         *  {gameName: "game2", humanPlayers, compPlayers, joinedHuman, playerNames}
+         *  {gameName: "game3", humanPlayers, compPlayers, joinedHuman, playerNames}
+         * ]
+         */
+        String json = new Gson().toJson(waitingGames);
+        response.setContentType("application/json");
+        writer.write(json);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods.">

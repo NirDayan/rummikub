@@ -1,0 +1,22 @@
+body {
+    background-image: url(../images/Rummikub_Background.jpg);
+    background-repeat: no-repeat;
+    background-size: 100%;
+}
+
+.newGame,.mainGame,.winner,.error {
+    visibility: hidden;
+}
+
+/**
+* Waiting Games Page
+**/
+#waitingGamesTable {
+    margin: 50px;
+    width: 800px;
+    height: 400px;
+}
+
+#waitingGamesTable th:hover {
+        
+}
