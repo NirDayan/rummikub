@@ -5,7 +5,7 @@ define([
         
         $("#doneCreate").click(
                 define([
-                        'pages/waitingGames'
+                        'pages/WaitingGames'
                 ], function (waitingGames) {
                     $(".newGame").hide();
                     $(".waitingGames").show();
