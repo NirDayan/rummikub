@@ -12,9 +12,7 @@ body {
 * Waiting Games Page
 **/
 #waitingGamesTable {
-    margin: 50px;
-    width: 800px;
-    height: 400px;
+    margin-top: 150px;
 }
 
 #waitingGamesTable th:hover {

@@ -3,13 +3,18 @@ package servlets.joingame;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import servlets.utils.ServletUtils;
+import ws.rummikub.GameDetails;
+import ws.rummikub.GameDoesNotExists_Exception;
 import ws.rummikub.RummikubWebService;
 
 // Will return a list of gameDetails to show in the waiting games table.
@@ -20,11 +25,21 @@ public class WaitingGamesServlet extends HttpServlet {
             throws ServletException, IOException {
         PrintWriter writer = response.getWriter();
         RummikubWebService webService = ServletUtils.getWebService(getServletContext());
-        if (webService == null){
+        if (webService == null) {
             writer.write("Could not connect to the server at this time.");
             return;
         }
+        
         List<String> waitingGames = webService.getWaitingGames();
+        List<GameDetails> gameDetails = new ArrayList<>(waitingGames.size());
+        
+        waitingGames.forEach((s) -> {
+            try {
+                gameDetails.add(webService.getGameDetails(s));
+            } catch (GameDoesNotExists_Exception e) {
+                System.err.println(e.getMessage());
+            }
+        });
         
         /*
          * TODO: we need to change the JSON object to structure like:
@@ -34,7 +49,7 @@ public class WaitingGamesServlet extends HttpServlet {
          *  {gameName: "game3", humanPlayers, compPlayers, joinedHuman, playerNames}
          * ]
          */
-        String json = new Gson().toJson(waitingGames);
+        String json = new Gson().toJson(gameDetails);
         response.setContentType("application/json");
         writer.write(json);
     }
