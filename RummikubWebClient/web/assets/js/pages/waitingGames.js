@@ -5,12 +5,7 @@ define([
     var updateWaitingGamesTable = function (waitingGames) {
         var tableBody = jQuery("#waitingGamesTable tbody").empty();
         /*
-         * TODO: we need to change the JSON object to structure like:
-         * [
-         *  {gameName: "game1", humanPlayers, compPlayers, joinedHuman, playerNames}
-         *  {gameName: "game2", humanPlayers, compPlayers, joinedHuman, playerNames}
-         *  {gameName: "game3", humanPlayers, compPlayers, joinedHuman, playerNames}
-         * ]
+         * TODO: the last element should be a list of name
          */
         for (var i = 0; i < waitingGames.length; i++) {
             tableBody.append("<tr>" +
@@ -35,6 +30,11 @@ define([
         waitingGamesRequest.fail(function () {
             //TODO
         });
+
+        $("#creatGameBtn").click(function () {
+                    $(".waitingGames").hide();
+                    $(".newGame").show();
+                });
     };
 
     return {
