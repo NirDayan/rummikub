@@ -2,6 +2,7 @@ package servlets.joingame;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.sun.javafx.scene.control.skin.VirtualFlow;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
@@ -23,9 +24,17 @@ import ws.rummikub.RummikubWebService;
 @WebServlet(name = "WaitingGamesServlet", urlPatterns = {"/waitingGames"})
 public class WaitingGamesServlet extends HttpServlet {
 
-    private class WaitingGameDetails {
-        public GameDetails gameDetails;
-        public List<String> joinedPlayersNames = new ArrayList<>();
+    private class WaitingGameDetails extends GameDetails {
+        public WaitingGameDetails(GameDetails gameDetails, List<String> joinedPlayersNames) {
+            this.humanPlayers = gameDetails.getHumanPlayers();
+            this.computerizedPlayers = gameDetails.getComputerizedPlayers();
+            this.joinedHumanPlayers = gameDetails.getJoinedHumanPlayers();
+            this.loadedFromXML = gameDetails.isLoadedFromXML();
+            this.name = gameDetails.getName();
+            this.status = gameDetails.getStatus();
+            this.joinedPlayersNames = joinedPlayersNames;
+        }
+        public  List<String> joinedPlayersNames = new ArrayList<>();
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -42,9 +51,8 @@ public class WaitingGamesServlet extends HttpServlet {
         List<WaitingGameDetails> waitingGamesDetails = new ArrayList<>(waitingGames.size());
         waitingGames.forEach((s) -> {
             try {
-                WaitingGameDetails toAdd = new WaitingGameDetails();
-                toAdd.gameDetails = webService.getGameDetails(s);
 //                TODO: toAdd.joinedPlayersNames
+                WaitingGameDetails toAdd = new WaitingGameDetails(webService.getGameDetails(s), new ArrayList<>());
                 waitingGamesDetails.add(toAdd);
             } catch (GameDoesNotExists_Exception e) {
                 System.err.println(e.getMessage());
