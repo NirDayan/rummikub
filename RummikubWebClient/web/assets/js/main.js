@@ -1,18 +1,20 @@
 require.config({
-    shim: {
+    shim: {        
         bootstrap: {deps: ['jquery']}
     },
     paths: {
         jquery: 'libs/jquery',
-        bootstrap: 'libs/bootstrap'
+        bootstrap: 'libs/bootstrap',
+        underscore: 'libs/underscore',
     }
 
 });
 
 require([
     // Load our app module and pass it to our definition function
-    'app',
+    'app'
 ], function (App) {
     // The "app" dependency is passed in as "App"
-    App.initialize();
+    var application = new App();
+    application.initialize();
 });

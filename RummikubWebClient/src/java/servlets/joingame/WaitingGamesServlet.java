@@ -22,7 +22,7 @@ import ws.rummikub.RummikubWebService;
 // Will return a list of gameDetails to show in the waiting games table.
 @WebServlet(name = "WaitingGamesServlet", urlPatterns = {"/waitingGames"})
 public class WaitingGamesServlet extends HttpServlet {
-    
+
     private class WaitingGameDetails {
         public GameDetails gameDetails;
         public List<String> joinedPlayersNames = new ArrayList<>();
@@ -36,7 +36,7 @@ public class WaitingGamesServlet extends HttpServlet {
             writer.write("Could not connect to the server at this time.");
             return;
         }
-        
+
         List<String> waitingGames = webService.getWaitingGames();
         List<GameDetails> gameDetails = new ArrayList<>(waitingGames.size());
         List<WaitingGameDetails> waitingGamesDetails = new ArrayList<>(waitingGames.size());
@@ -50,7 +50,7 @@ public class WaitingGamesServlet extends HttpServlet {
                 System.err.println(e.getMessage());
             }
         });
-        
+
         String json = new Gson().toJson(waitingGamesDetails);
         response.setContentType("application/json");
         writer.write(json);

@@ -4,7 +4,7 @@ body {
     background-size: 100%;
 }
 
-.newGame,.mainGame,.winner,.error {
+.newGame,.mainGame,.gameOver,.error {
     visibility: hidden;
 }
 
