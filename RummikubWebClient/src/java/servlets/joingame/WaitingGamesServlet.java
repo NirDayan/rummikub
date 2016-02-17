@@ -1,8 +1,10 @@
 package servlets.joingame;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -20,6 +22,11 @@ import ws.rummikub.RummikubWebService;
 // Will return a list of gameDetails to show in the waiting games table.
 @WebServlet(name = "WaitingGamesServlet", urlPatterns = {"/waitingGames"})
 public class WaitingGamesServlet extends HttpServlet {
+    
+    private class WaitingGameDetails {
+        public GameDetails gameDetails;
+        public List<String> joinedPlayersNames = new ArrayList<>();
+    }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -32,24 +39,19 @@ public class WaitingGamesServlet extends HttpServlet {
         
         List<String> waitingGames = webService.getWaitingGames();
         List<GameDetails> gameDetails = new ArrayList<>(waitingGames.size());
-        
+        List<WaitingGameDetails> waitingGamesDetails = new ArrayList<>(waitingGames.size());
         waitingGames.forEach((s) -> {
             try {
-                gameDetails.add(webService.getGameDetails(s));
+                WaitingGameDetails toAdd = new WaitingGameDetails();
+                toAdd.gameDetails = webService.getGameDetails(s);
+//                TODO: toAdd.joinedPlayersNames
+                waitingGamesDetails.add(toAdd);
             } catch (GameDoesNotExists_Exception e) {
                 System.err.println(e.getMessage());
             }
         });
         
-        /*
-         * TODO: we need to change the JSON object to structure like:
-         * [
-         *  {gameName: "game1", humanPlayers, compPlayers, joinedHuman, playerNames}
-         *  {gameName: "game2", humanPlayers, compPlayers, joinedHuman, playerNames}
-         *  {gameName: "game3", humanPlayers, compPlayers, joinedHuman, playerNames}
-         * ]
-         */
-        String json = new Gson().toJson(gameDetails);
+        String json = new Gson().toJson(waitingGamesDetails);
         response.setContentType("application/json");
         writer.write(json);
     }

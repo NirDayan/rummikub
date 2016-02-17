@@ -9,11 +9,11 @@ define([
          */
         for (var i = 0; i < waitingGames.length; i++) {
             tableBody.append("<tr>" +
-                    "<td>" + waitingGames[i].name + "</td>" +
-                    "<td>" + waitingGames[i].humanPlayers + "</td>" +
-                    "<td>" + waitingGames[i].computerizedPlayers + "</td>" +
-                    "<td>" + waitingGames[i].joinedHumanPlayers + "</td>" +
-                    "<td>" + waitingGames[i].name + "</td>" +
+                    "<td>" + waitingGames[i].gameDetails.name + "</td>" +
+                    "<td>" + waitingGames[i].gameDetails.humanPlayers + "</td>" +
+                    "<td>" + waitingGames[i].gameDetails.computerizedPlayers + "</td>" +
+                    "<td>" + waitingGames[i].gameDetails.joinedHumanPlayers + "</td>" +
+                    "<td>" + waitingGames[i].gameDetails.name + "</td>" +
                     "</tr>");
         }
     };
