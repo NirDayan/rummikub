@@ -16,10 +16,10 @@
                         <table id="waitingGamesTable" class="table table-hover table-condensed table-bordered">
                             <thead>
                                 <tr>
-                                    <th>Game name</th>
-                                    <th>Human players</th>
-                                    <th>Computerize players</th>
-                                    <th>Joined human</th>
+                                    <th>Game Name</th>
+                                    <th>Human Players</th>
+                                    <th>Computerize Players</th>
+                                    <th>Joined Human</th>
                                     <th>Available Names</th>
                                 </tr>
                             </thead>
@@ -27,7 +27,13 @@
                             </tbody>
                         </table>
                     </div>
-                    <button id="creatGameBtn">Create Game</button>
+                    <div id="playerNameInputGroup" class="input-group">
+                        <input id="playerNameInput" type="text" class="form-control" placeholder="Player name">
+                        <span class="input-group-btn">
+                            <button id="joinGameButton" class="btn btn-default" type="button" disabled>Join Game</button>
+                        </span>
+                    </div>
+                    <button class="btn" id="creatGameBtn">Create Game</button>
                 </div>
                 <div class="newGame page">
                     <h1>New Game Creation</h1>

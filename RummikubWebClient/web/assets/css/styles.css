@@ -26,9 +26,20 @@ body {
 #waitingGamesTable td,th {
   text-align: center !important;
   font-size: 1.8rem;
+  font-weight: bold;
 }
 
 #waitingGamesTable th {
   background: lightblue;
   border-color: white;
+  font-size: 2rem;
+}
+
+#waitingGamesTable .selected {
+    background-color: chartreuse;
+}
+
+#playerNameInputGroup {
+    width: 30%;
+    margin: 10px 0 15px 0;
 }
