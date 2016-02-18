@@ -11,20 +11,24 @@ define([
     WaitingGames.prototype = {
         updateWaitingGamesTable: function (waitingGames) {
             var tableBody = jQuery("#waitingGamesTable tbody").empty();
-            /*
-             * TODO: the last element should be a list of name
-             */
+            var namesString = "";
+            var namesList;
+
             for (var i = 0; i < waitingGames.length; i++) {
+                namesList = waitingGames[i].unjoinedPlayersNames;
+                for (var j = 0; j < namesList.length; j++) {
+                    namesString += namesList[i];
+                    if (j != namesList.length - 1) {
+                        namesString += ", ";
+                    }
+                }
                 tableBody.append("<tr>" +
                         "<td>" + waitingGames[i].name + "</td>" +
                         "<td>" + waitingGames[i].humanPlayers + "</td>" +
                         "<td>" + waitingGames[i].computerizedPlayers + "</td>" +
-                        "<td>" + waitingGames[i].joinedHumanPlayers + "</td><td>");
-                var namesList = waitingGames[i].unjoinedPlayersNames;
-                for (var j = 0; j < namesList.length; j++) {
-                    tableBody.append(namesList[j] + " ");
-                }
-                tableBody.append("</td></tr>");
+                        "<td>" + waitingGames[i].joinedHumanPlayers + "</td>" +
+                        "<td>" + namesString + "</td>");
+
             }
         },
         initialize: function () {
