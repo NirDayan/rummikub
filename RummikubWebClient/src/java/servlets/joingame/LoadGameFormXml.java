@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
+import servlets.utils.ServletConstants;
 import servlets.utils.ServletUtils;
 
 // This servlet returns a json that spcifie if the load was successful or not
@@ -41,10 +42,10 @@ public class LoadGameFormXml extends HttpServlet {
         try {
             ServletUtils.getWebService(getServletContext())
                     .createGameFromXML(fileContent.toString());
-            retJson.addProperty("isLoaded", Boolean.TRUE);
+            retJson.addProperty(ServletConstants.IS_SUCCESS, Boolean.TRUE);
         } catch (Exception ex) {
-            retJson.addProperty("isLoaded", Boolean.TRUE);
-            retJson.addProperty("errorMsg", ex.getMessage());
+            retJson.addProperty(ServletConstants.IS_SUCCESS, Boolean.FALSE);
+            retJson.addProperty(ServletConstants.ERROR_MSG, ex.getMessage());
         }
         out.write(retJson.toString());
     }
