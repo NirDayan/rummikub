@@ -1,80 +1,55 @@
 package servlets.joingame;
 
+import com.google.gson.JsonObject;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.Scanner;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 import servlets.utils.ServletUtils;
 
+// This servlet returns a json that spcifie if the load was successful or not
 @WebServlet(name = "LoadGameFormXml", urlPatterns = {"/loadGame"})
 public class LoadGameFormXml extends HttpServlet {
 
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        String xmlPath = "C:\\Rummi\\Test.xml"; //Will be a request parameter in the future
-        try (PrintWriter out = response.getWriter()) {
-            try {
-                String fileContent = getFileContent(xmlPath, StandardCharsets.UTF_8);
-                ServletUtils.getWebService(getServletContext()).createGameFromXML(fileContent);
-                out.println("Success!");
-            }catch (IOException ex){
-                out.println("Could not open file: "+ xmlPath);
-            }
-            catch (Exception ex) {
-                out.println(ex.getMessage());
-            }
-        }
-    }
-
-    private static String getFileContent(String path, Charset encoding) throws IOException {
-        byte[] encoded = Files.readAllBytes(Paths.get(path));
-        return new String(encoded, encoding);
-    }
-
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        response.sendRedirect("index.html");
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+
+        response.setContentType("application/json");
+        PrintWriter out = response.getWriter();
+        Collection<Part> parts = request.getParts();
+        StringBuilder fileContent = new StringBuilder();
+        JsonObject retJson = new JsonObject();
+
+        for (Part part : parts) {
+            fileContent.append(readFromInputStream(part.getInputStream()));
+        }
+
+        try {
+            ServletUtils.getWebService(getServletContext())
+                    .createGameFromXML(fileContent.toString());
+            retJson.addProperty("isLoaded", Boolean.TRUE);
+        } catch (Exception ex) {
+            retJson.addProperty("isLoaded", Boolean.TRUE);
+            retJson.addProperty("errorMsg", ex.getMessage());
+        }
+        out.write(retJson.toString());
     }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
-    @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
+    private String readFromInputStream(InputStream inputStream) {
+        return new Scanner(inputStream).useDelimiter("\\Z").next();
+    }
 }
