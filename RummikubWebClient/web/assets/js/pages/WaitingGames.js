@@ -16,15 +16,15 @@ define([
              */
             for (var i = 0; i < waitingGames.length; i++) {
                 tableBody.append("<tr>" +
-                    "<td>" + waitingGames[i].name + "</td>" +
-                    "<td>" + waitingGames[i].humanPlayers + "</td>" +
-                    "<td>" + waitingGames[i].computerizedPlayers + "</td>" +
-                    "<td>" + waitingGames[i].joinedHumanPlayers + "</td>");
-            var namesList = waitingGames[i].unjoinedPlayersNames;
+                        "<td>" + waitingGames[i].name + "</td>" +
+                        "<td>" + waitingGames[i].humanPlayers + "</td>" +
+                        "<td>" + waitingGames[i].computerizedPlayers + "</td>" +
+                        "<td>" + waitingGames[i].joinedHumanPlayers + "</td><td>");
+                var namesList = waitingGames[i].unjoinedPlayersNames;
                 for (var j = 0; j < namesList.length; j++) {
-                    tableBody.append("<td>" + namesList[j] + "</td>");
+                    tableBody.append(namesList[j] + " ");
                 }
-                    tableBody.append("</tr>");
+                tableBody.append("</td></tr>");
             }
         },
         initialize: function () {
