@@ -56,9 +56,6 @@ define([
                 });
 
                 waitingGamesRequest.done(function (waitingGames) {
-                    if (!waitingGames || waitingGames.length === 0) {
-                        return;
-                    }
                     if (this.currentWaitingGames && _.isEqual(this.currentWaitingGames, waitingGames)) {
                         //List has not been changed. Do Nothing...
                         return;
@@ -91,9 +88,11 @@ define([
                     jQuery.post("./joinGame", {
                         gameName: gameName,
                         playerName: playerName
-                    }).done(function () {
+                    }).done(function (data) {
+                        return;
                         //Todo: continue...
-                    }).fail(function () {
+                    }).fail(function (errorMessage) {
+                        return;
                         //TODO: error message
                     });
                 } else {

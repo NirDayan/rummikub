@@ -18,13 +18,13 @@ import servlets.utils.ServletUtils;
 @WebServlet(name = "JoinGameServlet", urlPatterns = {"/joinGame"})
 
 public class JoinGameServlet extends HttpServlet {
+
     private static final String PLAYER_NAME = "playerName";
     private static final String GAME_NAME = "gameName";
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("application/json");
-        JsonObject retJson = new JsonObject();
         PrintWriter out = response.getWriter();
         String playerName = request.getParameter(PLAYER_NAME);
         String gameName = request.getParameter(GAME_NAME);
@@ -34,12 +34,11 @@ public class JoinGameServlet extends HttpServlet {
                     .joinGame(gameName, playerName);
 
             request.getSession(true).setAttribute(ServletConstants.PLAYER_ID, playerId);
-            retJson.addProperty(ServletConstants.IS_SUCCESS, Boolean.TRUE);
+            response.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception ex) {
-            retJson.addProperty(ServletConstants.IS_SUCCESS, Boolean.FALSE);
-            retJson.addProperty(ServletConstants.ERROR_MSG, ex.getMessage());
+            out.write(ex.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
-        out.write(retJson.toString());
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
