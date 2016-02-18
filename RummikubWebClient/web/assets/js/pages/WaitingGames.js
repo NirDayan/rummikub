@@ -17,7 +17,7 @@ define([
             for (var i = 0; i < waitingGames.length; i++) {
                 namesList = waitingGames[i].unjoinedPlayersNames;
                 for (var j = 0; j < namesList.length; j++) {
-                    namesString += namesList[i];
+                    namesString += namesList[j];
                     if (j != namesList.length - 1) {
                         namesString += ", ";
                     }

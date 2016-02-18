@@ -18,3 +18,17 @@ body {
 #waitingGamesTable th:hover {
         
 }
+
+#waitingGamesTable thead {
+    background-color: white;
+}
+
+#waitingGamesTable td,th {
+  text-align: center !important;
+  font-size: 1.8rem;
+}
+
+#waitingGamesTable th {
+  background: lightblue;
+  border-color: white;
+}
