@@ -1,15 +1,10 @@
 package servlets.joingame;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.sun.javafx.scene.control.skin.VirtualFlow;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -18,6 +13,9 @@ import javax.servlet.http.HttpServletResponse;
 import servlets.utils.ServletUtils;
 import ws.rummikub.GameDetails;
 import ws.rummikub.GameDoesNotExists_Exception;
+import ws.rummikub.PlayerDetails;
+import ws.rummikub.PlayerStatus;
+import ws.rummikub.PlayerType;
 import ws.rummikub.RummikubWebService;
 
 // Will return a list of gameDetails to show in the waiting games table.
@@ -25,16 +23,16 @@ import ws.rummikub.RummikubWebService;
 public class WaitingGamesServlet extends HttpServlet {
 
     private class WaitingGameDetails extends GameDetails {
-        public WaitingGameDetails(GameDetails gameDetails, List<String> joinedPlayersNames) {
+        public WaitingGameDetails(GameDetails gameDetails, List<String> unjoinedPlayersNames) {
             this.humanPlayers = gameDetails.getHumanPlayers();
             this.computerizedPlayers = gameDetails.getComputerizedPlayers();
             this.joinedHumanPlayers = gameDetails.getJoinedHumanPlayers();
             this.loadedFromXML = gameDetails.isLoadedFromXML();
             this.name = gameDetails.getName();
             this.status = gameDetails.getStatus();
-            this.joinedPlayersNames = joinedPlayersNames;
+            this.unjoinedPlayersNames = unjoinedPlayersNames;
         }
-        public  List<String> joinedPlayersNames = new ArrayList<>();
+        public  List<String> unjoinedPlayersNames = new ArrayList<>();
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -47,12 +45,14 @@ public class WaitingGamesServlet extends HttpServlet {
         }
 
         List<String> waitingGames = webService.getWaitingGames();
-        List<GameDetails> gameDetails = new ArrayList<>(waitingGames.size());
         List<WaitingGameDetails> waitingGamesDetails = new ArrayList<>(waitingGames.size());
+        
         waitingGames.forEach((s) -> {
             try {
-//                TODO: toAdd.joinedPlayersNames
-                WaitingGameDetails toAdd = new WaitingGameDetails(webService.getGameDetails(s), new ArrayList<>());
+                WaitingGameDetails toAdd = new WaitingGameDetails(
+                        webService.getGameDetails(s),
+                        getUnjoinedPlayerNames(webService, s));
+                
                 waitingGamesDetails.add(toAdd);
             } catch (GameDoesNotExists_Exception e) {
                 System.err.println(e.getMessage());
@@ -63,6 +63,20 @@ public class WaitingGamesServlet extends HttpServlet {
         response.setContentType("application/json");
         writer.write(json);
     }
+
+    private List<String> getUnjoinedPlayerNames(RummikubWebService webService, String gameName)
+            throws GameDoesNotExists_Exception {
+        List<String> playerNames = new ArrayList<>();
+        List<PlayerDetails> playerDetails = webService.getPlayersDetails(gameName);
+        
+        playerDetails.stream()
+                .filter((p) -> p.getType() == PlayerType.HUMAN)
+                .filter((p) -> p.getStatus() == PlayerStatus.RETIRED)
+                .forEachOrdered((p) -> playerNames.add(p.getName()));
+        
+        return playerNames;
+    }
+
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods.">
     /**

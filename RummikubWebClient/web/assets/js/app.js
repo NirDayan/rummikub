@@ -2,7 +2,7 @@
 define([
     'jquery',
     'bootstrap',
-    'pages/WaitingGames'
+    'pages/waitingGames'
 ], function (jQuery, bootstrap, WaitingGames) {
 
     function application() {        

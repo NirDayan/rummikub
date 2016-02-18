@@ -19,9 +19,12 @@ define([
                     "<td>" + waitingGames[i].name + "</td>" +
                     "<td>" + waitingGames[i].humanPlayers + "</td>" +
                     "<td>" + waitingGames[i].computerizedPlayers + "</td>" +
-                    "<td>" + waitingGames[i].joinedHumanPlayers + "</td>" +
-                    "<td>" + waitingGames[i].name + "</td>" +
-                    "</tr>");
+                    "<td>" + waitingGames[i].joinedHumanPlayers + "</td>");
+            var namesList = waitingGames[i].unjoinedPlayersNames;
+                for (var j = 0; j < namesList.length; j++) {
+                    tableBody.append("<td>" + namesList[j] + "</td>");
+                }
+                    tableBody.append("</tr>");
             }
         },
         initialize: function () {
