@@ -119,18 +119,6 @@ define([
                 reader.readAsText(files[0]);
             });
         },
-        isNewGameFormValid: function () {
-            var gameName = jQuery('#inputGameName').val().trim();
-            var humanPlayersNum = parseInt(jQuery('#humanPlayersNum').val());
-            var compPlayersNum = parseInt(jQuery('#compPlayersNum').val());
-            var playersSum = humanPlayersNum + compPlayersNum;
-
-            if (gameName.length < 1 || playersSum > 4 || playersSum < 2) {
-                return false;
-            }
-
-            return true;
-        },
         initNewGameForm: function () {
             jQuery('#inputGameName').on('change', function () {
                 var inputText = jQuery(this).val().trim();
