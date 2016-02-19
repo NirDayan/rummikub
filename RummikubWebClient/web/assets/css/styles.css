@@ -56,21 +56,21 @@ body {
 }
 
 #waitingGames .btn-file {
-  position: relative;
-  overflow: hidden;
+    position: relative;
+    overflow: hidden;
 }
 
 #waitingGames .btn-file input[type=file] {
-  position: absolute;
-  top: 0;
-  right: 0;
-  font-size: 100px;
-  text-align: right;
-  filter: alpha(opacity=0);
-  opacity: 0;
-  background: red;
-  cursor: inherit;
-  display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    background: red;
+    cursor: inherit;
+    display: block;
 }
 
 #waitingGames .btn-group-vertical {
@@ -78,6 +78,10 @@ body {
 }
 
 #waitingGames input[readonly] {
-  background-color: white !important;
-  cursor: text !important;
+    background-color: white !important;
+    cursor: text !important;
 }
+/*
+#createNewGame {
+    margin-top: 15px;
+}*/
