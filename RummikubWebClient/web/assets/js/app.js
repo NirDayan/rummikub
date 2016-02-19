@@ -2,8 +2,9 @@
 define([
     'jquery',
     'bootstrap',
-    'pages/WaitingGames'
-], function (jQuery, bootstrap, WaitingGames) {
+    'pages/WaitingGames',
+    'pages/NewGame'
+], function (jQuery, bootstrap, WaitingGames, NewGame) {
 
     function application() {        
         this.currentPage = null;
@@ -12,8 +13,13 @@ define([
                 var waitingGamesPage = new WaitingGames();
                 waitingGamesPage.initialize();
                 this.currentPage = waitingGamesPage;
+                jQuery('#waitingGames').addClass("visible");
             }.bind(this),
             '#newGame': function () {
+                var newGamePage = new NewGame();
+                newGamePage.initialize();
+                this.currentPage = newGamePage;
+                jQuery('#newGame').addClass("visible");
             }.bind(this),
             '#mainGame': function () {
             }.bind(this),
@@ -29,7 +35,7 @@ define([
             // Get the keyword from the url.
             var temp = url.split('/')[0];
             // Hide whatever page is currently shown.
-            jQuery('.main-content .page').removeClass('visible');
+            jQuery('#main-content .page').removeClass('visible');
 
             // Execute the current page close function
             if (this.currentPage != null) {

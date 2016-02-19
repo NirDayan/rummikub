@@ -4,8 +4,15 @@ body {
     background-size: 100%;
 }
 
-.newGame,.mainGame,.gameOver,.error {
-    visibility: hidden;
+/**
+* All Pages
+**/
+.page {
+    display: none;
+}
+
+.page.visible {
+    display: block;
 }
 
 /**
@@ -16,7 +23,7 @@ body {
 }
 
 #waitingGamesTable th:hover {
-        
+
 }
 
 #waitingGamesTable thead {
@@ -24,15 +31,15 @@ body {
 }
 
 #waitingGamesTable td,th {
-  text-align: center !important;
-  font-size: 1.8rem;
-  font-weight: bold;
+    text-align: center !important;
+    font-size: 1.8rem;
+    font-weight: bold;
 }
 
 #waitingGamesTable th {
-  background: lightblue;
-  border-color: white;
-  font-size: 2rem;
+    background: lightblue;
+    border-color: white;
+    font-size: 2rem;
 }
 
 #waitingGamesTable .selected {
@@ -43,3 +50,4 @@ body {
     width: 30%;
     margin: 10px 0 15px 0;
 }
+

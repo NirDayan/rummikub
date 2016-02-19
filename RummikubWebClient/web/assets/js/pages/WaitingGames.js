@@ -1,8 +1,9 @@
 // Filename: WaitingGames.js
 define([
     'jquery',
-    'underscore'
-], function (jQuery, _) {
+    'underscore',
+    'utils/PageErrorAlert'
+], function (jQuery, _, PageErrorAlert) {
     function WaitingGames() {
         this.pollingInterval = null;
         this.currentWaitingGames = null;
@@ -92,18 +93,23 @@ define([
                         return;
                         //Todo: continue...
                     }).fail(function (errorMessage) {
-                        return;
-                        //TODO: error message
+                        new PageErrorAlert().show(errorMessage.responseText);
                     });
                 } else {
-                    //TODO: error message
+                    new PageErrorAlert().show("Invalid player name or selected game.");
                 }
             }.bind(this));
+        },
+        initCreateGameButton: function () {
+            jQuery("#creatGameBtn").on("click", function () {
+                window.location.hash = "newGame";                
+            });
         },
         initialize: function () {
             this.startPolling();
             this.initPlayerNameField();
             this.initJoinGameButton();
+            this.initCreateGameButton();
         },
         close: function () {
             if (this.pollingInterval) {
