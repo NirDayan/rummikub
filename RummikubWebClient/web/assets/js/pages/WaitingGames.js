@@ -100,16 +100,32 @@ define([
                 }
             }.bind(this));
         },
-        initCreateGameButton: function () {
-            jQuery("#creatGameBtn").on("click", function () {
-                window.location.hash = "newGame";                
+        initLoadGameFromFileButton: function () {
+            jQuery("#loadGameFromFile").on('change', function (evt) {
+                var files = evt.target.files; // FileList object
+                var reader = new FileReader();
+                var input = jQuery(this),
+                        label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+                
+                input.parents('.input-group').find(':text').val(label);
+                reader.onload = function(evt) {
+                    jQuery.post("./loadGame", {
+                        fileContent: evt.target.result
+                    }).done(function (data) {
+                        return;
+                        //Todo: continue...
+                    }).fail(function (errorMessage) {
+                        new PageErrorAlert().show(errorMessage.responseText);
+                    });
+                };
+                reader.readAsText(files[0]);
             });
         },
         initialize: function () {
             this.startPolling();
             this.initPlayerNameField();
             this.initJoinGameButton();
-            this.initCreateGameButton();
+            this.initLoadGameFromFileButton();
         },
         close: function () {
             if (this.pollingInterval) {

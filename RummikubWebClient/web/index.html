@@ -33,9 +33,45 @@
                             <button id="joinGameButton" class="btn btn-default" type="button" disabled>Join Game</button>
                         </span>
                     </div>
-                    <button class="btn" id="creatGameBtn">Create Game</button>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Add a new game</div>
+                        <div class="panel-body">
+                            <div class="btn-group-vertical" role="group" aria-label="...">
+                                <div class="input-group">
+                                    <span class="input-group-btn">
+                                        <span class="btn btn-primary btn-file">
+                                            Browse&hellip; <input id="loadGameFromFile" type="file">
+                                        </span>
+                                    </span>
+                                    <input type="text" class="form-control" readonly>
+                                </div>
+                                <button id="createNewGame" type="button" class="btn btn-default" aria-label="Left Align">
+                                    Create new game
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
                 <div id="newGame" class="page">
+                    <div class="btn-group" data-toggle="buttons">
+                        <div class="radio">
+                            <label class="input-group-addon">
+                                <input type="radio" name="options" id="option1"> Radio 1 (preselected)
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label class="input-group-addon">
+                                <input type="radio" name="options" id="option2"> Radio 2
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label class="input-group-addon">
+                                <input type="radio" name="options" id="option3"> Radio 3
+                            </label>
+                        </div>
+
+                    </div>
                 </div>
                 <div id="mainGame" class="page"></div>
                 <div id="gameOver" class="page"></div>

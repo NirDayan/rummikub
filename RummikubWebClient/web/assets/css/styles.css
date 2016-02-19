@@ -15,6 +15,10 @@ body {
     display: block;
 }
 
+.page .panel {
+    background-color: transparent;
+    font-size: 2rem;
+}
 /**
 * Waiting Games Page
 **/
@@ -51,3 +55,29 @@ body {
     margin: 10px 0 15px 0;
 }
 
+#waitingGames .btn-file {
+  position: relative;
+  overflow: hidden;
+}
+
+#waitingGames .btn-file input[type=file] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 100px;
+  text-align: right;
+  filter: alpha(opacity=0);
+  opacity: 0;
+  background: red;
+  cursor: inherit;
+  display: block;
+}
+
+#waitingGames .btn-group-vertical {
+    width: 50%;
+}
+
+#waitingGames input[readonly] {
+  background-color: white !important;
+  cursor: text !important;
+}

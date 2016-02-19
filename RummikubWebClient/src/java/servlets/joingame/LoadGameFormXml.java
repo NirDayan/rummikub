@@ -19,6 +19,8 @@ import servlets.utils.ServletUtils;
 @WebServlet(name = "LoadGameFormXml", urlPatterns = {"/loadGame"})
 public class LoadGameFormXml extends HttpServlet {
 
+    private static final String FILE_CONTENT = "fileContent";
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -29,28 +31,13 @@ public class LoadGameFormXml extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        response.setContentType("application/json");
-        PrintWriter out = response.getWriter();
-        Collection<Part> parts = request.getParts();
-        StringBuilder fileContent = new StringBuilder();
-        JsonObject retJson = new JsonObject();
-
-        for (Part part : parts) {
-            fileContent.append(readFromInputStream(part.getInputStream()));
-        }
-
         try {
             ServletUtils.getWebService(getServletContext())
-                    .createGameFromXML(fileContent.toString());
-            retJson.addProperty(ServletConstants.IS_SUCCESS, Boolean.TRUE);
+                    .createGameFromXML(request.getParameter(FILE_CONTENT));
+            response.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception ex) {
-            retJson.addProperty(ServletConstants.IS_SUCCESS, Boolean.FALSE);
-            retJson.addProperty(ServletConstants.ERROR_MSG, ex.getMessage());
+            response.getWriter().write(ex.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
-        out.write(retJson.toString());
-    }
-
-    private String readFromInputStream(InputStream inputStream) {
-        return new Scanner(inputStream).useDelimiter("\\Z").next();
     }
 }
