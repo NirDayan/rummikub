@@ -121,11 +121,42 @@ define([
                 reader.readAsText(files[0]);
             });
         },
+        initNewGameForm: function () {
+            jQuery('#inputGameName').on('change', function () {
+                var inputText = jQuery(this).val().trim();
+                jQuery(this).val(inputText);
+            });
+            jQuery('#newGameForm').on('submit', function () {
+                var gameName = jQuery('#inputGameName').val().trim();
+                var humanPlayersNum = parseInt(jQuery('#humanPlayersNum').val());
+                var compPlayersNum = parseInt(jQuery('#compPlayersNum').val());
+                var playersSum = humanPlayersNum + compPlayersNum;
+
+                if (gameName.length > 1 && playersSum <= 4 && playersSum >= 2) {
+                    jQuery.post("./createGame", {
+                        gameName: gameName,
+                        humanPlayersNum: humanPlayersNum,
+                        compPlayersNum: compPlayersNum                        
+                    }).done(function (data) {
+                        jQuery('#inputGameName').val("");
+                        jQuery('#humanPlayersNum').val("");
+                        jQuery('#compPlayersNum').val("");
+                    }).fail(function (errorMessage) {
+                        (new PageErrorAlert()).show(errorMessage.responseText);
+                    });
+                } else {
+                    (new PageErrorAlert()).show("Invalid form fields");
+                }
+                //Prevent the submittion from changing the URL
+                return false;
+            });
+        },
         initialize: function () {
             this.startPolling();
             this.initPlayerNameField();
             this.initJoinGameButton();
             this.initLoadGameFromFileButton();
+            this.initNewGameForm();
         },
         close: function () {
             if (this.pollingInterval) {
