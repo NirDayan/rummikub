@@ -1,8 +1,9 @@
-package servlets.joingame;
+package servlets.gameplay;
 
-import com.google.gson.JsonObject;
+import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -10,30 +11,24 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import servlets.utils.SessionUtils;
 import servlets.utils.ServletUtils;
+import ws.rummikub.Event;
 
-/**
- *
- * @author Lior
- */
-@WebServlet(name = "JoinGameServlet", urlPatterns = {"/joinGame"})
-
-public class JoinGameServlet extends HttpServlet {
-
-    private static final String PLAYER_NAME = "playerName";
-    private static final String GAME_NAME = "gameName";
+@WebServlet(name = "GetEventsServlet", urlPatterns = {"/GetEvents"})
+public class GetEventsServlet extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("application/json");
         PrintWriter out = response.getWriter();
-        String playerName = request.getParameter(PLAYER_NAME);
-        String gameName = request.getParameter(GAME_NAME);
-
+        
         try {
-            int playerId = ServletUtils.getWebService(getServletContext())
-                    .joinGame(gameName, playerName);
-
-            request.getSession(true).setAttribute(SessionUtils.PLAYER_ID, playerId);
+            List<Event> eventsList = ServletUtils.getWebService(getServletContext())
+                    .getEvents(SessionUtils.getPlayerId(request),
+                            SessionUtils.getEventsId(request));
+            
+            String json = new Gson().toJson(eventsList);
+            out.write(json);
+            
+            SessionUtils.incrementEventsId(request, eventsList.size());
             response.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception ex) {
             out.write(ex.getMessage());
@@ -41,7 +36,7 @@ public class JoinGameServlet extends HttpServlet {
         }
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
