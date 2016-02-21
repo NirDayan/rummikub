@@ -82,6 +82,13 @@ body {
     background-color: white !important;
     cursor: text !important;
 }
+
+#pageError {
+    position: fixed;
+    top: 0;
+    z-index: 10000;
+    width: 80%;
+}
 /*
 #createNewGame {
     margin-top: 15px;
