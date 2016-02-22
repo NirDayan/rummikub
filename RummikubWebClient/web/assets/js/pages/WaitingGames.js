@@ -93,10 +93,10 @@ define([
                         return;
                         //Todo: continue...
                     }).fail(function (errorMessage) {
-                        new PageErrorAlert().show(errorMessage.responseText);
+                        (new PageErrorAlert()).show(errorMessage.responseText);
                     });
                 } else {
-                    new PageErrorAlert().show("Invalid player name or selected game.");
+                    (new PageErrorAlert()).show("Invalid player name or selected game.");
                 }
             }.bind(this));
         },
@@ -106,16 +106,14 @@ define([
                 var reader = new FileReader();
                 var input = jQuery(this),
                         label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
-                
-                input.parents('.input-group').find(':text').val(label);
-                reader.onload = function(evt) {
+
+                reader.onload = function (evt) {
                     jQuery.post("./loadGame", {
                         fileContent: evt.target.result
                     }).done(function (data) {
-                        return;
-                        //Todo: continue...
+                        input.parents('.input-group').find(':text').val(label);
                     }).fail(function (errorMessage) {
-                        new PageErrorAlert().show(errorMessage.responseText);
+                        (new PageErrorAlert()).show(errorMessage.responseText);
                     });
                 };
                 reader.readAsText(files[0]);
