@@ -89,7 +89,32 @@ body {
     z-index: 10000;
     width: 80%;
 }
-/*
-#createNewGame {
-    margin-top: 15px;
-}*/
+/**
+* Main Game Page
+**/
+#playersPanel {
+    margin-top: 5%;
+}
+
+#board {
+    background-image: url(../images/Board.png);
+    background-repeat: no-repeat;
+    background-size: 100%;
+    position: absolute;
+    left: 15%;
+    right: 15%;
+    top: 15%;
+    bottom: 5%;
+    border-radius: 10px;
+}
+
+#playersTable {
+    background-color: rgba(0,0,0,0.2);
+    color: white;
+}
+
+#playersTable th {
+    text-align: center !important;
+    font-size: 2.5rem;
+    font-weight: bold;
+}

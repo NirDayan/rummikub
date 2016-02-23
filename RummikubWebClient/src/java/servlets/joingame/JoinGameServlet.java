@@ -11,10 +11,6 @@ import javax.servlet.http.HttpServletResponse;
 import servlets.utils.SessionUtils;
 import servlets.utils.ServletUtils;
 
-/**
- *
- * @author Lior
- */
 @WebServlet(name = "JoinGameServlet", urlPatterns = {"/joinGame"})
 
 public class JoinGameServlet extends HttpServlet {
@@ -24,7 +20,6 @@ public class JoinGameServlet extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("application/json");
         PrintWriter out = response.getWriter();
         String playerName = request.getParameter(PLAYER_NAME);
         String gameName = request.getParameter(GAME_NAME);

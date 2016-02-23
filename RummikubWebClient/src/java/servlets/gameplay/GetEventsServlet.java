@@ -26,6 +26,7 @@ public class GetEventsServlet extends HttpServlet {
                             SessionUtils.getEventsId(request));
             
             String json = new Gson().toJson(eventsList);
+            response.setContentType("application/json");
             out.write(json);
             
             SessionUtils.incrementEventsId(request, eventsList.size());

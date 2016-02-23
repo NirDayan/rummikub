@@ -2,8 +2,9 @@
 define([
     'jquery',
     'bootstrap',
-    'pages/WaitingGames'
-], function (jQuery, bootstrap, WaitingGames) {
+    'pages/WaitingGames',
+    'pages/MainGame'
+], function (jQuery, bootstrap, WaitingGames, MainGame) {
 
     function application() {        
         this.currentPage = null;
@@ -15,6 +16,11 @@ define([
                 jQuery('#waitingGames').addClass("visible");
             }.bind(this),
             '#mainGame': function () {
+                var gameDetails = this.currentPage.getGameDetails();
+                var mainGame = new MainGame(gameDetails.gameName, gameDetails.playerName, gameDetails.playersNumber);
+                mainGame.initialize();
+                this.currentPage = mainGame;
+                jQuery('#mainGame').addClass("visible");
             }.bind(this),
             '#gameOver': function () {
             }.bind(this),
