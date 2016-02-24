@@ -3,7 +3,6 @@ package servlets.gameplay;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -13,18 +12,18 @@ import servlets.utils.ServletUtils;
 import servlets.utils.SessionUtils;
 import ws.rummikub.PlayerDetails;
 
-@WebServlet(name = "GetPlayerDetailsServlet", urlPatterns = {"/playersDetails"})
-public class GetPlayersDetailsServlet extends HttpServlet {
+@WebServlet(name = "GetPlayerDetailsServlet", urlPatterns = {"/playerDetails"})
+public class GetPlayerDetailsServlet extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         PrintWriter out = response.getWriter();
 
         try {
-            List<PlayerDetails> playersDetails = ServletUtils.getWebService(getServletContext())
-                    .getPlayersDetails(SessionUtils.getCurrentGameName(request));
+            PlayerDetails playerDetails = ServletUtils.getWebService(getServletContext())
+                    .getPlayerDetails(SessionUtils.getPlayerId(request));
 
-            String json = new Gson().toJson(playersDetails);
+            String json = new Gson().toJson(playerDetails);
             response.setContentType("application/json");
             out.write(json);
 
