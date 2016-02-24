@@ -6,11 +6,18 @@ import javax.servlet.http.HttpSession;
 public class SessionUtils {
     public static final String PLAYER_ID = "playerId";
     public static final String EVENTS_ID = "eventsId";
+    public static final String GAME_NAME = "gameName";
     
     public static int getPlayerId (HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         Object attribute = session != null ? session.getAttribute(PLAYER_ID) : null;
         return attribute != null ? (Integer)attribute : -1;
+    }
+    
+    public static String getCurrentGameName (HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        Object attribute = session != null ? session.getAttribute(GAME_NAME) : null;
+        return attribute != null ? (String)attribute : "";
     }
     
     public static int getEventsId(HttpServletRequest request) {

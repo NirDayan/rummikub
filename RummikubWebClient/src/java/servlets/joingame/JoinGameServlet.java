@@ -1,6 +1,5 @@
 package servlets.joingame;
 
-import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
@@ -29,6 +28,7 @@ public class JoinGameServlet extends HttpServlet {
                     .joinGame(gameName, playerName);
 
             request.getSession(true).setAttribute(SessionUtils.PLAYER_ID, playerId);
+            request.getSession(true).setAttribute(SessionUtils.GAME_NAME, gameName);
             response.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception ex) {
             out.write(ex.getMessage());
