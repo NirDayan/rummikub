@@ -7,6 +7,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import servlets.utils.SessionUtils;
 import servlets.utils.ServletUtils;
 
@@ -26,9 +27,13 @@ public class JoinGameServlet extends HttpServlet {
         try {
             int playerId = ServletUtils.getWebService(getServletContext())
                     .joinGame(gameName, playerName);
-
-            request.getSession(true).setAttribute(SessionUtils.PLAYER_ID, playerId);
-            request.getSession(true).setAttribute(SessionUtils.GAME_NAME, gameName);
+            
+            // initialize session attributes
+            HttpSession session = request.getSession(true);
+            session.setAttribute(SessionUtils.PLAYER_ID, playerId);
+            session.setAttribute(SessionUtils.GAME_NAME, gameName);
+            session.setAttribute(SessionUtils.EVENTS_ID, 0);
+            
             response.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception ex) {
             out.write(ex.getMessage());
