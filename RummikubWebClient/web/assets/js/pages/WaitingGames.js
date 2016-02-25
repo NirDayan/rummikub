@@ -97,6 +97,7 @@ define([
                         this.currentPlayerName = playerName;
                         this.currentGameName = gameName;
                         this.playersNumber =humanPlayers + computerizedPlayers;
+                        jQuery("#playerNameInput").val( "");
                         window.location.hash = "mainGame";
                     }.bind(this)).fail(function (errorMessage) {
                         (new PageErrorAlert()).show(errorMessage.responseText);

@@ -27,7 +27,7 @@ define([
             }.bind(this), 1000);
         },
         handleGameEvents: function (events) {
-            
+
         },
         initPlayersNames: function () {
             var tableRow = jQuery("#playersTable thead tr:first");
@@ -39,15 +39,52 @@ define([
             jQuery.get({
                 'url': "./getPlayerTiles"
             }).done(function (playerTiles) {
-                
+
             }).fail(function () {
 
             });
         },
-        switchBackground: function() {
+        switchBackground: function () {
             jQuery("body").removeClass("waitingGamesBackground").addClass("mainGameBackground");
         },
+        handlePullTile: function () {
+            jQuery.get({
+                'url': "./pullTile"
+            }).done(function () {
+
+            }).fail(function () {
+
+            });
+        },
+        handleResign: function () {
+            jQuery.get({
+                'url': "./resign"
+            }).done(function () {
+
+            }).fail(function () {
+
+            });
+        },
+        handleFinishTurn: function () {
+            jQuery.get({
+                'url': "./finishTurn"
+            }).done(function () {
+
+            }).fail(function () {
+
+            });
+        },
+        handleMainMenu: function () {
+            window.location.hash = "waitingGames";
+        },
+        initButtons: function () {
+            jQuery("#mainMenu").on("click", this.handleMainMenu.bind(this));
+            jQuery("#pullTile").on("click", this.handlePullTile.bind(this));
+            jQuery("#resign").on("click", this.handleResign.bind(this));
+            jQuery("#finishTurn").on("click", this.handleFinishTurn.bind(this));
+        },
         initialize: function () {
+            this.initButtons();
             this.switchBackground();
             this.initPlayersNames();
             this.initPlayerTiles();
