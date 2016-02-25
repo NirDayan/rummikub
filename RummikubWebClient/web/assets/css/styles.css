@@ -1,10 +1,3 @@
-body {
-    background-image: url(../images/Rummikub_Background.jpg);
-    background-repeat: no-repeat;
-    background-size: 100%;
-    background-attachment: fixed;
-}
-
 /**
 * All Pages
 **/
@@ -23,6 +16,13 @@ body {
 /**
 * Waiting Games Page
 **/
+.waitingGamesBackground {
+    background-image: url(../images/Rummikub_Background.jpg);
+    background-repeat: no-repeat;
+    background-size: 100%;
+    background-attachment: fixed;
+}
+
 #waitingGamesTable {
     margin-top: 150px;
 }
@@ -92,20 +92,25 @@ body {
 /**
 * Main Game Page
 **/
+
+.mainGameBackground {
+    background-image: url(../images/Board.png);
+    background-repeat: no-repeat;
+    background-size: 100%;
+    background-attachment: fixed;
+}
+
 #playersPanel {
     margin-top: 5%;
 }
 
 #board {
-    background-image: url(../images/Board.png);
-    background-repeat: no-repeat;
-    background-size: 100%;
-    position: absolute;
     left: 15%;
     right: 15%;
     top: 15%;
-    bottom: 5%;
+    bottom: 20%;
     border-radius: 10px;
+    position: absolute;
 }
 
 #playersTable {
@@ -117,4 +122,16 @@ body {
     text-align: center !important;
     font-size: 2.5rem;
     font-weight: bold;
+}
+
+#playerTilesContainer {
+    background-image: url(../images/rummikub_stand.png);
+    background-repeat: round;
+    background-size: 100%;
+    background-attachment: fixed;
+    position: absolute;
+    bottom: 5%;
+    height: 15%;
+    left: 15%;
+    right: 15%;
 }

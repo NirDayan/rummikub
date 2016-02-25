@@ -26,9 +26,8 @@ define([
                 });
             }.bind(this), 1000);
         },
-        handleGameEvents: function () {
-            return;
-            //TODO...
+        handleGameEvents: function (events) {
+            
         },
         initPlayersNames: function () {
             var tableRow = jQuery("#playersTable thead tr:first");
@@ -45,7 +44,11 @@ define([
 
             });
         },
+        switchBackground: function() {
+            jQuery("body").removeClass("waitingGamesBackground").addClass("mainGameBackground");
+        },
         initialize: function () {
+            this.switchBackground();
             this.initPlayersNames();
             this.initPlayerTiles();
             this.startPolling();

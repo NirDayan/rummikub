@@ -8,7 +8,7 @@
         <link rel="stylesheet" href="assets/css/bootstrap.min.css">
         <script data-main="assets/js/main" src="assets/js/libs/require.js"></script>
     </head>
-    <body>
+    <body class="waitingGamesBackground">
         <div id="main-content" class="container">
             <div id="waitingGames" class="page">
                 <div class="table-responsive">
@@ -85,10 +85,21 @@
                     </div>
                 </div>
             </div>
-            <div id="mainGame" class="page"></div>
+            <div id="mainGame" class="page">
+                <div id="playersPanel">
+                    <table id="playersTable" class="table table-hover table-condensed table-bordered">
+                        <thead>
+                            <tr></tr>
+                        </thead>
+                    </table>
+                </div>
+                <div id="board">                    
+                </div>
+                <div id="playerTilesContainer"></div>
+            </div>
             <div id="gameOver" class="page"></div>
             <div class="error page"></div>
-                <div id="pageError"></div>
+            <div id="pageError"></div>
         </div>        
     </body>
 </html>
