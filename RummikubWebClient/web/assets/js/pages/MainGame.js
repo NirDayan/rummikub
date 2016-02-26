@@ -67,26 +67,18 @@ define([
                 tableRow.append("<th>" + (i == 0 ? this.playerName : "") + "</th>");
             }
         },
-        setPlayersNames: function () {
-            var deferred = new jQuery.Deferred();
-            jQuery.get("./playersDetails").done(function (playersDetails) {
-                var tablePlayerNamesCollection = jQuery("#playersTable thead th");
-                for (var i = 0; i < playersDetails.length; i++) {
-                    tablePlayerNamesCollection.eq(i).text(playersDetails[i].name);
-                }
-
-                deferred.resolve(playersDetails);
-            }).fail(function (errorMessage) {
-                (new PageErrorAlert()).show(errorMessage.responseText);
-                deferred.reject();
-            });
-
-            return deferred.promise();
+        updatePlayersNames: function (playersDetails) {
+            var tablePlayerNamesCollection = jQuery("#playersTable thead th");
+            for (var i = 0; i < playersDetails.length; i++) {
+                tablePlayerNamesCollection.eq(i).text(playersDetails[i].name);
+            }
         },
         updatePlayerNamesWithCurrentPlayer: function () {
             var tablePlayerNamesCollection = jQuery("#playersTable thead th");
         },
-        initPlayerTiles: function () {
+        updatePlayerTiles: function (playerDetails) {
+            var playerTiles = playerDetails.tiles;
+            var playerStand = jQuery("#playerTilesList");
             jQuery("ul.droptrue").sortable({
                 connectWith: "ul"
             });
@@ -94,23 +86,14 @@ define([
                 connectWith: "ul",
                 dropOnEmpty: false
             });
-            jQuery("#playerTilesList").disableSelection();
-            
-            jQuery.get({
-                'url': "./playerDetails"
-            }).done(function (playerDetails) {
-                var playerTiles = playerDetails.tiles;
-                var playerStand = jQuery("#playerTilesList");
+            playerStand.disableSelection();
 
-                for (var i = 0; i < playerTiles.length; i++) {
-                    playerStand.append('<li class="ui-state-default">' +
-                            '<div><img class="tileImg" src="assets/images/tiles/' +
-                            playerTiles[i].color.toLowerCase() + '/' + playerTiles[i].value + '.png" ' +
-                            'width=40px></div></li>');
-                }
-            }).fail(function (errorMessage) {
-                (new PageErrorAlert()).show(errorMessage.responseText);
-            });
+            for (var i = 0; i < playerTiles.length; i++) {
+                playerStand.append('<li class="ui-state-default">' +
+                        '<div><img class="tileImg" src="assets/images/tiles/' +
+                        playerTiles[i].color.toLowerCase() + '/' + playerTiles[i].value + '.png" ' +
+                        'width=40px></div></li>');
+            }
         },
         switchBackground: function () {
             jQuery("body").removeClass("waitingGamesBackground").addClass("mainGameBackground");
@@ -167,7 +150,11 @@ define([
         },
         handleGameStart: function () {
             this.playSound(SOUNDS.GAME_STARTED);
-            return this.setPlayersNames();
+
+            var playersDetailsPromise = jQuery.get("./playersDetails").done(this.updatePlayersNames.bind(this));
+            var currentPlayerDetailsPromise = jQuery.get("./playerDetails").done(this.updatePlayerTiles.bind(this));
+            
+            return jQuery.when(playersDetailsPromise, currentPlayerDetailsPromise);
         },
         handleGameOver: function () {
             return new jQuery.Deferred().resolve();
@@ -183,7 +170,7 @@ define([
             }
 
             this.updatePlayerNamesWithCurrentPlayer(event.playerName);
-            
+
             return new jQuery.Deferred().resolve();
         },
         handlePlayerFinishedTurn: function () {
@@ -210,8 +197,7 @@ define([
         initialize: function () {
             this.initButtons();
             this.switchBackground();
-            this.initPlayersNames();       
-            this.initPlayerTiles(); 
+            this.initPlayersNames();
             this.startPolling();
         },
         close: function () {
