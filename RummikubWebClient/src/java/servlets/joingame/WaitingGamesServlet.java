@@ -23,6 +23,7 @@ import ws.rummikub.RummikubWebService;
 public class WaitingGamesServlet extends HttpServlet {
 
     private class WaitingGameDetails extends GameDetails {
+
         public WaitingGameDetails(GameDetails gameDetails, List<String> unjoinedPlayersNames) {
             this.humanPlayers = gameDetails.getHumanPlayers();
             this.computerizedPlayers = gameDetails.getComputerizedPlayers();
@@ -32,7 +33,7 @@ public class WaitingGamesServlet extends HttpServlet {
             this.status = gameDetails.getStatus();
             this.unjoinedPlayersNames = unjoinedPlayersNames;
         }
-        public  List<String> unjoinedPlayersNames = new ArrayList<>();
+        public List<String> unjoinedPlayersNames = new ArrayList<>();
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -46,13 +47,13 @@ public class WaitingGamesServlet extends HttpServlet {
 
         List<String> waitingGames = webService.getWaitingGames();
         List<WaitingGameDetails> waitingGamesDetails = new ArrayList<>(waitingGames.size());
-        
+
         waitingGames.forEach((s) -> {
             try {
                 WaitingGameDetails toAdd = new WaitingGameDetails(
                         webService.getGameDetails(s),
                         getUnjoinedPlayerNames(webService, s));
-                
+
                 waitingGamesDetails.add(toAdd);
             } catch (GameDoesNotExists_Exception e) {
                 System.err.println(e.getMessage());
@@ -69,14 +70,16 @@ public class WaitingGamesServlet extends HttpServlet {
         List<String> playerNames = new ArrayList<>();
         List<PlayerDetails> playerDetails = webService.getPlayersDetails(gameName);
         
-        playerDetails.stream()
-                .filter((p) -> p.getType() == PlayerType.HUMAN)
-                .filter((p) -> p.getStatus() == PlayerStatus.RETIRED)
-                .forEachOrdered((p) -> playerNames.add(p.getName()));
-        
+        //Unjoined players are relevent only for loaded games
+        if (webService.getGameDetails(gameName).isLoadedFromXML()) {
+            playerDetails.stream()
+                    .filter((p) -> p.getType() == PlayerType.HUMAN)
+                    .filter((p) -> p.getStatus() == PlayerStatus.RETIRED)
+                    .forEachOrdered((p) -> playerNames.add(p.getName()));
+        }
+
         return playerNames;
     }
-
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods.">
     /**

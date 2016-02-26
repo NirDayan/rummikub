@@ -13,6 +13,7 @@ define([
         this.pollingInterval = null;
         this.events = null;
         this.playerTilesModel = null;
+        this.gameWinner = null;
         this.gameName = gameName;
         this.playerName = playerName;
         this.playersNumber = playersNumber;
@@ -69,6 +70,9 @@ define([
         updatePlayersNames: function (playersDetails) {
             var tablePlayerNamesCollection = jQuery("#playersTable thead th");
             for (var i = 0; i < playersDetails.length; i++) {
+                if (playersDetails[i].name.toLowerCase() === this.playerName.toLowerCase()) {
+                    tablePlayerNamesCollection.eq(i).css("color", "blue");
+                }
                 tablePlayerNamesCollection.eq(i).text(playersDetails[i].name);
             }
         },
@@ -76,7 +80,7 @@ define([
             var tablePlayerNamesCollection = jQuery("#playersTable thead th");
             tablePlayerNamesCollection.removeClass("currentPlayer");
             for (var i = 0; i < tablePlayerNamesCollection.length; i++) {
-                if (tablePlayerNamesCollection.eq(i).text() == playerName) {
+                if (tablePlayerNamesCollection.eq(i).text().toLowerCase() === playerName.toLowerCase()) {
                     tablePlayerNamesCollection.eq(i).addClass("currentPlayer");
                     break;
                 }
@@ -130,7 +134,7 @@ define([
             jQuery.get("./finishTurn").fail(function (errorMessage) {
                 (new PageErrorAlert()).show(errorMessage.responseText);
             });
-            
+
             this.setGameEnabled(false);
         },
         initButtons: function () {
@@ -164,13 +168,16 @@ define([
             return jQuery.when(playersDetailsPromise, currentPlayerDetailsPromise);
         },
         handleGameOver: function () {
+            //Go to gameOver page
+            window.location.hash = "gameOver";
             return new jQuery.Deferred().resolve();
         },
-        handleGameWinner: function () {
-            return new jQuery.Deferred().resolve();
+        handleGameWinner: function (event) {
+            this.gameWinner = event.playerName;
+            return this.handleGameOver();
         },
         handlePlayerTurn: function (event) {
-            if (event.playerName.toLowerCase() === this.playerName) {
+            if (event.playerName.toLowerCase() === this.playerName.toLowerCase()) {
                 this.setGameEnabled(true);
                 this.playSound(SOUNDS.PLAYER_TURN);
                 this.isPlayerPerformAnyChange = false;
@@ -180,10 +187,10 @@ define([
 
             return new jQuery.Deferred().resolve();
         },
-        handlePlayerFinishedTurn: function (finishTurnData) {
-            if (finishTurnData.tiles) {
-                if (finishTurnData.playerName.toLowerCase() === this.playerName) {
-                    this.playerTilesModel.push(finishTurnData.tiles[0]);
+        handlePlayerFinishedTurn: function (event) {
+            if (event.tiles) {
+                if (event.playerName.toLowerCase() === this.playerName.toLowerCase()) {
+                    this.playerTilesModel.push(event.tiles[0]);
                     this.updatePlayerTilesView();
                 } else {
                     //TODO:showMessage(playerName + " has pulled a tile from the deck");
@@ -192,22 +199,34 @@ define([
 
             return new jQuery.Deferred().resolve();
         },
-        handlePlayerResigned: function () {
+        handlePlayerResigned: function (event) {
+            var tablePlayerNamesCollection = jQuery("#playersTable thead th");
+            for (var i = 0; i < tablePlayerNamesCollection.length; i++) {
+                if (tablePlayerNamesCollection.eq(i).text().toLowerCase() === event.playerName.toLowerCase()) {
+                    tablePlayerNamesCollection.eq(i).text("");
+                    break;
+                }
+            }
             return new jQuery.Deferred().resolve();
         },
         handleSequenceCreated: function () {
+            //TODO
             return new jQuery.Deferred().resolve();
         },
         handleTileAdded: function () {
+            //TODO
             return new jQuery.Deferred().resolve();
         },
         TileReturned: function () {
+            //TODO
             return new jQuery.Deferred().resolve();
         },
         handleTileMoved: function () {
+            //TODO
             return new jQuery.Deferred().resolve();
         },
         handleRevert: function () {
+            //TODO
             return new jQuery.Deferred().resolve();
         },
         initialize: function () {

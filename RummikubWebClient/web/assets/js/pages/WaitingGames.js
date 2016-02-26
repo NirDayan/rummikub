@@ -136,7 +136,8 @@ define([
                 var inputText = jQuery(this).val().trim();
                 jQuery(this).val(inputText);
             });
-            jQuery('#newGameForm').on('submit', function () {
+            jQuery('#newGameForm').on('submit', function (e) {
+                e.preventDefault();                
                 var gameName = jQuery('#inputGameName').val().trim();
                 var humanPlayersNum = parseInt(jQuery('#humanPlayersNum').val());
                 var compPlayersNum = parseInt(jQuery('#compPlayersNum').val());
