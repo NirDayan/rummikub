@@ -130,15 +130,27 @@
 }
 
 #playerTilesContainer {
-    background-image: url(../images/rummikub_stand.png);
-    background-repeat: round;
-    background-size: 100%;
-    background-attachment: fixed;
     position: absolute;
     bottom: 5%;
     height: 15%;
     left: 15%;
     right: 15%;
+    z-index: 1000;
+}
+
+#playerTilesStandImg {
+    height: 100%;
+    width: 100%;
+}
+
+#playerTilesStand {
+    position: absolute;
+    bottom: 5%;
+    height: 15%;
+    left: 10%;
+    right: 10%;
+    display: inline;
+    z-index: 0;
 }
 
 #mainGameButtonsContainer {
