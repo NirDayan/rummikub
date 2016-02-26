@@ -12,6 +12,7 @@ define([
     function MainGame(gameName, playerName, playersNumber) {
         this.pollingInterval = null;
         this.events = null;
+        this.playerTilesModel = null;
         this.gameName = gameName;
         this.playerName = playerName;
         this.playersNumber = playersNumber;
@@ -81,8 +82,7 @@ define([
                 }
             }
         },
-        updatePlayerTiles: function (playerDetails) {
-            var playerTiles = playerDetails.tiles;
+        updatePlayerTilesView: function () {
             var playerStand = jQuery("#playerTilesList");
             jQuery("ul.droptrue").sortable({
                 connectWith: "ul"
@@ -93,10 +93,11 @@ define([
             });
             playerStand.disableSelection();
 
-            for (var i = 0; i < playerTiles.length; i++) {
+            playerStand.empty();
+            for (var i = 0; i < this.playerTilesModel.length; i++) {
                 playerStand.append('<li class="ui-state-default">' +
                         '<div><img class="tileImg" src="assets/images/tiles/' +
-                        playerTiles[i].color.toLowerCase() + '/' + playerTiles[i].value + '.png" ' +
+                        this.playerTilesModel[i].color.toLowerCase() + '/' + this.playerTilesModel[i].value + '.png" ' +
                         'width=40px></div></li>');
             }
         },
@@ -104,11 +105,14 @@ define([
             jQuery("body").removeClass("waitingGamesBackground").addClass("mainGameBackground");
         },
         handlePullTile: function () {
-            jQuery.get("./pullTile").done(function () {
-
-            }).fail(function () {
-
+            if (this.isPlayerPerformAnyChange) {
+                (new PageErrorAlert()).show("Pull tile from deck is not possible since you performed board changes");
+                return;
+            }
+            jQuery.get("./finishTurn").fail(function (errorMessage) {
+                (new PageErrorAlert()).show(errorMessage.responseText);
             });
+            this.setGameEnabled(false);
         },
         handleResign: function () {
             jQuery.get("./resign").done(function () {
@@ -119,11 +123,15 @@ define([
             });
         },
         handleFinishTurn: function () {
-            jQuery.get("./finishTurn").done(function () {
-
-            }).fail(function () {
-
+            if (!this.isPlayerPerformAnyChange) {
+                (new PageErrorAlert()).show("No Changes have been made to the board");
+                return;
+            }
+            jQuery.get("./finishTurn").fail(function (errorMessage) {
+                (new PageErrorAlert()).show(errorMessage.responseText);
             });
+            
+            this.setGameEnabled(false);
         },
         initButtons: function () {
             jQuery("#mainMenu").on("click", this.handleResign.bind(this));
@@ -148,7 +156,10 @@ define([
             this.playSound(SOUNDS.GAME_STARTED);
 
             var playersDetailsPromise = jQuery.get("./playersDetails").done(this.updatePlayersNames.bind(this));
-            var currentPlayerDetailsPromise = jQuery.get("./playerDetails").done(this.updatePlayerTiles.bind(this));
+            var currentPlayerDetailsPromise = jQuery.get("./playerDetails").done(function (playerDetails) {
+                this.playerTilesModel = playerDetails.tiles;
+                this.updatePlayerTilesView();
+            }.bind(this));
 
             return jQuery.when(playersDetailsPromise, currentPlayerDetailsPromise);
         },
@@ -162,14 +173,23 @@ define([
             if (event.playerName.toLowerCase() === this.playerName) {
                 this.setGameEnabled(true);
                 this.playSound(SOUNDS.PLAYER_TURN);
-                this.isPlayerPerformAnyChange = true;
+                this.isPlayerPerformAnyChange = false;
             }
 
             this.updatePlayerNamesWithCurrentPlayer(event.playerName);
 
             return new jQuery.Deferred().resolve();
         },
-        handlePlayerFinishedTurn: function () {
+        handlePlayerFinishedTurn: function (finishTurnData) {
+            if (finishTurnData.tiles) {
+                if (finishTurnData.playerName.toLowerCase() === this.playerName) {
+                    this.playerTilesModel.push(finishTurnData.tiles[0]);
+                    this.updatePlayerTilesView();
+                } else {
+                    //TODO:showMessage(playerName + " has pulled a tile from the deck");
+                }
+            }
+
             return new jQuery.Deferred().resolve();
         },
         handlePlayerResigned: function () {

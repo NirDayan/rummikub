@@ -10,8 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 import servlets.utils.ServletUtils;
 import servlets.utils.SessionUtils;
 
-@WebServlet(name = "ResignServlet", urlPatterns = {"/resign"})
-public class ResignServlet extends HttpServlet {
+@WebServlet(name = "FinishTurnServlet", urlPatterns = {"/finishTurn"})
+public class FinishTurnServlet extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -19,7 +19,7 @@ public class ResignServlet extends HttpServlet {
 
         try {
             int playerId = SessionUtils.getPlayerId(request);
-            ServletUtils.getWebService(getServletContext()).resign(playerId);
+            ServletUtils.getWebService(getServletContext()).finishTurn(playerId);
             response.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception ex) {
             out.write(ex.getMessage());
