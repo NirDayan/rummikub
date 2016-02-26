@@ -87,11 +87,19 @@ define([
         },
         initPlayerTiles: function () {
             jQuery.get({
-                'url': "./getPlayerTiles"
-            }).done(function (playerTiles) {
+                'url': "./playerDetails"
+            }).done(function (playerDetails) {
+                var playerTiles = playerDetails.tiles;
+                var playerStand = jQuery("#playerTilesList");
 
-            }).fail(function () {
-
+                for (var i = 0; i < playerTiles.length; i++) {
+                    playerStand.append('<li class="ui-state-default">' +
+                            '<div><img class="tileImg" src="assets/images/tiles/' +
+                            playerTiles[i].color.toLowerCase() + '/' + playerTiles[i].value + '.png" ' +
+                            'width=40px></div></li>');
+                }
+            }).fail(function (errorMessage) {
+                (new PageErrorAlert()).show(errorMessage.responseText);
             });
         },
         switchBackground: function () {
@@ -192,7 +200,8 @@ define([
         initialize: function () {
             this.initButtons();
             this.switchBackground();
-            this.initPlayersNames();            
+            this.initPlayersNames();       
+            this.initPlayerTiles(); 
             this.startPolling();
         },
         close: function () {

@@ -143,3 +143,22 @@
     top: 50%;
     transform: translateY(-50%);
 }
+
+#playerTilesList, #sortable2, #sortable3 {
+    list-style-type: none;
+    margin: 0;
+    margin-right: 10px;
+    padding: 5px;
+    width: 100%;
+}
+
+#playerTilesList li, #sortable2 li, #sortable3 li {
+    float: left;
+    margin: 5px;
+    padding: 5px;
+}
+
+.tileImg {
+    height: 56px;
+    width: 40px;
+}
