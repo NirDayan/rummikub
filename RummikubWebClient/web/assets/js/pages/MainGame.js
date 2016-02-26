@@ -1,8 +1,9 @@
 // Filename: MainGame.js
 define([
     'jquery',
+    'libs/jquery-ui',
     'utils/PageErrorAlert'
-], function (jQuery, PageErrorAlert) {
+], function (jQuery, jQueryUI, PageErrorAlert) {
     var SOUNDS = {
         GAME_STARTED: "",
         PLAYER_TURN: "",
@@ -86,6 +87,15 @@ define([
             var tablePlayerNamesCollection = jQuery("#playersTable thead th");
         },
         initPlayerTiles: function () {
+            jQuery("ul.droptrue").sortable({
+                connectWith: "ul"
+            });
+            jQuery("ul.dropfalse").sortable({
+                connectWith: "ul",
+                dropOnEmpty: false
+            });
+            jQuery("#playerTilesList").disableSelection();
+            
             jQuery.get({
                 'url': "./playerDetails"
             }).done(function (playerDetails) {
