@@ -53,9 +53,7 @@ define([
         },
         startPolling: function () {
             this.pollingInterval = setInterval(function () {
-                var waitingGamesRequest = jQuery.get({
-                    url: "./waitingGames"
-                });
+                var waitingGamesRequest = jQuery.get("./waitingGames");
 
                 waitingGamesRequest.done(function (waitingGames) {
                     if (this.currentWaitingGames && _.isEqual(this.currentWaitingGames, waitingGames)) {
@@ -162,6 +160,9 @@ define([
                 //Prevent the submittion from changing the URL
                 return false;
             });
+        },        
+        switchBackground: function () {
+            jQuery("body").removeClass("mainGameBackground").addClass("waitingGamesBackground");
         },
         initialize: function () {
             this.startPolling();
@@ -169,6 +170,7 @@ define([
             this.initJoinGameButton();
             this.initLoadGameFromFileButton();
             this.initNewGameForm();
+            this.switchBackground();
         },
         close: function () {
             if (this.pollingInterval) {

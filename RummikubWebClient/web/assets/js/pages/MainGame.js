@@ -35,9 +35,7 @@ define([
     MainGame.prototype = {
         startPolling: function () {
             this.pollingInterval = setInterval(function () {
-                var getEventsPolling = jQuery.get({
-                    url: "./GetEvents"
-                });
+                var getEventsPolling = jQuery.get("./GetEvents");
 
                 getEventsPolling.done(function (events) {
                     this.events = events;
@@ -73,8 +71,15 @@ define([
                 tablePlayerNamesCollection.eq(i).text(playersDetails[i].name);
             }
         },
-        updatePlayerNamesWithCurrentPlayer: function () {
+        updatePlayerNamesWithCurrentPlayer: function (playerName) {
             var tablePlayerNamesCollection = jQuery("#playersTable thead th");
+            tablePlayerNamesCollection.removeClass("currentPlayer");
+            for (var i = 0; i < tablePlayerNamesCollection.length; i++) {
+                if (tablePlayerNamesCollection.eq(i).text() == playerName) {
+                    tablePlayerNamesCollection.eq(i).addClass("currentPlayer");
+                    break;
+                }
+            }
         },
         updatePlayerTiles: function (playerDetails) {
             var playerTiles = playerDetails.tiles;
@@ -99,18 +104,14 @@ define([
             jQuery("body").removeClass("waitingGamesBackground").addClass("mainGameBackground");
         },
         handlePullTile: function () {
-            jQuery.get({
-                'url': "./pullTile"
-            }).done(function () {
+            jQuery.get("./pullTile").done(function () {
 
             }).fail(function () {
 
             });
         },
         handleResign: function () {
-            jQuery.get({
-                'url': "./resign"
-            }).done(function () {
+            jQuery.get("./resign").done(function () {
                 //Go back to waitingGames page
                 window.location.hash = "waitingGames";
             }).fail(function (errorMessage) {
@@ -118,19 +119,14 @@ define([
             });
         },
         handleFinishTurn: function () {
-            jQuery.get({
-                'url': "./finishTurn"
-            }).done(function () {
+            jQuery.get("./finishTurn").done(function () {
 
             }).fail(function () {
 
             });
         },
-        handleMainMenu: function () {
-            window.location.hash = "waitingGames";
-        },
         initButtons: function () {
-            jQuery("#mainMenu").on("click", this.handleMainMenu.bind(this));
+            jQuery("#mainMenu").on("click", this.handleResign.bind(this));
             jQuery("#pullTile").on("click", this.handlePullTile.bind(this));
             jQuery("#resign").on("click", this.handleResign.bind(this));
             jQuery("#finishTurn").on("click", this.handleFinishTurn.bind(this));
@@ -138,10 +134,10 @@ define([
         setGameEnabled: function (isEnabled) {
             var buttons = jQuery("#mainGameButtonsContainer .actionButton");
             if (isEnabled) {
-                buttons.attr("disabled", true);
+                buttons.attr("disabled", false);
                 this.isEnabled = true;
             } else {
-                buttons.attr("disabled", false);
+                buttons.attr("disabled", true);
                 this.isEnabled = false;
             }
         },
@@ -153,7 +149,7 @@ define([
 
             var playersDetailsPromise = jQuery.get("./playersDetails").done(this.updatePlayersNames.bind(this));
             var currentPlayerDetailsPromise = jQuery.get("./playerDetails").done(this.updatePlayerTiles.bind(this));
-            
+
             return jQuery.when(playersDetailsPromise, currentPlayerDetailsPromise);
         },
         handleGameOver: function () {
