@@ -125,10 +125,6 @@
     width:25%;
 }
 
-#playersTable th.currentPlayer {
-    background-color: greenyellow;
-}
-
 #playerTilesContainer {
     background-image: url(../images/rummikub_stand.png);
     background-repeat: round;
@@ -148,7 +144,7 @@
     transform: translateY(-50%);
 }
 
-#playerTilesList, #sortable2, #sortable3 {
+#playerTilesList, .boardSequence{
     list-style-type: none;
     margin: 0;
     margin-right: 10px;
@@ -156,7 +152,7 @@
     width: 100%;
 }
 
-#playerTilesList li, #sortable2 li, #sortable3 li {
+#playerTilesList li, .boardSeqList li {
     float: left;
     margin: 5px;
     padding: 5px;
