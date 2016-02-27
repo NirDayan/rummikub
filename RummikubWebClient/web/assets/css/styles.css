@@ -24,7 +24,8 @@
 }
 
 #rummikubTitle {
-    margin-bottom: 25px;
+    width: 250px;
+    margin: 25px 0 25px 0;
 }
 
 #waitingGamesTable th:hover {
