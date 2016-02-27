@@ -6,8 +6,8 @@ define([
     'utils/PageInfoAlert'
 ], function (jQuery, jQueryUI, PageErrorAlert, PageInfoAlert) {
     var SOUNDS = {
-        GAME_STARTED: "",
-        PLAYER_TURN: "",
+        GAME_STARTED: "GAME_STARTED",
+        PLAYER_TURN: "PLAYER_TURN",
     };
 
     function MainGame(gameName, playerName, playersNumber) {
@@ -162,7 +162,11 @@ define([
             }
         },
         playSound: function (soundType) {
-            //TODO: make sound :)
+            if (soundType === SOUNDS.PLAYER_TURN) {
+                document.getElementById("playerTurnAudio").play();
+            } else {
+                document.getElementById("gameStartAudio").play();
+            }            
         },
         handleGameStart: function () {
             this.playSound(SOUNDS.GAME_STARTED);
