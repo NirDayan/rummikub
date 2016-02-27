@@ -2,8 +2,9 @@
 define([
     'jquery',
     'libs/jquery-ui',
-    'utils/PageErrorAlert'
-], function (jQuery, jQueryUI, PageErrorAlert) {
+    'utils/PageErrorAlert',
+    'utils/PageInfoAlert'
+], function (jQuery, jQueryUI, PageErrorAlert, PageInfoAlert) {
     var SOUNDS = {
         GAME_STARTED: "",
         PLAYER_TURN: "",
@@ -170,6 +171,7 @@ define([
             var currentPlayerDetailsPromise = jQuery.get("./playerDetails").done(function (playerDetails) {
                 this.playerTilesModel = playerDetails.tiles;
                 this.updatePlayerTilesView();
+                (new PageInfoAlert()).show("Game started!");
             }.bind(this));
 
             return jQuery.when(playersDetailsPromise, currentPlayerDetailsPromise);
@@ -199,9 +201,8 @@ define([
                 if (event.playerName.toLowerCase() === this.playerName.toLowerCase()) {
                     this.playerTilesModel.push(event.tiles[0]);
                     this.updatePlayerTilesView();
-                } else {
-                    //TODO:showMessage(playerName + " has pulled a tile from the deck");
                 }
+                (new PageInfoAlert()).show(event.playerName + " has pulled a tile from the deck");
             }
 
             return new jQuery.Deferred().resolve();
@@ -214,14 +215,18 @@ define([
                     break;
                 }
             }
+
+            (new PageInfoAlert()).show(event.playerName + " has Resigned from game");
             return new jQuery.Deferred().resolve();
         },
-        handleSequenceCreated: function () {
+        handleSequenceCreated: function (event) {
             //TODO
+            (new PageInfoAlert()).show(event.playerName + " has added a new sequence");
             return new jQuery.Deferred().resolve();
         },
-        handleTileAdded: function () {
+        handleTileAdded: function (event) {
             //TODO
+            (new PageInfoAlert()).show(event.playerName + " has added tile to board");
             return new jQuery.Deferred().resolve();
         },
         TileReturned: function () {
@@ -232,9 +237,24 @@ define([
             //TODO
             return new jQuery.Deferred().resolve();
         },
-        handleRevert: function () {
-            //TODO
-            return new jQuery.Deferred().resolve();
+        handleRevert: function (event) {
+            var deferred = new jQuery.Deferred();
+            if (event.playerName.toLowerCase() === this.playerName.toLowerCase()) {
+                jQuery.get("./playerDetails").done(function (playerDetails) {
+                    this.playerTilesModel = playerDetails.tiles;
+                    this.updatePlayerTilesView();
+                    //TODO: update board here
+
+                    (new PageInfoAlert()).show(event.playerName + " you punished with 3 tiles");
+                    deferred.resolve();
+                }.bind(this)).fail(function (err) {
+                    deferred.reject(err);
+                });
+            } else {
+                (new PageInfoAlert()).show(event.playerName + "player" + event.playerName + " was punished with 3 tiles");
+                deferred.resolve();
+            }
+            return deferred.promise();
         },
         getGameWinner: function () {
             return this.gameWinner;
@@ -246,6 +266,7 @@ define([
             this.startPolling();
         },
         close: function () {
+            this.disableButtons();
             if (this.pollingInterval) {
                 clearInterval(this.pollingInterval);
             }
