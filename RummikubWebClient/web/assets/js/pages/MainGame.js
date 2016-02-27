@@ -63,6 +63,7 @@ define([
         },
         initPlayersNames: function () {
             var tableRow = jQuery("#playersTable thead tr:first");
+            tableRow.empty();
             for (var i = 0; i < this.playersNumber; i++) {
                 tableRow.append("<th>" + (i == 0 ? this.playerName : "") + "</th>");
             }
@@ -142,6 +143,12 @@ define([
             jQuery("#pullTile").on("click", this.handlePullTile.bind(this));
             jQuery("#resign").on("click", this.handleResign.bind(this));
             jQuery("#finishTurn").on("click", this.handleFinishTurn.bind(this));
+        },
+        disableButtons: function () {
+            jQuery("#mainMenu").off("click");
+            jQuery("#pullTile").off("click");
+            jQuery("#resign").off("click");
+            jQuery("#finishTurn").off("click");
         },
         setGameEnabled: function (isEnabled) {
             var buttons = jQuery("#mainGameButtonsContainer .actionButton");
@@ -228,6 +235,9 @@ define([
         handleRevert: function () {
             //TODO
             return new jQuery.Deferred().resolve();
+        },
+        getGameWinner: function () {
+            return this.gameWinner;
         },
         initialize: function () {
             this.initButtons();

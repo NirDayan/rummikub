@@ -174,6 +174,13 @@ define([
             this.switchBackground();
         },
         close: function () {
+            var tableBody = jQuery("#waitingGamesTable tbody");
+            tableBody.find('tr').off("click");
+            jQuery("#playerNameInput").off("keyup");
+            jQuery("#joinGameButton").off("click");
+            jQuery("#loadGameFromFile").off('change');
+            jQuery('#inputGameName').off('change');
+            jQuery('#newGameForm').off('submit');
             if (this.pollingInterval) {
                 clearInterval(this.pollingInterval);
             }

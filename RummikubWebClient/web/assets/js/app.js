@@ -3,8 +3,9 @@ define([
     'jquery',
     'bootstrap',
     'pages/WaitingGames',
-    'pages/MainGame'
-], function (jQuery, bootstrap, WaitingGames, MainGame) {
+    'pages/MainGame',
+    'pages/GameOver'
+], function (jQuery, bootstrap, WaitingGames, MainGame, GameOver) {
 
     function application() {        
         this.currentPage = null;
@@ -23,6 +24,11 @@ define([
                 jQuery('#mainGame').addClass("visible");
             }.bind(this),
             '#gameOver': function () {
+                var winnerPlayerName = this.currentPage.getGameWinner();
+                var gameOver = new GameOver(winnerPlayerName);
+                gameOver.initialize();
+                this.currentPage = gameOver;
+                jQuery('#gameOver').addClass("visible");
             }.bind(this),
             '#error': function () {
             }.bind(this)
