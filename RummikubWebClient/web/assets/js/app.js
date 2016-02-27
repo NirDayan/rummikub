@@ -29,8 +29,6 @@ define([
                 gameOver.initialize();
                 this.currentPage = gameOver;
                 jQuery('#gameOver').addClass("visible");
-            }.bind(this),
-            '#error': function () {
             }.bind(this)
         };        
     }
@@ -50,14 +48,6 @@ define([
             if (this.pagesLoadMap[temp]) {
                 this.pagesLoadMap[temp]();
             }
-            // If the keyword isn't listed in the above - render the error page.
-            else {
-                this.renderErrorPage("Wrong URL");
-            }
-        },
-        
-        renderErrorPage: function (errorMessage) {
-            jQuery('.error').addClass('visible');
         },
         
         initialize: function () {

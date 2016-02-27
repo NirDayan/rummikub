@@ -23,8 +23,8 @@
     background-attachment: fixed;
 }
 
-#waitingGamesTable {
-    margin-top: 150px;
+#rummikubTitle {
+    margin-bottom: 25px;
 }
 
 #waitingGamesTable th:hover {

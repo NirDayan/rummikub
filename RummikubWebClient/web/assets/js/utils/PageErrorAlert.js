@@ -13,7 +13,7 @@ define([
                     '</button>' +
                     '<h4>Aw Snap! You got an error:</h4>' +
                     '<p id="pageErrorMessage">' + errorMessage + '</p>' +
-                    '</div>');
+                    '</div>').fadeIn().delay(2000).fadeOut("slow");;
         }
     };
 
