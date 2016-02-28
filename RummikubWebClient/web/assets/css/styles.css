@@ -161,7 +161,7 @@
     transform: translateY(-50%);
 }
 
-#playerTilesList, .boardSequence{
+#playerTilesList, #boardSeqList, .boardSequence{
     list-style-type: none;
     margin: 0;
     margin-right: 10px;
@@ -169,10 +169,11 @@
     width: 100%;
 }
 
-#playerTilesList li, .boardSeqList li {
+#playerTilesList li, #boardSeqList li, .boardSequence li {
     float: left;
     margin: 5px;
     padding: 5px;
+    display: inline;
 }
 
 .tileImg {
