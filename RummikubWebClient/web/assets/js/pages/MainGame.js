@@ -88,24 +88,41 @@ define([
                 }
             }
         },
-        updatePlayerTilesView: function () {
+        initPlayerTilesView: function () {
             var playerStand = jQuery("#playerTilesList");
+            playerStand.sortable({
+                connectWith: "boardSequence",
+            });
             jQuery("ul.droptrue").sortable({
-                connectWith: "ul"
+                connectWith: "ul",
+                start: function (event, ui){},
+                drag: function (event, ui){},
+                stop: function (event, ui){},
             });
             jQuery("ul.dropfalse").sortable({
                 connectWith: "ul",
                 dropOnEmpty: false
             });
             playerStand.disableSelection();
-
+            jQuery("#board").disableSelection();  
+        },
+        updatePlayerTilesView: function () {
+            var playerStand = jQuery("#playerTilesList");
+          
             playerStand.empty();
             for (var i = 0; i < this.playerTilesModel.length; i++) {
                 playerStand.append('<li class="ui-state-default">' +
                         '<div><img class="tileImg" src="assets/images/tiles/' +
-                        this.playerTilesModel[i].color.toLowerCase() + '/' + this.playerTilesModel[i].value + '.png" ' +
+                        this.playerTilesModel[i].color.toLowerCase() +
+                        '/' + this.playerTilesModel[i].value + '.png" ' +
                         'width=40px></div></li>');
+                
+                this.addJqueryTileData(jQuery("#playerTilesList li").last(), -1, i);
             }
+        },
+        addJqueryTileData: function (jQueryObj, seqIndex, seqPosition){
+            jQueryObj.data("sequenceIndex", seqIndex);
+            jQueryObj.data("sequencePosition", seqPosition);
         },
         switchBackground: function () {
             jQuery("body").removeClass("waitingGamesBackground").addClass("mainGameBackground");
@@ -267,6 +284,7 @@ define([
             this.initButtons();
             this.switchBackground();
             this.initPlayersNames();
+            this.initPlayerTilesView();
             this.startPolling();
         },
         close: function () {
