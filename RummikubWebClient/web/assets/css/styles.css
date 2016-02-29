@@ -162,7 +162,10 @@
 }
 
 .boardSequence {
-    margin: 0;
+    margin: 0;    
+}
+
+.sortable {
     height: 80px;
 }
 

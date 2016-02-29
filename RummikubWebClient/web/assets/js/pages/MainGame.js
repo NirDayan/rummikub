@@ -96,7 +96,7 @@ define([
                 connectWith: '.sortable',
                 tolerance: "touch",
                 
-                start: function (event, ui){
+                start: function (event, ui) {
                     //Add new empty sequence
                     jQuery("#board").last().append('<ul class="boardSequence sortable"></ul>');
                     
@@ -111,7 +111,7 @@ define([
                     this.tileDragged.srcPosition = ui.helper.data().Position;
                 }.bind(this),
                 
-                stop: function (event, ui){
+                stop: function (event, ui) {
                     this.updateBoradTilesView();
                 }.bind(this)
             }).disableSelection();
@@ -317,7 +317,12 @@ define([
             this.initPlayerTilesView();
             this.startPolling();
         },
+        cleanUpDomElements: function () {
+            jQuery("#board").empty();
+            jQuery("#playerTilesList").empty();
+        },
         close: function () {
+            this.cleanUpDomElements();
             this.disableButtons();
             if (this.pollingInterval) {
                 clearInterval(this.pollingInterval);
