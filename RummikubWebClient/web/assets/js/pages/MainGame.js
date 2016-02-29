@@ -15,7 +15,7 @@ define([
         this.pollingInterval = null;
         this.events = null;
         this.playerTilesModel = null;
-        this.BoardTilesModel = new Array();
+        this.BoardTilesModel = null;
         this.gameWinner = null;
         this.gameName = gameName;
         this.playerName = playerName;
@@ -92,34 +92,30 @@ define([
             }
         },
         initPlayerTilesView: function () {
-            var playerStand = jQuery("#playerTilesList");
-            jQuery('#playerTilesList, .boardSequence').sortable({
-                connectWith: '#playerTilesList, .boardSequence',
+            jQuery('.sortable').sortable({
+                connectWith: '.sortable',
                 tolerance: "touch",
+                
                 start: function (event, ui){
                     //Add new empty sequence
-                    jQuery("#boardSeqList").last().append('<li><ul class="boardSequence droptrue"></ul></li>');
+                    jQuery("#boardSeqList").last().append('<li><div class="boardSequenceContainer">'+
+                            '<ul class="boardSequence sortable"></ul></div></li>');
                     
                     //Add PlaceHolder
                     jQuery(".boardSequence").each(function (index, elem){
-                        $(elem).append('<li class="ui-state-default">' +
-                        '<div><img class="tileImg" src="assets/images/plus_tile.png"' +
-                        'width=40px></div></li>');
+                        $(elem).append('<li class="ui-state-default"><div>' +
+                        '<img class="tileImg" src="assets/images/plus_tile.png">' +
+                        '</div></li>');
                     });
                     
                     this.tileDragged.srcIndex = ui.helper.data().Index;
                     this.tileDragged.srcPosition = ui.helper.data().Position;
                 }.bind(this),
+                
                 stop: function (event, ui){
                     this.updateBoradTilesView();
                 }.bind(this)
-            });
-            jQuery("ul.dropfalse").sortable({
-                connectWith: "ul",
-                dropOnEmpty: false
-            });
-            playerStand.disableSelection();
-            jQuery("#board").disableSelection();  
+            }).disableSelection();
         },
         updatePlayerTilesView: function () {
             var playerStand = jQuery("#playerTilesList");
@@ -127,7 +123,7 @@ define([
             playerStand.empty();
             for (var i = 0; i < this.playerTilesModel.length; i++) {
                 this.addTileToSequecne(playerStand, this.playerTilesModel[i]);
-                this.addJqueryTileData(jQuery("#playerTilesList li").last(),
+                this.addJqueryTileData(playerStand.find().last(),
                 FROM_PLAYER, i, this.playerTilesModel[i]);
             }
         },
@@ -136,14 +132,14 @@ define([
                         '<div><img class="tileImg" src="assets/images/tiles/' +
                         tile.color.toLowerCase() +
                         '/' + tile.value + '.png" ' +
-                        'width=40px></div></li>');
+                        '</div></li>');
         },
         updateBoradTilesView: function () {
             var boardView = jQuery("#boardSeqList");
             boardView.empty();
             for (var i = 0; i < this.BoardTilesModel.length; i++) {
                 var boardSequecne = this.BoardTilesModel[i];
-                boardView.append('<li><ul class="boardSequence droptrue"></ul></li>');
+                boardView.append('<li><div class="boardSequenceContainer"><ul class="boardSequence sortable"></ul></div></li>');
                 var sequenceElem = jQuery(".boardSequence").last();
                 for (var j = 0; j < boardSequecne.length; j++) {
                     this.addTileToSequecne(sequenceElem, boardSequecne[j]);

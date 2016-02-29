@@ -161,22 +161,28 @@
     transform: translateY(-50%);
 }
 
-#playerTilesList, #boardSeqList, .boardSequence{
+#boardSeqList, .sortable{
     list-style-type: none;
-    margin: 0;
-    margin-right: 10px;
     padding: 5px;
     width: 100%;
+    height: 100%;
 }
 
-#playerTilesList li, #boardSeqList li, .boardSequence li {
+#boardSeqList li {
+    padding: 30px;
+}
+
+.sortable li {
     float: left;
-    margin: 5px;
-    padding: 5px;
+    padding: 10px;
     display: inline;
 }
 
+.boardSequenceContainer {
+    height: 100%;
+    width: 100%;
+}
+
 .tileImg {
-    height: 56px;
     width: 40px;
 }
