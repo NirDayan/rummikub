@@ -161,26 +161,15 @@
     transform: translateY(-50%);
 }
 
-#boardSeqList, .sortable{
-    list-style-type: none;
-    padding: 5px;
-    width: 100%;
-    height: 100%;
-}
-
-#boardSeqList li {
-    padding: 30px;
+.boardSequence {
+    margin: 0;
+    height: 80px;
 }
 
 .sortable li {
     float: left;
     padding: 10px;
     display: inline;
-}
-
-.boardSequenceContainer {
-    height: 100%;
-    width: 100%;
 }
 
 .tileImg {

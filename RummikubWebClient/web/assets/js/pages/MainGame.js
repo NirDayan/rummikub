@@ -15,7 +15,7 @@ define([
         this.pollingInterval = null;
         this.events = null;
         this.playerTilesModel = null;
-        this.BoardTilesModel = null;
+        this.BoardTilesModel = [];
         this.gameWinner = null;
         this.gameName = gameName;
         this.playerName = playerName;
@@ -98,8 +98,7 @@ define([
                 
                 start: function (event, ui){
                     //Add new empty sequence
-                    jQuery("#boardSeqList").last().append('<li><div class="boardSequenceContainer">'+
-                            '<ul class="boardSequence sortable"></ul></div></li>');
+                    jQuery("#board").last().append('<ul class="boardSequence sortable"></ul>');
                     
                     //Add PlaceHolder
                     jQuery(".boardSequence").each(function (index, elem){
@@ -135,11 +134,11 @@ define([
                         '</div></li>');
         },
         updateBoradTilesView: function () {
-            var boardView = jQuery("#boardSeqList");
+            var boardView = jQuery("#board");
             boardView.empty();
             for (var i = 0; i < this.BoardTilesModel.length; i++) {
                 var boardSequecne = this.BoardTilesModel[i];
-                boardView.append('<li><div class="boardSequenceContainer"><ul class="boardSequence sortable"></ul></div></li>');
+                boardView.append('<ul class="boardSequence sortable"></ul>');
                 var sequenceElem = jQuery(".boardSequence").last();
                 for (var j = 0; j < boardSequecne.length; j++) {
                     this.addTileToSequecne(sequenceElem, boardSequecne[j]);
