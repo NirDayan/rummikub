@@ -98,13 +98,19 @@ define([
                 
                 start: function (event, ui) {
                     //Add new empty sequence
-                    jQuery("#board").last().append('<ul class="boardSequence sortable"></ul>');
+                    jQuery("#board").append('<ul class="boardSequence sortable"></ul>');
+                    
+                    var emptySequence = jQuery("#board ul").last();
                     
                     //Add PlaceHolder
-                    jQuery(".boardSequence").each(function (index, elem){
-                        $(elem).append('<li class="ui-state-default"><div>' +
-                        '<img class="tileImg" src="assets/images/plus_tile.png">' +
-                        '</div></li>');
+                    emptySequence.append('<li class="ui-state-default"><div>' +
+                            '<img class="tileImg" src="assets/images/plus_tile.png">' +
+                            '</div></li>');
+                    
+                    //Temp
+                    emptySequence.sortable({
+                        connectWith: '.sortable',
+                        tolerance: "touch"
                     });
                     
                     this.tileDragged.srcIndex = ui.helper.data().Index;
@@ -130,7 +136,7 @@ define([
             sequenceElem.append('<li class="ui-state-default">' +
                         '<div><img class="tileImg" src="assets/images/tiles/' +
                         tile.color.toLowerCase() +
-                        '/' + tile.value + '.png" ' +
+                        '/' + tile.value + '.png">' +
                         '</div></li>');
         },
         updateBoradTilesView: function () {
@@ -145,6 +151,9 @@ define([
                     this.addJqueryTileData(jQuery(sequenceElem).find("li").last(),
                     i, j, boardSequecne[j]);
                 }
+                //Temp
+                sequenceElem.sortable({connectWith: '.sortable',
+                    tolerance: "touch"});
             }
         },
         addJqueryTileData: function (jQueryObj, seqIndex, seqPosition, tile){
