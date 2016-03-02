@@ -332,14 +332,16 @@ define([
                 this.updateBoradTilesView();
 
                 (new PageInfoAlert()).show(event.playerName + " has added a new sequence");
-                return new jQuery.Deferred().resolve();
             }
+            return new jQuery.Deferred().resolve();
         },
         handleTileAdded: function (event) {
             if (event.playerName.toUpperCase() === this.playerName.toUpperCase()) {
 
                 //Remove Tile From Player
-                var indexToRemove = this.playerTilesModel.indexOf(event.tiles[0]);
+                var indexToRemove = this.playerTilesModel.findIndex(function(e){
+                    return _.isEqual(e,event.tiles[0]);
+                });
                 this.playerTilesModel.splice(indexToRemove, 1);
                 
                 this.isPlayerPerformAnyChange = true;
