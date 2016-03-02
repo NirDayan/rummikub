@@ -106,7 +106,7 @@ define([
             playerStand.empty();
             for (var i = 0; i < this.playerTilesModel.length; i++) {
                 this.addTileToSequecne(playerStand, this.playerTilesModel[i]);
-                this.addJqueryTileData(playerStand.find().last(),
+                this.addJqueryTileData(playerStand.find('li').last(),
                 PLAYER_STAND_INDEX, i, this.playerTilesModel[i]);
             }
         },
@@ -127,18 +127,17 @@ define([
                 
                 for (var j = 0; j < boardSequecne.length; j++) {
                     this.addTileToSequecne(sequenceElem, boardSequecne[j]);
-                    this.addJqueryTileData(jQuery(sequenceElem).find("li").last(),
+                    this.addJqueryTileData(jQuery(sequenceElem).find('li').last(),
                     i, j, boardSequecne[j]);
                 }
                 
-                var that = this;
                 sequenceElem.sortable({
                     connectWith: '#playerTilesList, .boardSequence',
                     tolerance: "touch",
                     start: this.onBoardStartDrag.bind(this),
                     stop: this.updateBoradTilesView.bind(this),
                     receive: this.onBoardDrop.bind(this)
-                }).bind(this);
+                });
                 
             }
         },
@@ -164,12 +163,15 @@ define([
                 //receive: this.performCreateNewSequenceFromPlayer
             });
 
-            this.tileDragged.srcIndex = ui.helper.data().Index;
-            this.tileDragged.srcPosition = ui.helper.data().Position;
+            this.tileDragged.srcIndex = ui.item.data().Index;
+            this.tileDragged.srcPosition = ui.item.data().Position;
+        },
+        onBoardStartDrag: function (event, ui) {
+            this.onPlayerStartDrag(event,ui);
         },
         onPlayerDrop: function (event, ui) {
             if(this.tileDragged.srcIndex !== PLAYER_STAND_INDEX){
-                var placeholderIndex = jQuery('#playerTilesList .ui-sortable-handle').index(); //TODO: find a better way to do it
+                var placeholderIndex = ui.item.index();
                 
                 this.tileDragged.destIndex = PLAYER_STAND_INDEX;
                 this.tileDragged.destPosition = placeholderIndex;
@@ -184,13 +186,29 @@ define([
                 //TODO: send a tile back event to servlet
             }
         },
-        onBoardStartDrag: function (event, ui) {
-            
-            this.tileDragged.srcIndex = ui.helper.data().Index;
-            this.tileDragged.srcPosition = ui.helper.data().Position;
-        },
         onBoardDrop: function (event, ui) {
-            
+            this.tileDragged.destIndex = ui.item.parent().index();
+            this.tileDragged.destPosition = ui.item.index();
+            if (this.tileDragged.srcIndex === PLAYER_STAND_INDEX) {
+                this.performAddTile(ui.item.data().Tile);
+            }
+            else {
+                this.performMoveTile(ui.item.data().Tile);
+            }
+        },
+        performAddTile: function (tile) {
+            jQuery.post("./addTile", {
+                tile: tile,
+                sequenceIndex: this.tileDragged.destIndex,
+                sequencePosition: this.tileDragged.destPosition
+            }).done(function () {
+                
+            }.bind(this)).fail(function (errorMessage) {
+                (new PageErrorAlert()).show(errorMessage.responseText);
+            });
+        },
+        performMoveTile: function (tile) {
+
         },
         switchBackground: function () {
             jQuery("body").removeClass("waitingGamesBackground").addClass("mainGameBackground");
@@ -309,15 +327,32 @@ define([
             return new jQuery.Deferred().resolve();
         },
         handleSequenceCreated: function (event) {
-            this.BoardTilesModel.push(event.tiles);
-            this.updateBoradTilesView();
-            
-            (new PageInfoAlert()).show(event.playerName + " has added a new sequence");
-            return new jQuery.Deferred().resolve();
+            if (event.tiles) {
+                this.BoardTilesModel.push(event.tiles);
+                this.updateBoradTilesView();
+
+                (new PageInfoAlert()).show(event.playerName + " has added a new sequence");
+                return new jQuery.Deferred().resolve();
+            }
         },
         handleTileAdded: function (event) {
-            //TODO
-            (new PageInfoAlert()).show(event.playerName + " has added tile to board");
+            if (event.playerName.toUpperCase() === this.playerName.toUpperCase()) {
+
+                //Remove Tile From Player
+                var indexToRemove = this.playerTilesModel.indexOf(event.tiles[0]);
+                this.playerTilesModel.splice(indexToRemove, 1);
+                
+                this.isPlayerPerformAnyChange = true;
+                this.updatePlayerTilesView();
+            }else{
+                (new PageInfoAlert()).show(event.playerName + " has added tile to board");
+            }
+            
+            //Add Tile To Board
+            this.BoardTilesModel[event.targetSequenceIndex]
+                    .splice(event.targetSequencePosition, 0, event.tiles[0]);
+            
+            this.updateBoradTilesView();
             return new jQuery.Deferred().resolve();
         },
         TileReturned: function () {
