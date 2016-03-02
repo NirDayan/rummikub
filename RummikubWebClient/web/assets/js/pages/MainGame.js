@@ -93,8 +93,9 @@ define([
         },
         initPlayerTilesView: function () {
             jQuery('#playerTilesList').sortable({
-                connectWith: '#playerTilesList, .boardSequence',
+                connectWith: '.boardSequence',
                 tolerance: "touch",
+                revert: true,
                 start: this.onPlayerStartDrag.bind(this),
                 stop: this.updateBoradTilesView.bind(this),
                 receive: this.onPlayerDrop.bind(this)
@@ -134,9 +135,10 @@ define([
                 sequenceElem.sortable({
                     connectWith: '#playerTilesList, .boardSequence',
                     tolerance: "touch",
+                    revert: true,
                     start: this.onBoardStartDrag.bind(this),
                     stop: this.updateBoradTilesView.bind(this),
-                    receive: this.onBoardDrop.bind(this)
+                    update: this.onBoardDrop.bind(this)
                 });
                 
             }
@@ -159,7 +161,8 @@ define([
 
             emptySequence.sortable({
                 connectWith: '#playerTilesList, .boardSequence',
-                tolerance: "touch"
+                tolerance: "touch",
+                revert: true
                 //receive: this.performCreateNewSequenceFromPlayer
             });
 
@@ -192,7 +195,7 @@ define([
             if (this.tileDragged.srcIndex === PLAYER_STAND_INDEX) {
                 this.performAddTile(ui.item.data().Tile);
             }
-            else {
+            else if (ui.sender === null) { // Because move between sequecses send 2 events
                 this.performMoveTile(ui.item.data().Tile);
             }
         },
@@ -208,7 +211,31 @@ define([
             });
         },
         performMoveTile: function (tile) {
+            if (!this.isMoveTileValid()) {
+                (new PageErrorAlert()).show("Invalid move tile action");
+                return;
+            }
+            jQuery.post("./moveTile", {
+                sourceSequenceIndex: this.tileDragged.srcIndex,
+                sourceSequencePosition: this.tileDragged.srcPosition,
+                targetSequenceIndex: this.tileDragged.destIndex,
+                targetSequencePosition: this.tileDragged.destPosition,
+            }).done(function () {
 
+            }.bind(this)).fail(function (errorMessage) {
+                (new PageErrorAlert()).show(errorMessage.responseText);
+            });
+        },
+        isMoveTileValid: function (){
+            if (this.tileDragged.srcIndex === this.tileDragged.destIndex) {
+                var seqSize = this.BoardTilesModel[this.tileDragged.destIndex].length;
+
+                if (this.tileDragged.destPosition === seqSize) {
+                    return false;
+                }
+            }
+
+            return true;
         },
         switchBackground: function () {
             jQuery("body").removeClass("waitingGamesBackground").addClass("mainGameBackground");
@@ -357,12 +384,21 @@ define([
             this.updateBoradTilesView();
             return new jQuery.Deferred().resolve();
         },
-        TileReturned: function () {
+        TileReturned: function (event) {
             //TODO
             return new jQuery.Deferred().resolve();
         },
-        handleTileMoved: function () {
-            //TODO
+        handleTileMoved: function (event) {
+            //Remove Tile From Board
+            var tileRemoved = this.BoardTilesModel[event.sourceSequenceIndex]
+                    .splice(event.sourceSequencePosition, 1)[0];
+                
+            //Add Tile To Board
+            this.BoardTilesModel[event.targetSequenceIndex]
+                    .splice(event.targetSequencePosition, 0, tileRemoved);
+            
+            this.updateBoradTilesView();
+            
             return new jQuery.Deferred().resolve();
         },
         handleRevert: function (event) {
