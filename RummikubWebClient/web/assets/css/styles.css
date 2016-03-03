@@ -112,6 +112,7 @@
     bottom: 20%;
     border-radius: 10px;
     position: absolute;
+    overflow-y: auto;
 }
 
 #playersTable {

@@ -13,7 +13,7 @@ define([
 
     function MainGame(gameName, playerName, playersNumber) {
         this.pollingInterval = null;
-        this.events = null;
+        this.events = [];
         this.playerTilesModel = null;
         this.BoardTilesModel = [];
         this.gameWinner = null;
@@ -44,7 +44,7 @@ define([
                 var getEventsPolling = jQuery.get("./GetEvents");
 
                 getEventsPolling.done(function (events) {
-                    this.events = events;
+                    this.events = this.events.concat(events);
                     this.handleNextEvent();
                 }.bind(this));
 
@@ -94,7 +94,7 @@ define([
         },
         initPlayerTilesView: function () {
             jQuery('#playerTilesList').sortable({
-                connectWith: '.boardSequence',
+                connectWith: '.sortable',
                 tolerance: "touch",
                 revert: true,
                 start: this.onPlayerStartDrag.bind(this),
@@ -112,7 +112,7 @@ define([
             }
         },
         addTileToSequecne: function (sequenceElem, tile) {
-            sequenceElem.append('<li class="ui-state-default">' +
+            sequenceElem.append('<li>' +
                         '<div><img class="tileImg" src="assets/images/tiles/' +
                         tile.color.toLowerCase() +
                         '/' + tile.value + '.png">' +
@@ -133,13 +133,16 @@ define([
                 }
                 
                 sequenceElem.sortable({
-                    connectWith: '#playerTilesList, .boardSequence',
+                    connectWith: '.sortable',
                     tolerance: "touch",
                     revert: true,
                     start: this.onBoardStartDrag.bind(this),
                     beforeStop: this.onBoardStopDrag.bind(this)
                 });
                 
+                if (!this.isEnabled){
+                    sequenceElem.sortable('disable');
+                }
             }
         },
         addJqueryTileData: function (jQueryObj, seqIndex, seqPosition, tile){
@@ -149,19 +152,20 @@ define([
         },
         onPlayerStartDrag: function (event, ui) {
             //Add new empty sequence
-            jQuery("#board").append('<ul class="boardSequence sortable"></ul>');
-
-            var emptySequence = jQuery("#board ul").last();
+            var emptySequence = jQuery('<ul class="boardSequence sortable"></ul>');
 
             //Add PlaceHolder
-            emptySequence.append('<li class="ui-state-default placeholder"><div>' +
+            emptySequence.append('<li class="placeholder"><div>' +
                     '<img class="tileImg" src="assets/images/plus_tile.png">' +
                     '</div></li>');
 
-            emptySequence.droppable({
+            emptySequence.sortable({
+                connectWith: '.sortable',
                 tolerance: "touch"
-                //receive: this.performCreateNewSequenceFromPlayer
             });
+            jQuery("#board").append(emptySequence);
+            
+            jQuery("#playerTilesList, .boardSequence").sortable("refresh");
 
             this.tileDragged = {};
             this.tileDragged.srcIndex = ui.item.data().Index;
@@ -227,7 +231,7 @@ define([
                 targetSequenceIndex: this.tileDragged.destIndex,
                 targetSequencePosition: this.tileDragged.destPosition,
             }).done(function () {
-
+                
             }.bind(this)).fail(function (errorMessage) {
                 (new PageErrorAlert()).show(errorMessage.responseText);
             });
@@ -301,13 +305,17 @@ define([
         },
         setGameEnabled: function (isEnabled) {
             var buttons = jQuery("#mainGameButtonsContainer .actionButton");
+            var dndElements = jQuery(".sortable");
             if (isEnabled) {
                 buttons.attr("disabled", false);
+                dndElements.sortable("enable");
                 this.isEnabled = true;
             } else {
                 buttons.attr("disabled", true);
+                dndElements.sortable("disable");
                 this.isEnabled = false;
             }
+            
         },
         playSound: function (soundType) {
             if (soundType === SOUNDS.PLAYER_TURN) {
@@ -318,7 +326,7 @@ define([
         },
         handleGameStart: function () {
             this.playSound(SOUNDS.GAME_STARTED);
-
+            
             var playersDetailsPromise = jQuery.get("./playersDetails").done(this.updatePlayersNames.bind(this));
             var currentPlayerDetailsPromise = jQuery.get("./playerDetails").done(function (playerDetails) {
                 this.playerTilesModel = playerDetails.tiles;
@@ -342,6 +350,8 @@ define([
                 this.setGameEnabled(true);
                 this.playSound(SOUNDS.PLAYER_TURN);
                 this.isPlayerPerformAnyChange = false;
+            }else{
+                this.setGameEnabled(false);
             }
 
             this.updatePlayerNamesWithCurrentPlayer(event.playerName);
@@ -372,13 +382,26 @@ define([
             return new jQuery.Deferred().resolve();
         },
         handleSequenceCreated: function (event) {
-            if (event.tiles) {
-                this.BoardTilesModel.push(event.tiles);
+            if (event.playerName.toLowerCase() === this.playerName.toLowerCase()
+                    && event.tiles) {
+                //Remove Tile From Player
+                var indexToRemove = this.playerTilesModel.findIndex(function (e) {
+                    return _.isEqual(e, event.tiles[0]);
+                });
+                this.playerTilesModel.splice(indexToRemove, 1);
+                
+                this.updatePlayerTilesView();
                 this.isPlayerPerformAnyChange = true;
-                this.updateBoradTilesView();
-
+            } else if (event.playerName !== "") {
                 (new PageInfoAlert()).show(event.playerName + " has added a new sequence");
             }
+            var newSequence = [];
+            if (event.tiles) {
+                newSequence = newSequence.concat(event.tiles);
+            }
+            this.BoardTilesModel.push(newSequence);
+            this.updateBoradTilesView();
+
             return new jQuery.Deferred().resolve();
         },
         handleTileAdded: function (event) {
