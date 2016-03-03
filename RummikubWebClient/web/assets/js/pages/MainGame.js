@@ -7,7 +7,7 @@ define([
 ], function (jQuery, jQueryUI, PageErrorAlert, PageInfoAlert) {
     var SOUNDS = {
         GAME_STARTED: "GAME_STARTED",
-        PLAYER_TURN: "PLAYER_TURN",
+        PLAYER_TURN: "PLAYER_TURN"
     };
     var PLAYER_STAND_INDEX = -1;
 
@@ -70,7 +70,7 @@ define([
             var tableRow = jQuery("#playersTable thead tr:first");
             tableRow.empty();
             for (var i = 0; i < this.playersNumber; i++) {
-                tableRow.append("<th>" + (i == 0 ? this.playerName : "") + "</th>");
+                tableRow.append("<th>" + (i === 0 ? this.playerName : "") + "</th>");
             }
         },
         updatePlayersNames: function (playersDetails) {
@@ -374,6 +374,7 @@ define([
         handleSequenceCreated: function (event) {
             if (event.tiles) {
                 this.BoardTilesModel.push(event.tiles);
+                this.isPlayerPerformAnyChange = true;
                 this.updateBoradTilesView();
 
                 (new PageInfoAlert()).show(event.playerName + " has added a new sequence");
@@ -406,6 +407,7 @@ define([
             if (event.playerName.toLowerCase() === this.playerName.toLowerCase()) {
                 //Add Tile To Player
                 this.playerTilesModel.push(event.tiles[0]);
+                this.isPlayerPerformAnyChange = true;
                 this.updatePlayerTilesView();
             } else {
                 (new PageInfoAlert()).show(event.playerName + " has taken a tile back");
