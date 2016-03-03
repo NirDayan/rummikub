@@ -174,19 +174,12 @@ define([
         },
         onPlayerDrop: function (event, ui) {
             if(this.tileDragged.srcIndex !== PLAYER_STAND_INDEX){
-                var placeholderIndex = ui.item.index();
-                
-                this.tileDragged.destIndex = PLAYER_STAND_INDEX;
-                this.tileDragged.destPosition = placeholderIndex;
-                
-                //Remove Tile From Board
-                this.BoardTilesModel[this.tileDragged.srcIndex]
-                        .splice(this.tileDragged.srcPosition, 1);
-                
-                //Add Tile To Player
-                this.playerTilesModel.splice(placeholderIndex, 0, ui.item.data().Tile);
-                
-                //TODO: send a tile back event to servlet
+                jQuery.post("./moveTile", {
+                    sequenceIndex: this.tileDragged.srcIndex,
+                    sequencePosition: this.tileDragged.srcPosition
+                }.bind(this)).fail(function (errorMessage) {
+                    (new PageErrorAlert()).show(errorMessage.responseText);
+                });
             }
         },
         onBoardDrop: function (event, ui) {
@@ -195,7 +188,7 @@ define([
             if (this.tileDragged.srcIndex === PLAYER_STAND_INDEX) {
                 this.performAddTile(ui.item.data().Tile);
             }
-            else if (ui.sender === null) { // Because move between sequecses send 2 events
+            else if (ui.sender === null) { // Because move between sequences send 2 events
                 this.performMoveTile(ui.item.data().Tile);
             }
         },
@@ -363,7 +356,7 @@ define([
             return new jQuery.Deferred().resolve();
         },
         handleTileAdded: function (event) {
-            if (event.playerName.toUpperCase() === this.playerName.toUpperCase()) {
+            if (event.playerName.toLowerCase() === this.playerName.toLowerCase()) {
 
                 //Remove Tile From Player
                 var indexToRemove = this.playerTilesModel.findIndex(function(e){
@@ -385,7 +378,21 @@ define([
             return new jQuery.Deferred().resolve();
         },
         TileReturned: function (event) {
-            //TODO
+            if (event.playerName.toLowerCase() === this.playerName.toLowerCase()) {
+                //Add Tile To Player
+                this.playerTilesModel.push(event.tiles[0]);
+                this.updatePlayerTilesView();
+            } else {
+                (new PageInfoAlert()).show(event.playerName + " has taken a tile back");
+            }
+            //Remove Tile From Board
+            this.BoardTilesModel[event.sourceSequenceIndex]
+                    .splice(event.sourceSequencePosition, 1);
+            if (this.BoardTilesModel[event.sourceSequenceIndex].length === 0) {
+                this.BoardTilesModel.splice(event.sourceSequenceIndex, 1);
+            }
+            this.updateBoradTilesView();
+            
             return new jQuery.Deferred().resolve();
         },
         handleTileMoved: function (event) {
@@ -404,10 +411,11 @@ define([
         handleRevert: function (event) {
             var deferred = new jQuery.Deferred();
             if (event.playerName.toLowerCase() === this.playerName.toLowerCase()) {
+                this.BoardTilesModel = [];
+                this.updateBoradTilesView();
                 jQuery.get("./playerDetails").done(function (playerDetails) {
                     this.playerTilesModel = playerDetails.tiles;
                     this.updatePlayerTilesView();
-                    //TODO: update board here
 
                     (new PageInfoAlert()).show(event.playerName + " you punished with 3 tiles");
                     deferred.resolve();
