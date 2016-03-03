@@ -166,6 +166,7 @@ define([
                 //receive: this.performCreateNewSequenceFromPlayer
             });
 
+            this.tileDragged = {};
             this.tileDragged.srcIndex = ui.item.data().Index;
             this.tileDragged.srcPosition = ui.item.data().Position;
         },
@@ -174,10 +175,10 @@ define([
         },
         onPlayerDrop: function (event, ui) {
             if(this.tileDragged.srcIndex !== PLAYER_STAND_INDEX){
-                jQuery.post("./moveTile", {
+                jQuery.post("./takeBackTile", {
                     sequenceIndex: this.tileDragged.srcIndex,
                     sequencePosition: this.tileDragged.srcPosition
-                }.bind(this)).fail(function (errorMessage) {
+                }).fail(function (errorMessage) {
                     (new PageErrorAlert()).show(errorMessage.responseText);
                 });
             }

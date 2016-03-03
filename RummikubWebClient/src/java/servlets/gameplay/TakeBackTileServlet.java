@@ -9,8 +9,8 @@ import javax.servlet.http.HttpServletResponse;
 import servlets.utils.ServletUtils;
 import servlets.utils.SessionUtils;
 
-@WebServlet(name = "takeBackTileTileServlet", urlPatterns = {"/takeBackTileTile"})
-public class takeBackTileTileServlet extends HttpServlet {
+@WebServlet(name = "takeBackTileServlet", urlPatterns = {"/takeBackTile"})
+public class TakeBackTileServlet extends HttpServlet {
 
     private static final String SEQUENCE_INDEX = "sequenceIndex";
     private static final String SEQUENCE_POSITION = "sequencePosition";
