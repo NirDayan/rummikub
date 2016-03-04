@@ -157,22 +157,24 @@ define([
             jQueryObj.data("Tile", tile);
         },
         onStartDrag: function (event, ui) {
-            //Add new empty sequence
-            var emptySequence = jQuery('<ul class="boardSequence sortable"></ul>');
-
-            //Add PlaceHolder to the emptySequence 
-            emptySequence.append('<li class="placeholder"><div>' +
-                    '<img class="tileImg" src="assets/images/plus_tile.png">' +
-                    '</div></li>');
-
-            emptySequence.sortable(SORTABLE_COMMON_OPTIONS);
-            jQuery("#board").append(emptySequence);
-            
-            jQuery(".sortable").sortable("refresh");
-
             this.tileDragged = {};
             this.tileDragged.srcIndex = ui.item.data().Index;
             this.tileDragged.srcPosition = ui.item.data().Position;
+
+            if (ui.item.parent().attr('id') === 'playerTilesList') {
+                //Add new empty sequence
+                var emptySequence = jQuery('<ul class="boardSequence sortable"></ul>');
+
+                //Add PlaceHolder to the emptySequence 
+                emptySequence.append('<li class="placeholder"><div>' +
+                        '<img class="tileImg" src="assets/images/plus_tile.png">' +
+                        '</div></li>');
+
+                emptySequence.sortable(SORTABLE_COMMON_OPTIONS);
+                jQuery("#board").append(emptySequence);
+
+                jQuery(".sortable").sortable("refresh");
+            }
         },
         onPlayerStopDrag: function (event, ui) {
             console.log('onPlayerStopDrag');
