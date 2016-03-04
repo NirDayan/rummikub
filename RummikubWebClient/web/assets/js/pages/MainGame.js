@@ -16,6 +16,7 @@ define([
         scroll: false,
         zIndex: 10000,
         placeholder: "placeholderView"
+        //cursor: "pointer"
     };
     var PLAYER_STAND_INDEX = -1;
 
@@ -484,14 +485,17 @@ define([
         },
         handleRevert: function (event) {
             var deferred = new jQuery.Deferred();
+            
+            // Clear Board
+            this.BoardTilesModel = [];
+            this.updateBoradTilesView();
+            
             if (event.playerName.toLowerCase() === this.playerName.toLowerCase()) {
-                this.BoardTilesModel = [];
-                this.updateBoradTilesView();
                 jQuery.get("./playerDetails").done(function (playerDetails) {
                     this.playerTilesModel = playerDetails.tiles;
                     this.updatePlayerTilesView();
 
-                    (new PageInfoAlert()).show(event.playerName + " you punished with 3 tiles");
+                    (new PageInfoAlert()).show(event.playerName + " you were punished with 3 tiles");
                     deferred.resolve();
                 }.bind(this)).fail(function (err) {
                     deferred.reject(err);

@@ -179,6 +179,11 @@
     padding-right: 2%;
     padding-top: 1%;
     display: inline;
+    cursor: pointer;
+}
+
+.ui-sortable-disabled li{
+    cursor: not-allowed;
 }
 
 .tileImg {
