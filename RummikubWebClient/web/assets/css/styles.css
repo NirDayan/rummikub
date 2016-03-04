@@ -105,7 +105,7 @@
     margin-top: 15px;
 }
 
-#board {
+#boardContainer {
     left: 15%;
     right: 15%;
     top: 15%;
@@ -114,6 +114,9 @@
     position: absolute;
     overflow-y: auto;
     overflow-x: auto;
+}
+#SequencePlaceholder {
+    height: 20%;
 }
 
 #playersTable {
