@@ -14,7 +14,8 @@ define([
         tolerance: "touch",
         revert: true,
         scroll: false,
-        zIndex: 10000
+        zIndex: 10000,
+        placeholder: "placeholderView"
     };
     var PLAYER_STAND_INDEX = -1;
 
