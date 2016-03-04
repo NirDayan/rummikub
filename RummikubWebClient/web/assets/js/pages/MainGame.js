@@ -195,6 +195,7 @@ define([
                 }
             }
             this.updateBoradTilesView();
+            this.updatePlayerTilesView();
         },
         onBoardStopDrag: function (event, ui) {
             console.log('onBoardStopDrag');
@@ -212,6 +213,7 @@ define([
                 console.log('onBoardStopDrag: unknown destination');
             }
             this.updateBoradTilesView();
+            this.updatePlayerTilesView();
         },
         performAddTile: function (tile) {
             console.log('performAddTile (index, pos): '+ this.tileDragged.destIndex +
@@ -289,7 +291,7 @@ define([
         },
         handlePullTile: function () {
             if (this.isPlayerPerformAnyChange) {
-                (new PageErrorAlert()).show("Pull tile from deck is not possible since you performed board changes");
+                (new PageErrorInfo()).show("Pull tile from deck is not possible since you performed board changes");
                 return;
             }
             jQuery.get("./finishTurn").fail(function (errorMessage) {
@@ -307,7 +309,7 @@ define([
         },
         handleFinishTurn: function () {
             if (!this.isPlayerPerformAnyChange) {
-                (new PageErrorAlert()).show("No Changes have been made to the board");
+                (new PageErrorInfo()).show("No Changes have been made to the board");
                 return;
             }
             jQuery.get("./finishTurn").fail(function (errorMessage) {
