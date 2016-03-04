@@ -9,6 +9,13 @@ define([
         GAME_STARTED: "GAME_STARTED",
         PLAYER_TURN: "PLAYER_TURN"
     };
+    var SORTABLE_COMMON_OPTIONS = {
+        connectWith: '.sortable',
+        tolerance: "touch",
+        revert: true,
+        scroll: false,
+        zIndex: 10000
+    };
     var PLAYER_STAND_INDEX = -1;
 
     function MainGame(gameName, playerName, playersNumber) {
@@ -93,13 +100,13 @@ define([
             }
         },
         initPlayerTilesView: function () {
-            jQuery('#playerTilesList').sortable({
-                connectWith: '.sortable',
-                tolerance: "touch",
-                revert: true,
-                start: this.onPlayerStartDrag.bind(this),
+            var playerTiles = jQuery('#playerTilesList');
+            
+            playerTiles.sortable(SORTABLE_COMMON_OPTIONS);
+            playerTiles.sortable("option", {
+                start: this.onStartDrag.bind(this),
                 beforeStop: this.onPlayerStopDrag.bind(this)
-            }).disableSelection();
+            });
         },
         updatePlayerTilesView: function () {
             var playerStand = jQuery("#playerTilesList");
@@ -132,11 +139,9 @@ define([
                     i, j, boardSequecne[j]);
                 }
                 
-                sequenceElem.sortable({
-                    connectWith: '.sortable',
-                    tolerance: "touch",
-                    revert: true,
-                    start: this.onBoardStartDrag.bind(this),
+                sequenceElem.sortable(SORTABLE_COMMON_OPTIONS);
+                sequenceElem.sortable("option", {
+                    start: this.onStartDrag.bind(this),
                     beforeStop: this.onBoardStopDrag.bind(this)
                 });
                 
@@ -150,29 +155,23 @@ define([
             jQueryObj.data("Position", seqPosition);
             jQueryObj.data("Tile", tile);
         },
-        onPlayerStartDrag: function (event, ui) {
+        onStartDrag: function (event, ui) {
             //Add new empty sequence
             var emptySequence = jQuery('<ul class="boardSequence sortable"></ul>');
 
-            //Add PlaceHolder
+            //Add PlaceHolder to the emptySequence 
             emptySequence.append('<li class="placeholder"><div>' +
                     '<img class="tileImg" src="assets/images/plus_tile.png">' +
                     '</div></li>');
 
-            emptySequence.sortable({
-                connectWith: '.sortable',
-                tolerance: "touch"
-            });
+            emptySequence.sortable(SORTABLE_COMMON_OPTIONS);
             jQuery("#board").append(emptySequence);
             
-            jQuery("#playerTilesList, .boardSequence").sortable("refresh");
+            jQuery(".sortable").sortable("refresh");
 
             this.tileDragged = {};
             this.tileDragged.srcIndex = ui.item.data().Index;
             this.tileDragged.srcPosition = ui.item.data().Position;
-        },
-        onBoardStartDrag: function (event, ui) {
-            this.onPlayerStartDrag(event,ui);
         },
         onPlayerStopDrag: function (event, ui) {
             console.log('onPlayerStopDrag');
