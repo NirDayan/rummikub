@@ -179,7 +179,14 @@ define([
                 //On Board Drop From Player
                 this.tileDragged.destIndex = ui.item.parent().index();
                 this.tileDragged.destPosition = ui.item.index();
-                this.performAddTile(ui.item.data().Tile);
+                
+                if (this.tileDragged.destIndex === this.BoardTilesModel.length){
+                    // Drop to new sequence (empty)
+                    this.performCreateSequecne(ui.item.data().Tile);
+                }else{
+                    // Drop to existing sequence
+                    this.performAddTile(ui.item.data().Tile);
+                }
             }
             this.updateBoradTilesView();
         },
@@ -190,12 +197,12 @@ define([
                 this.tileDragged.destIndex = ui.item.parent().index();
                 this.tileDragged.destPosition = ui.item.index();
                 this.performMoveTile(ui.item.data().Tile);
-                
-            } else if(jQuery(ui.item).parent().attr('id') === 'playerTilesList'){
+            }    
+            else if(jQuery(ui.item).parent().attr('id') === 'playerTilesList'){
                 //From Board To Player
                 this.performTakeBackTile(ui.item.data().Tile);
-                
-            }else{
+            }    
+            else {
                 console.log('onBoardStopDrag: unknown destination');
             }
             this.updateBoradTilesView();
@@ -245,6 +252,14 @@ define([
             }
 
             return true;
+        },
+        performCreateSequecne: function (tile) {
+            console.log('performCreateSequecne');
+            jQuery.post("./createSequence", {
+                    tile: tile
+                }).fail(function (errorMessage) {
+                    (new PageErrorAlert()).show(errorMessage.responseText);
+                });
         },
         performTakeBackTile: function (tile) {
             console.log('performTakeBackTile (srcInd, srcPos): ' +

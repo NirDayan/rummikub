@@ -4,12 +4,14 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import servlets.utils.GameObjectsConvertor;
 import servlets.utils.ServletUtils;
 import servlets.utils.SessionUtils;
 import ws.rummikub.Tile;
@@ -17,16 +19,18 @@ import ws.rummikub.Tile;
 @WebServlet(name = "CreateSequenceServlet", urlPatterns = {"/createSequence"})
 public class CreateSequenceServlet extends HttpServlet {
 
-    static final String TILES = "tiles";
+    private static final String TILE_COLOR = "tile[color]";
+    private static final String TILE_VALUE = "tile[value]";
             
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        String tilesJson = request.getParameter(TILES);
-        Type tilesListType = new TypeToken<List<Tile>>() {}.getType();
+        String tileColor = request.getParameter(TILE_COLOR);
+        int tileValue = Integer.parseInt(request.getParameter(TILE_VALUE));
         
         try {
-            List<Tile> tiles = new Gson().fromJson(tilesJson, tilesListType);
+            List<Tile> tiles = new ArrayList<>();
+            tiles.add(GameObjectsConvertor.getTile(tileColor, tileValue));
             
             ServletUtils.getWebService(getServletContext())
                     .createSequence(SessionUtils.getPlayerId(request), tiles);
