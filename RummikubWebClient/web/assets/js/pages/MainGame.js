@@ -162,17 +162,19 @@ define([
             this.tileDragged.srcPosition = ui.item.data().Position;
 
             if (ui.item.parent().attr('id') === 'playerTilesList') {
-                //Add new empty sequence
+                //Create new empty sequence
                 var emptySequence = jQuery('<ul class="boardSequence sortable"></ul>');
 
-                //Add PlaceHolder to the emptySequence 
+                //Add PlaceHolder image to the emptySequence 
                 emptySequence.append('<li class="placeholder"><div>' +
                         '<img class="tileImg" src="assets/images/plus_tile.png">' +
                         '</div></li>');
 
+                //Make empty sequence sortable and add to DOM
                 emptySequence.sortable(SORTABLE_COMMON_OPTIONS);
                 jQuery("#board").append(emptySequence);
-
+                
+                // Connect with all other sortable lists
                 jQuery(".sortable").sortable("refresh");
             }
         },
