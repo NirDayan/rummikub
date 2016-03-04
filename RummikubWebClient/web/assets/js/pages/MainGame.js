@@ -227,7 +227,7 @@ define([
         },
         performMoveTile: function (tile) {
             if (!this.isMoveTileValid()) {
-                (new PageErrorAlert()).show("Invalid move tile action");
+                (new PageInfoAlert()).show("Invalid move tile action");
                 return;
             }
             console.log('performMoveTile (srcInd, srcPos, Ind, Dest): ' +
@@ -252,6 +252,11 @@ define([
                 var seqSize = this.BoardTilesModel[this.tileDragged.destIndex].length;
 
                 if (this.tileDragged.destPosition === seqSize) {
+                    return false;
+                }
+                if (this.tileDragged.srcPosition === this.tileDragged.destPosition + 1 ||
+                        this.tileDragged.srcPosition + 1 === this.tileDragged.destPosition)
+                {
                     return false;
                 }
             }
