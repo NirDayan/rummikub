@@ -109,7 +109,7 @@
     left: 15%;
     right: 15%;
     top: 15%;
-    bottom: 20%;
+    bottom: 25%;
     border-radius: 10px;
     position: absolute;
     overflow-y: auto;
@@ -135,7 +135,7 @@
 #playerTilesContainer {
     position: absolute;
     bottom: 5%;
-    height: 15%;
+    height: 22%;
     left: 15%;
     right: 15%;
     z-index: 1000;
@@ -149,7 +149,7 @@
 #playerTilesStand {
     position: absolute;
     bottom: 5%;
-    height: 15%;
+    height: 22%;
     left: 10%;
     right: 10%;
     display: inline;
@@ -173,7 +173,8 @@
 
 .sortable li {
     float: left;
-    padding: 10px;
+    padding-right: 2%;
+    padding-top: 1%;
     display: inline;
 }
 
