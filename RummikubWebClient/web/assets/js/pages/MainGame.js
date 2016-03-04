@@ -495,13 +495,13 @@ define([
                     this.playerTilesModel = playerDetails.tiles;
                     this.updatePlayerTilesView();
 
-                    (new PageInfoAlert()).show(event.playerName + " you were punished with 3 tiles");
+                    (new PageInfoAlert()).show("you were punished with 3 tiles");
                     deferred.resolve();
                 }.bind(this)).fail(function (err) {
                     deferred.reject(err);
                 });
             } else {
-                (new PageInfoAlert()).show(event.playerName + "player" + event.playerName + " was punished with 3 tiles");
+                (new PageInfoAlert()).show(event.playerName + " was punished with 3 tiles");
                 deferred.resolve();
             }
             return deferred.promise();
