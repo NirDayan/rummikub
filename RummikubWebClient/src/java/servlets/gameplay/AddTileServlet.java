@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 import servlets.utils.GameObjectsConvertor;
 import servlets.utils.ServletUtils;
 import servlets.utils.SessionUtils;
-import ws.rummikub.Color;
 import ws.rummikub.Tile;
 
 @WebServlet(name = "AddTileServlet", urlPatterns = {"/addTile"})
@@ -23,12 +22,12 @@ public class AddTileServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String tileColor = request.getParameter(TILE_COLOR);
-        int tileValue = Integer.parseInt(request.getParameter(TILE_VALUE));
-        int sequenceIndex = Integer.parseInt(request.getParameter(SEQUENCE_INDEX));
-        int sequencePosition = Integer.parseInt(request.getParameter(SEQUENCE_POSITION));
-
         try {
+            String tileColor = request.getParameter(TILE_COLOR);
+            int tileValue = Integer.parseInt(request.getParameter(TILE_VALUE));
+            int sequenceIndex = Integer.parseInt(request.getParameter(SEQUENCE_INDEX));
+            int sequencePosition = Integer.parseInt(request.getParameter(SEQUENCE_POSITION));
+
             Tile tile = GameObjectsConvertor.getTile(tileColor, tileValue);
 
             ServletUtils.getWebService(getServletContext())
@@ -36,7 +35,7 @@ public class AddTileServlet extends HttpServlet {
 
             response.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception ex) {
-            response.getWriter().write(ex.getMessage());
+            response.getWriter().write(ServletUtils.INVALID_ADD_TILE_PARAMETERS_ERR_MSG);
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
     }

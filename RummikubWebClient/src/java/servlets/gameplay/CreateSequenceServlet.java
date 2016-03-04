@@ -1,9 +1,6 @@
 package servlets.gameplay;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.ServletException;
@@ -25,10 +22,10 @@ public class CreateSequenceServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        String tileColor = request.getParameter(TILE_COLOR);
-        int tileValue = Integer.parseInt(request.getParameter(TILE_VALUE));
-        
         try {
+            String tileColor = request.getParameter(TILE_COLOR);
+            int tileValue = Integer.parseInt(request.getParameter(TILE_VALUE));
+
             List<Tile> tiles = new ArrayList<>();
             tiles.add(GameObjectsConvertor.getTile(tileColor, tileValue));
             

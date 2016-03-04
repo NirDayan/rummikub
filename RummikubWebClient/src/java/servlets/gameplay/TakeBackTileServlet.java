@@ -18,16 +18,17 @@ public class TakeBackTileServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        int sequenceIndex = Integer.parseInt(request.getParameter(SEQUENCE_INDEX));
-        int sequencePosition = Integer.parseInt(request.getParameter(SEQUENCE_POSITION));
         
         try {
+            int sequenceIndex = Integer.parseInt(request.getParameter(SEQUENCE_INDEX));
+            int sequencePosition = Integer.parseInt(request.getParameter(SEQUENCE_POSITION));
+
             ServletUtils.getWebService(getServletContext())
                     .takeBackTile(SessionUtils.getPlayerId(request), sequenceIndex, sequencePosition);
 
             response.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception ex) {
-            response.getWriter().write(ex.getMessage());
+            response.getWriter().write(ServletUtils.INVALID_TAKE_BACK_TILE_PARAMETERS_ERR_MSG);
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
     }

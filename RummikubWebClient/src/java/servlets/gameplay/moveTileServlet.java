@@ -20,18 +20,18 @@ public class moveTileServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        int sourceSequenceIndex = Integer.parseInt(request.getParameter(SOURCE_SEQUENCE_INDEX));
-        int sourceSequencePosition = Integer.parseInt(request.getParameter(SOURCE_SEQUENCE_POSITION));
-        int targetSequenceIndex = Integer.parseInt(request.getParameter(TARGET_SEQUENCE_INDEX));
-        int targetSequencePosition = Integer.parseInt(request.getParameter(TARGET_SEQUENCE_POSITION));
-
         try {
+            int sourceSequenceIndex = Integer.parseInt(request.getParameter(SOURCE_SEQUENCE_INDEX));
+            int sourceSequencePosition = Integer.parseInt(request.getParameter(SOURCE_SEQUENCE_POSITION));
+            int targetSequenceIndex = Integer.parseInt(request.getParameter(TARGET_SEQUENCE_INDEX));
+            int targetSequencePosition = Integer.parseInt(request.getParameter(TARGET_SEQUENCE_POSITION));
+
             ServletUtils.getWebService(getServletContext())
                     .moveTile(SessionUtils.getPlayerId(request), sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
 
             response.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception ex) {
-            response.getWriter().write(ex.getMessage());
+            response.getWriter().write(ServletUtils.INVALID_MOVE_TILE_PARAMETERS_ERR_MSG);
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
