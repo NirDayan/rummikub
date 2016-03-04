@@ -72,38 +72,45 @@ define([
         initPlayerNameField: function () {
             var that = this;
             jQuery("#playerNameInput").on("keyup", function () {
-                if (jQuery(this).val().trim().length > 2 && that.selectedTableRow != null) {
+                if (jQuery(this).val().trim().length > 2 && that.selectedTableRow !== null) {
                     jQuery("#joinGameButton").attr("disabled", false);
                 } else {
                     jQuery("#joinGameButton").attr("disabled", true);
                 }
-            });
+            }).on("keypress", function (e) {
+                // If ENTER is pressed and joinGameButton is not disabled -> Join game
+                if (e.which === 13 && jQuery("#joinGameButton").attr("disabled") !== "disabled") {
+                    that.joinGame();
+                }
+            }
+            );
         },
         initJoinGameButton: function () {
-            jQuery("#joinGameButton").on("click", function () {
-                var gameName = this.selectedTableRow.find("td").eq(0).text();
-                var humanPlayers = parseInt(this.selectedTableRow.find("td").eq(1).text());
-                var computerizedPlayers = parseInt(this.selectedTableRow.find("td").eq(2).text());
-                
-                var playerName = jQuery("#playerNameInput").val();
-                if (gameName && playerName) {
-                    jQuery.post("./joinGame", {
-                        gameName: gameName,
-                        playerName: playerName
-                    }).done(function () {
-                        //Move to the next screen
-                        this.currentPlayerName = playerName;
-                        this.currentGameName = gameName;
-                        this.playersNumber =humanPlayers + computerizedPlayers;
-                        jQuery("#playerNameInput").val( "");
-                        window.location.hash = "mainGame";
-                    }.bind(this)).fail(function (errorMessage) {
-                        (new PageErrorAlert()).show(errorMessage.responseText);
-                    });
-                } else {
-                    (new PageErrorAlert()).show("Invalid player name or selected game.");
-                }
-            }.bind(this));
+            jQuery("#joinGameButton").on("click", this.joinGame.bind(this));
+        },
+        joinGame: function () {
+            var gameName = this.selectedTableRow.find("td").eq(0).text();
+            var humanPlayers = parseInt(this.selectedTableRow.find("td").eq(1).text());
+            var computerizedPlayers = parseInt(this.selectedTableRow.find("td").eq(2).text());
+
+            var playerName = jQuery("#playerNameInput").val();
+            if (gameName && playerName) {
+                jQuery.post("./joinGame", {
+                    gameName: gameName,
+                    playerName: playerName
+                }).done(function () {
+                    //Move to the next screen
+                    this.currentPlayerName = playerName;
+                    this.currentGameName = gameName;
+                    this.playersNumber = humanPlayers + computerizedPlayers;
+                    jQuery("#playerNameInput").val("");
+                    window.location.hash = "mainGame";
+                }.bind(this)).fail(function (errorMessage) {
+                    (new PageErrorAlert()).show(errorMessage.responseText);
+                });
+            } else {
+                (new PageErrorAlert()).show("Invalid player name or selected game.");
+            }
         },
         getGameDetails: function () {
             return {
