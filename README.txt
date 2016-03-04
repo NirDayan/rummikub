@@ -15,3 +15,4 @@ Assumptions:
 3. If player creates a wrong sequence on his first step, he will be punished by taking 3 tiles from the deck.
 4. If player performed any change on the board, he can't take tile from deck on the same step.
 5. If all players resigned from game except ONE player, the game is finished and there is no winner [technical win is not considered]
+6. The web client cannot run on the GoogleCloud server.
