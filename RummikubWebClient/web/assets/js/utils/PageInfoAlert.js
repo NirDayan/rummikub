@@ -7,7 +7,10 @@ define([
 
     PageInfoAlert.prototype = {
         show: function (infoMessage) {
-            jQuery("#pageInfo").empty().text(infoMessage).fadeIn().delay(2000).fadeOut("slow");;
+            jQuery("#pageInfo").empty().text(infoMessage).fadeIn().delay(2000).fadeOut("slow");
+        },
+        showNoFadeOut: function (infoMessage) {
+            jQuery("#pageInfo").empty().text(infoMessage).fadeIn();
         }
     };
 

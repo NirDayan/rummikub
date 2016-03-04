@@ -510,6 +510,7 @@ define([
             return this.gameWinner;
         },
         initialize: function () {
+            (new PageInfoAlert()).showNoFadeOut('Waiting for other players to join...');
             this.initButtons();
             this.switchBackground();
             this.initPlayersNames();
