@@ -291,7 +291,7 @@ define([
         },
         handlePullTile: function () {
             if (this.isPlayerPerformAnyChange) {
-                (new PageErrorInfo()).show("Pull tile from deck is not possible since you performed board changes");
+                (new PageErrorAlert()).show("Pull tile from deck is not possible since you performed board changes");
                 return;
             }
             jQuery.get("./finishTurn").fail(function (errorMessage) {
@@ -309,7 +309,7 @@ define([
         },
         handleFinishTurn: function () {
             if (!this.isPlayerPerformAnyChange) {
-                (new PageErrorInfo()).show("No Changes have been made to the board");
+                (new PageErrorAlert()).show("No Changes have been made to the board");
                 return;
             }
             jQuery.get("./finishTurn").fail(function (errorMessage) {
